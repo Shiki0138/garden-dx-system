@@ -4,16 +4,11 @@
     {
       "src": "app/package.json",
       "use": "@vercel/static-build",
-      "config": {
-        "distDir": "app/build"
-      }
+      "config": { "distDir": "app/build" }
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/app/$1"
-    }
+    { "src": "/(.*)", "dest": "/app/$1" }
   ],
   "buildCommand": "cd app && npm run build",
   "installCommand": "cd app && npm install",
