@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "name": "garden-dx-system",
+  "builds": [
+    {
+      "src": "app/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "app/build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/app/$1"
+    }
+  ],
+  "env": {
+    "REACT_APP_SUPABASE_URL": "@supabase_url",
+    "REACT_APP_SUPABASE_ANON_KEY": "@supabase_anon_key"
+  },
+  "buildCommand": "cd app && npm run build",
+  "outputDirectory": "app/build",
+  "installCommand": "cd app && npm install",
+  "framework": "create-react-app"
+}

@@ -16,7 +16,7 @@ if [ -z "$PROJECT_NAME" ]; then
     fi
 fi
 
-TEAM_SESSION="${PROJECT_NAME}_team"
+TEAM_SESSION="${PROJECT_NAME}_multiagent"
 
 echo "👥 Team Session を起動します: $PROJECT_NAME"
 echo ""

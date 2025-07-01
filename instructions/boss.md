@@ -29,12 +29,12 @@ cat specifications/project_spec.md
 # 作業開始ログ記録
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [START] [$PROJECT_NAME] [boss1] チーム指示開始" >> development/development_log.txt
 
-# 初回指示（仕様書遵守を徹底）
-./agent-send.sh $PROJECT_NAME worker1 "あなたはworker1です。specifications/project_spec.md の仕様書を確認して作業開始"
-./agent-send.sh $PROJECT_NAME worker2 "あなたはworker2です。specifications/project_spec.md の仕様書を確認して作業開始"
-./agent-send.sh $PROJECT_NAME worker3 "あなたはworker3です。specifications/project_spec.md の仕様書を確認して作業開始"
-./agent-send.sh $PROJECT_NAME worker4 "あなたはworker4です。specifications/project_spec.md の仕様書を確認して作業開始"
-./agent-send.sh $PROJECT_NAME worker5 "あなたはworker5です。specifications/project_spec.md の仕様書を確認して作業開始"
+# workerへの指示（シンプルかつ明確に）
+./agent-send.sh garden worker1 "worker1として作業を開始してください"
+./agent-send.sh garden worker2 "worker2として作業を開始してください"
+./agent-send.sh garden worker3 "worker3として作業を開始してください"
+./agent-send.sh garden worker4 "worker4として作業を開始してください"
+./agent-send.sh garden worker5 "worker5として作業を開始してください"
 
 # 指示完了ログ記録
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [COMPLETE] [$PROJECT_NAME] [boss1] 全worker指示完了" >> development/development_log.txt

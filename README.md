@@ -58,7 +58,7 @@ cd ClaudeAuto
 #### PRESIDENTから指示を出す
 ```bash
 # プロジェクト開始
-./president-command.sh myproject "プロジェクトを開始してください"
+./president-command.sh garden "プロジェクトを開始してください"
 
 # 進捗確認
 ./president-command.sh myproject "進捗を確認してください"
@@ -135,7 +135,7 @@ PRESIDENT → Claude(リーダー) → Gemini/Codex → Claude → PRESIDENT
 
 # セッション接続
 ./team-status.sh myproject connect-president
-./team-status.sh myproject connect-team
+./team-status.sh garden connect-team
 ./team-status.sh myproject connect-errorfix
 
 # 自動継続管理

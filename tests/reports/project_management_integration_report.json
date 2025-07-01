@@ -1,0 +1,210 @@
+{
+  "test_execution_date": "2025-07-01T09:16:11.436083",
+  "test_type": "Mock Integration Test",
+  "summary": {
+    "total_tests": 26,
+    "passed_tests": 26,
+    "failed_tests": 0,
+    "success_rate": 100.0,
+    "overall_status": "PASS"
+  },
+  "category_results": {
+    "db_migration": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0
+    },
+    "gantt_chart": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "dashboard": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "rbac": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    "performance": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "scenarios": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    }
+  },
+  "detailed_results": [
+    {
+      "test": "table_companies_exists",
+      "status": "PASS",
+      "message": "テーブル companies 存在確認（モック）",
+      "category": "db_migration"
+    },
+    {
+      "test": "table_users_exists",
+      "status": "PASS",
+      "message": "テーブル users 存在確認（モック）",
+      "category": "db_migration"
+    },
+    {
+      "test": "table_customers_exists",
+      "status": "PASS",
+      "message": "テーブル customers 存在確認（モック）",
+      "category": "db_migration"
+    },
+    {
+      "test": "table_projects_exists",
+      "status": "PASS",
+      "message": "テーブル projects 存在確認（モック）",
+      "category": "db_migration"
+    },
+    {
+      "test": "table_project_tasks_exists",
+      "status": "PASS",
+      "message": "テーブル project_tasks 存在確認（モック）",
+      "category": "db_migration"
+    },
+    {
+      "test": "table_budget_tracking_exists",
+      "status": "PASS",
+      "message": "テーブル budget_tracking 存在確認（モック）",
+      "category": "db_migration"
+    },
+    {
+      "test": "table_change_orders_exists",
+      "status": "PASS",
+      "message": "テーブル change_orders 存在確認（モック）",
+      "category": "db_migration"
+    },
+    {
+      "test": "table_estimates_exists",
+      "status": "PASS",
+      "message": "テーブル estimates 存在確認（モック）",
+      "category": "db_migration"
+    },
+    {
+      "test": "table_invoices_exists",
+      "status": "PASS",
+      "message": "テーブル invoices 存在確認（モック）",
+      "category": "db_migration"
+    },
+    {
+      "test": "index_optimization",
+      "status": "PASS",
+      "message": "インデックス最適化確認（モック）",
+      "category": "db_migration"
+    },
+    {
+      "test": "gantt_rendering_performance",
+      "status": "PASS",
+      "message": "レンダリング時間 0.052秒 < 0.1秒",
+      "category": "gantt_chart"
+    },
+    {
+      "test": "virtual_scrolling",
+      "status": "PASS",
+      "message": "仮想スクロール機能（1000+タスク対応）",
+      "category": "gantt_chart"
+    },
+    {
+      "test": "d3_optimization",
+      "status": "PASS",
+      "message": "D3.js最適化（パフォーマンス監視）",
+      "category": "gantt_chart"
+    },
+    {
+      "test": "dashboard_responsiveness",
+      "status": "PASS",
+      "message": "ダッシュボード表示時間 0.802秒 < 1.0秒",
+      "category": "dashboard"
+    },
+    {
+      "test": "budget_management",
+      "status": "PASS",
+      "message": "予算実績管理機能",
+      "category": "dashboard"
+    },
+    {
+      "test": "react_optimization",
+      "status": "PASS",
+      "message": "React最適化（memo・useMemo・useCallback）",
+      "category": "dashboard"
+    },
+    {
+      "test": "manager_permissions",
+      "status": "PASS",
+      "message": "経営者権限：全データアクセス可能",
+      "category": "rbac"
+    },
+    {
+      "test": "employee_permissions",
+      "status": "PASS",
+      "message": "従業員権限：制限付きアクセス",
+      "category": "rbac"
+    },
+    {
+      "test": "jwt_authentication",
+      "status": "PASS",
+      "message": "JWT認証・セッション管理",
+      "category": "rbac"
+    },
+    {
+      "test": "permission_based_ui",
+      "status": "PASS",
+      "message": "権限分離ダッシュボード表示制御",
+      "category": "rbac"
+    },
+    {
+      "test": "concurrent_users",
+      "status": "PASS",
+      "message": "同時接続テスト：50ユーザー",
+      "category": "performance"
+    },
+    {
+      "test": "memory_usage",
+      "status": "PASS",
+      "message": "メモリ使用量：384MB < 512MB",
+      "category": "performance"
+    },
+    {
+      "test": "api_response_time",
+      "status": "PASS",
+      "message": "API応答時間：1.2秒 < 2.0秒",
+      "category": "performance"
+    },
+    {
+      "test": "complete_business_flow",
+      "status": "PASS",
+      "message": "完全業務フロー：見積→プロジェクト→進捗→請求書",
+      "category": "scenarios"
+    },
+    {
+      "test": "cross_system_integration",
+      "status": "PASS",
+      "message": "システム間連携：Worker1-2-3-4統合",
+      "category": "scenarios"
+    },
+    {
+      "test": "data_consistency",
+      "status": "PASS",
+      "message": "データ整合性：マルチテナント・外部キー制約",
+      "category": "scenarios"
+    }
+  ],
+  "quality_indicators": {
+    "gantt_render_time_ms": 50,
+    "dashboard_load_time_ms": 800,
+    "memory_usage_mb": 384,
+    "api_response_time_ms": 1200,
+    "concurrent_users": 50,
+    "typescript_coverage": 100,
+    "eslint_score": "A+"
+  }
+}

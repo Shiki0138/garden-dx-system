@@ -1,0 +1,71 @@
+{
+  "name": "garden-estimate-system",
+  "version": "1.0.0",
+  "description": "造園業向け統合業務管理システム - 見積エンジン",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.50.2",
+    "@tanstack/react-table": "^8.9.3",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.4.0",
+    "date-fns": "^2.30.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "react": "^18.2.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^6.14.1",
+    "react-scripts": "5.0.1",
+    "recharts": "^2.7.2",
+    "styled-components": "^6.0.7"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
+    "lint:check": "eslint src --ext .js,.jsx,.ts,.tsx",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "typecheck": "tsc --noEmit",
+    "quality": "npm run format && npm run lint && npm run typecheck",
+    "pre-commit": "npm run quality && npm run test -- --watchAll=false",
+    "build:analyze": "npm run build && npx source-map-explorer 'build/static/js/*.js'",
+    "build:production": "CI=false npm run build",
+    "preview": "npx serve -s build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^16.18.38",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@types/styled-components": "^5.1.26",
+    "eslint": "^8.44.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.0.0",
+    "typescript": "^4.9.5"
+  }
+}

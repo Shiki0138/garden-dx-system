@@ -1,0 +1,137 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # テストジョブ
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./app
+        run: npm ci
+
+      - name: Run linter
+        working-directory: ./app
+        run: npm run lint:check
+
+      - name: Run type check
+        working-directory: ./app
+        run: npm run typecheck
+
+      - name: Run tests
+        working-directory: ./app
+        run: npm test -- --coverage --watchAll=false
+
+  # デプロイジョブ（プレビュー）
+  deploy-preview:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@canary
+
+      - name: Pull Vercel Environment Information
+        working-directory: ./app
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        working-directory: ./app
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        working-directory: ./app
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+
+  # デプロイジョブ（本番）
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@canary
+
+      - name: Pull Vercel Environment Information
+        working-directory: ./app
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        working-directory: ./app
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        working-directory: ./app
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "🚀 本番デプロイ成功: Garden DX System"
+          echo "URL: https://garden-dx-system.vercel.app"
+
+  # セキュリティスキャン
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./app
+        run: npm ci
+
+      - name: Run security audit
+        working-directory: ./app
+        run: npm audit --audit-level moderate
+
+      - name: Check for vulnerabilities
+        working-directory: ./app
+        run: npx audit-ci --moderate

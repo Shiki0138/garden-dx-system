@@ -32,7 +32,7 @@ fi
 
 # セッション名
 PRESIDENT_SESSION="${PROJECT_NAME}_president"
-TEAM_SESSION="${PROJECT_NAME}_team"
+TEAM_SESSION="${PROJECT_NAME}_multiagent"
 ERROR_FIX_SESSION="${PROJECT_NAME}_errorfix"
 
 # タイムスタンプと指示ID
@@ -104,24 +104,8 @@ send_to_team() {
     
     echo "📤 Boss/Workers チームに指示を送信中..."
     
-    tmux send-keys -t "$TEAM_SESSION:0.0" "
-=====================================
-👑 PRESIDENT からの指示 [ID: $INSTRUCTION_ID]
-=====================================
-時刻: $TIMESTAMP
-タイプ: $task_type
-
-【指示内容】
-$instruction
-
-【実行要求】
-1. 指示内容を分析し、適切にWorker1-5に作業を分配
-2. 品質基準を維持しながら実行
-3. 定期的に進捗を報告
-4. 完了後、PRESIDENTに報告
-
-開発ルールと仕様書に従って実行してください。
-=====================================" C-m
+    # 長いメッセージは問題を引き起こす可能性があるため、シンプルな指示に変更
+    tmux send-keys -t "$TEAM_SESSION:0.0" "あなたはboss1です。PRESIDENTから指示：$instruction" C-m
     
     echo "✅ Team への指示送信完了"
 }

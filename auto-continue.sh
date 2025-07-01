@@ -20,7 +20,7 @@ LOG_FILE="logs/auto_continue_${PROJECT_NAME}.log"
 # 自動継続実行関数
 auto_continue_loop() {
     local project="$1"
-    local team_session="${project}_team"
+    local team_session="${project}_multiagent"
     local cycle=1
     
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] 自動継続実行システム開始" | tee -a "$LOG_FILE"

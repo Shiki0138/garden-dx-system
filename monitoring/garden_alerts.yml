@@ -1,0 +1,260 @@
+# ======================================
+# Garden システム アラート定義
+# サイクル2: 100%完成レベル監視品質
+# ======================================
+
+groups:
+  # ========== 重要度: CRITICAL ==========
+  - name: garden.critical
+    interval: 30s
+    rules:
+      # API サーバーダウン
+      - alert: GardenAPIDown
+        expr: up{job="garden-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "Garden API サーバーがダウンしています"
+          description: "Garden API サーバー ({{ $labels.instance }}) が1分間以上応答していません。"
+
+      # データベース接続不可
+      - alert: GardenDatabaseDown
+        expr: up{job="garden-postgres"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Garden データベースに接続できません"
+          description: "PostgreSQL データベースが2分間以上応答していません。"
+
+      # 高CPU使用率
+      - alert: GardenHighCPUUsage
+        expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Garden サーバーのCPU使用率が異常に高い"
+          description: "CPU使用率が {{ $value }}% で5分間継続しています。"
+
+      # 高メモリ使用率
+      - alert: GardenHighMemoryUsage
+        expr: (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 90
+        for: 3m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Garden サーバーのメモリ使用率が危険レベル"
+          description: "メモリ使用率が {{ $value }}% に達しています。"
+
+      # API応答時間異常
+      - alert: GardenAPIHighLatency
+        expr: histogram_quantile(0.95, http_request_duration_seconds_bucket{job="garden-api"}) > 5
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "Garden API の応答時間が異常に遅い"
+          description: "95%tile応答時間が {{ $value }}秒 です。"
+
+  # ========== 重要度: WARNING ==========
+  - name: garden.warning
+    interval: 60s
+    rules:
+      # ディスク使用率警告
+      - alert: GardenHighDiskUsage
+        expr: (1 - node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "Garden サーバーのディスク使用率が高い"
+          description: "ディスク使用率が {{ $value }}% です ({{ $labels.mountpoint }})。"
+
+      # データベース接続数警告
+      - alert: GardenHighDatabaseConnections
+        expr: pg_stat_activity_count{state="active"} > 80
+        for: 3m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Garden データベースの接続数が多い"
+          description: "アクティブ接続数が {{ $value }} です。"
+
+      # キャッシュヒット率低下
+      - alert: GardenLowCacheHitRatio
+        expr: (pg_stat_database_blks_hit / (pg_stat_database_blks_hit + pg_stat_database_blks_read)) * 100 < 85
+        for: 10m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Garden データベースのキャッシュヒット率が低い"
+          description: "キャッシュヒット率が {{ $value }}% です。"
+
+      # API エラー率上昇
+      - alert: GardenHighAPIErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 3m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "Garden API のエラー率が高い"
+          description: "5xx エラー率が {{ $value }}% です。"
+
+  # ========== セキュリティアラート ==========
+  - name: garden.security
+    interval: 60s
+    rules:
+      # ログイン失敗多発
+      - alert: GardenHighLoginFailures
+        expr: increase(garden_login_failures_total[1h]) > 50
+        for: 0s
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "Garden システムでログイン失敗が多発"
+          description: "過去1時間で {{ $value }} 回のログイン失敗が発生しています。"
+
+      # セキュリティ違反検知
+      - alert: GardenSecurityViolation
+        expr: increase(garden_security_violations_total[5m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "Garden システムでセキュリティ違反を検知"
+          description: "{{ $labels.violation_type }} 違反が検知されました。"
+
+      # 異常なAPI呼び出し
+      - alert: GardenAbnormalAPIUsage
+        expr: rate(http_requests_total[5m]) > 1000
+        for: 2m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "Garden API の異常な呼び出し頻度"
+          description: "API呼び出し頻度が {{ $value }} req/sec です。"
+
+  # ========== ビジネスメトリクス ==========
+  - name: garden.business
+    interval: 300s
+    rules:
+      # 見積書作成エラー
+      - alert: GardenEstimateCreationFailure
+        expr: increase(garden_estimate_creation_errors_total[1h]) > 10
+        for: 0s
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "Garden 見積書作成でエラーが多発"
+          description: "過去1時間で {{ $value }} 件の見積書作成エラーが発生しています。"
+
+      # PDF生成失敗
+      - alert: GardenPDFGenerationFailure
+        expr: increase(garden_pdf_generation_errors_total[30m]) > 5
+        for: 0s
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "Garden PDF生成でエラーが発生"
+          description: "過去30分で {{ $value }} 件のPDF生成エラーが発生しています。"
+
+      # データベース整合性エラー
+      - alert: GardenDataIntegrityError
+        expr: increase(garden_data_integrity_errors_total[1h]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          component: data
+        annotations:
+          summary: "Garden データ整合性エラーを検知"
+          description: "データ整合性に関するエラーが検知されました。"
+
+  # ========== パフォーマンス監視 ==========
+  - name: garden.performance
+    interval: 120s
+    rules:
+      # スロークエリ発生
+      - alert: GardenSlowQueries
+        expr: increase(garden_slow_queries_total[10m]) > 5
+        for: 0s
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "Garden データベースでスロークエリが発生"
+          description: "過去10分で {{ $value }} 件のスロークエリが発生しています。"
+
+      # レスポンス時間劣化
+      - alert: GardenResponseTimeDegradation
+        expr: histogram_quantile(0.90, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 3m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "Garden API のレスポンス時間が劣化"
+          description: "90%tile応答時間が {{ $value }}秒 です。"
+
+      # 同時接続数上昇
+      - alert: GardenHighConcurrentUsers
+        expr: garden_active_sessions_total > 200
+        for: 5m
+        labels:
+          severity: info
+          component: performance
+        annotations:
+          summary: "Garden システムの同時接続数が高い"
+          description: "現在 {{ $value }} 人のユーザーが同時接続しています。"
+
+  # ========== システム健全性 ==========
+  - name: garden.health
+    interval: 180s
+    rules:
+      # ヘルスチェック失敗
+      - alert: GardenHealthCheckFailure
+        expr: garden_health_check_success == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: health
+        annotations:
+          summary: "Garden システムのヘルスチェックが失敗"
+          description: "システムヘルスチェックが失敗しています。"
+
+      # バックアップ失敗
+      - alert: GardenBackupFailure
+        expr: increase(garden_backup_failures_total[24h]) > 0
+        for: 0s
+        labels:
+          severity: warning
+          component: backup
+        annotations:
+          summary: "Garden システムのバックアップが失敗"
+          description: "過去24時間でバックアップに失敗しました。"
+
+      # ログ出力異常
+      - alert: GardenLogOutputAnomaly
+        expr: absent_over_time(garden_log_entries_total[10m])
+        for: 5m
+        labels:
+          severity: warning
+          component: logging
+        annotations:
+          summary: "Garden システムのログ出力が停止"
+          description: "過去10分間ログ出力が確認できません。"
