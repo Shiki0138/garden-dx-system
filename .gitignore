@@ -32,3 +32,4 @@ __pycache__/
 # Ignore dependencies & caches
 **/node_modules/
 **/.cache/
+.env.vercel
