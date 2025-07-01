@@ -28,3 +28,7 @@ __pycache__/
 # Ignore deps & caches
 **/node_modules/
 **/.cache/
+
+# Ignore dependencies & caches
+**/node_modules/
+**/.cache/
