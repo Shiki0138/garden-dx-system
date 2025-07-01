@@ -1,0 +1,25 @@
+# Temporary files
+tmp/
+*.tmp
+
+# Log files
+logs/
+*.log
+
+# Environment files
+.env_*
+
+# macOS specific
+.DS_Store
+
+# VSCode settings
+.vscode/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Backup files
+*.bak
+*~
