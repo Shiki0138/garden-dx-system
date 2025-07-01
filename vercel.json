@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "garden-dx-system",
   "builds": [
     {
       "src": "app/package.json",
@@ -16,12 +15,8 @@
       "dest": "/app/$1"
     }
   ],
-  "env": {
-    "REACT_APP_SUPABASE_URL": "@supabase_url",
-    "REACT_APP_SUPABASE_ANON_KEY": "@supabase_anon_key"
-  },
   "buildCommand": "cd app && npm run build",
-  "outputDirectory": "app/build",
   "installCommand": "cd app && npm install",
+  "outputDirectory": "app/build",
   "framework": "create-react-app"
 }
