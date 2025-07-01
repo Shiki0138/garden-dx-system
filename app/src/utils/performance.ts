@@ -5,12 +5,12 @@
  */
 
 // デバウンス関数（型安全）
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (..._args: any[]) => any>(
   func: T,
   wait: number,
   immediate = false
 ): ((...args: Parameters<T>) => void) => {
-  let timeout: NodeJS.Timeout | null = null;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
   
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
@@ -28,7 +28,7 @@ export const debounce = <T extends (...args: any[]) => any>(
 };
 
 // スロットル関数（型安全）
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (..._args: any[]) => any>(
   func: T,
   limit: number
 ): ((...args: Parameters<T>) => void) => {
@@ -38,7 +38,7 @@ export const throttle = <T extends (...args: any[]) => any>(
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
+      setTimeout(() => { inThrottle = false; }, limit);
     }
   };
 };
@@ -86,9 +86,9 @@ class LRUCache<K, V> {
 
 // 高性能メモ化関数
 export const memoize = <Args extends any[], Return>(
-  fn: (...args: Args) => Return,
-  keyGenerator?: (...args: Args) => string
-): ((...args: Args) => Return) => {
+  fn: (..._args: Args) => Return,
+  keyGenerator?: (..._args: Args) => string
+): ((..._args: Args) => Return) => {
   const cache = new LRUCache<string, Return>(50);
   
   return (...args: Args): Return => {
@@ -109,7 +109,7 @@ export const memoize = <Args extends any[], Return>(
 export const batch = <T>(
   items: T[],
   batchSize: number,
-  processor: (batch: T[]) => Promise<void>,
+  processor: (_batch: T[]) => Promise<void>,
   delay = 0
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -158,8 +158,8 @@ export const calculateVisibleRange = (
 
 // リサイズ観察最適化
 export const createResizeObserver = (
-  callback: (entries: ResizeObserverEntry[]) => void,
-  options?: ResizeObserverOptions
+  callback: (_entries: ResizeObserverEntry[]) => void,
+  _options?: ResizeObserverOptions
 ): ResizeObserver => {
   const throttledCallback = throttle(callback, 16); // 60fps制限
   return new ResizeObserver(throttledCallback);
@@ -167,8 +167,8 @@ export const createResizeObserver = (
 
 // Intersection Observer最適化
 export const createIntersectionObserver = (
-  callback: (entries: IntersectionObserverEntry[]) => void,
-  options?: IntersectionObserverInit
+  callback: (_entries: IntersectionObserverEntry[]) => void,
+  options?: IntersectionObserverInit  
 ): IntersectionObserver => {
   const throttledCallback = throttle(callback, 100);
   return new IntersectionObserver(throttledCallback, {
@@ -314,6 +314,9 @@ export const preloadResource = (url: string, type: 'script' | 'style' | 'image' 
       case 'image':
         link.as = 'image';
         break;
+      default:
+        link.as = 'script';
+        break;
     }
     
     link.onload = () => resolve();
@@ -328,7 +331,7 @@ export const createEventDelegator = <T extends Event>(
   container: HTMLElement,
   eventType: string,
   selector: string,
-  handler: (event: T, element: HTMLElement) => void
+  handler: (_event: T, _element: HTMLElement) => void
 ): (() => void) => {
   const delegatedHandler = (event: Event) => {
     const target = event.target as HTMLElement;
@@ -347,7 +350,7 @@ export const createEventDelegator = <T extends Event>(
   };
 };
 
-export default {
+const performanceUtils = {
   debounce,
   throttle,
   memoize,
@@ -361,3 +364,5 @@ export default {
   preloadResource,
   createEventDelegator,
 };
+
+export default performanceUtils;
