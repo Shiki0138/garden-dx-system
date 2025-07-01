@@ -24,3 +24,7 @@ __pycache__/
 *.bak
 *~
 .vercel
+
+# Ignore deps & caches
+**/node_modules/
+**/.cache/
