@@ -1,35 +1,61 @@
-# Temporary files
-tmp/
-*.tmp
+############################
+# 依存ライブラリ
+############################
+/**/node_modules/
 
-# Log files
-logs/
-*.log
+############################
+# ビルド成果物
+############################
+app/dist/
+app/build/
+frontend/dist/
+frontend/build/
+app/out/
+app/.next/        # （Next.js を使う場合）
+app/.output/      # （Vite/Nuxt などで生成される場合）
 
-# Environment files
-.env_*
+############################
+# ログ
+############################
+*.log*            # すべての .log 系ファイル
+npm-debug.log*
+yarn-error.log*
 
-# macOS specific
-.DS_Store
+############################
+# テスト・カバレッジ
+############################
+coverage/
+.nyc_output/
 
-# VSCode settings
+############################
+# 環境変数・機密情報
+############################
+.env*
+!.env.example     # 例示用だけ残す
+
+############################
+# IDE・エディタ設定
+############################
 .vscode/
+.idea/
+*.sw?
+*.sublime-*
 
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
+############################
+# OS／ユーティリティのメタ情報
+############################
+.DS_Store
+Thumbs.db
+*.orig            # マージ衝突解決残骸
 
-# Backup files
-*.bak
-*~
-.vercel
+############################
+# パッケージマネージャの一時ファイル
+############################
+.pnpm-store/
+.cache/
 
-# Ignore deps & caches
-**/node_modules/
-**/.cache/
-
-# Ignore dependencies & caches
-**/node_modules/
-**/.cache/
-.env.vercel
+############################
+# 一時ファイル（任意）
+############################
+tmp/
+*.local
