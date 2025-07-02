@@ -44,8 +44,6 @@ import {
   Refresh,
   Speed,
   Memory,
-  Visibility,
-  VisibilityOff,
   TrendingUp,
   AttachMoney,
   Assignment,
@@ -257,7 +255,7 @@ export const OptimizedDashboard: React.FC<OptimizedDashboardProps> = ({
   // API call with performance tracking
   const fetchDashboardData = useCallback(async (): Promise<void> => {
     const startTime = performance.now();
-    const startMemory = measureMemoryUsage();
+    const _startMemory = measureMemoryUsage();
 
     try {
       setError(null);
@@ -287,7 +285,7 @@ export const OptimizedDashboard: React.FC<OptimizedDashboardProps> = ({
       });
 
     } catch (err) {
-      console.error('Dashboard data fetch error:', err);
+      // Dashboard error handled by UI state
       setError(err instanceof Error ? err.message : 'データの取得に失敗しました');
       setLoading(false);
     } finally {

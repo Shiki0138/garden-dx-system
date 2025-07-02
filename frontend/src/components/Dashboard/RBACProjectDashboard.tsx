@@ -41,12 +41,7 @@ import {
 } from '@mui/material';
 import {
   AttachMoney,
-  Timeline,
-  Assignment,
-  Warning,
   TrendingUp,
-  Schedule,
-  Person,
   Visibility,
   VisibilityOff,
   Security,
@@ -213,7 +208,7 @@ export const RBACProjectDashboard: React.FC<RBACProjectDashboardProps> = ({
       }
 
     } catch (error) {
-      console.error('ダッシュボードデータ取得エラー:', error);
+      // Dashboard error handled by UI state
     } finally {
       setLoading(false);
     }

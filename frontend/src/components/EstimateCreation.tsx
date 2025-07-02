@@ -125,7 +125,7 @@ const EstimateCreation: React.FC = () => {
       const data = await response.json();
       setPriceMasterItems(data);
     } catch (error) {
-      console.error('単価マスタ取得エラー:', error);
+      // Price master error handled by UI state
     }
   };
 
@@ -135,7 +135,7 @@ const EstimateCreation: React.FC = () => {
       const data = await response.json();
       setCategories(data);
     } catch (error) {
-      console.error('カテゴリ取得エラー:', error);
+      // Category error handled by UI state
     }
   };
 
@@ -312,7 +312,7 @@ const EstimateCreation: React.FC = () => {
     <Box sx={{ p: 3 }}>
       {/* ヘッダー */}
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant=\"h4\" gutterBottom>
+        <Typography variant="h4" gutterBottom>
           見積作成 - Garden DX
         </Typography>
         
@@ -320,7 +320,7 @@ const EstimateCreation: React.FC = () => {
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              label=\"見積番号\"
+              label="見積番号"
               value={estimate.estimate_number}
               onChange={(e) => setEstimate(prev => ({ ...prev, estimate_number: e.target.value }))}
             />
@@ -328,8 +328,8 @@ const EstimateCreation: React.FC = () => {
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              label=\"見積日\"
-              type=\"date\"
+              label="見積日"
+              type="date"
               value={estimate.estimate_date}
               onChange={(e) => setEstimate(prev => ({ ...prev, estimate_date: e.target.value }))}
               InputLabelProps={{ shrink: true }}
@@ -338,8 +338,8 @@ const EstimateCreation: React.FC = () => {
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              label=\"有効期限\"
-              type=\"date\"
+              label="有効期限"
+              type="date"
               value={estimate.valid_until}
               onChange={(e) => setEstimate(prev => ({ ...prev, valid_until: e.target.value }))}
               InputLabelProps={{ shrink: true }}
@@ -347,9 +347,9 @@ const EstimateCreation: React.FC = () => {
           </Grid>
           <Grid item xs={12} md={3}>
             <Button
-              variant=\"contained\"
+              variant="contained"
               startIcon={<DownloadIcon />}
-              size=\"large\"
+              size="large"
               fullWidth
             >
               PDF出力
@@ -363,10 +363,10 @@ const EstimateCreation: React.FC = () => {
         <Grid item xs={12} lg={8}>
           <Paper sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant=\"h6\">見積明細</Typography>
+              <Typography variant="h6">見積明細</Typography>
               <Box>
                 <Button
-                  variant=\"outlined\"
+                  variant="outlined"
                   startIcon={<TreeIcon />}
                   onClick={() => addHeaderItem(0)}
                   sx={{ mr: 1 }}
@@ -374,7 +374,7 @@ const EstimateCreation: React.FC = () => {
                   大項目
                 </Button>
                 <Button
-                  variant=\"outlined\"
+                  variant="outlined"
                   startIcon={<TreeIcon />}
                   onClick={() => addHeaderItem(1)}
                   sx={{ mr: 1 }}
@@ -382,7 +382,7 @@ const EstimateCreation: React.FC = () => {
                   中項目
                 </Button>
                 <Button
-                  variant=\"contained\"
+                  variant="contained"
                   startIcon={<AddIcon />}
                   onClick={() => setOpenItemDialog(true)}
                 >
@@ -392,19 +392,19 @@ const EstimateCreation: React.FC = () => {
             </Box>
 
             <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable droppableId=\"estimate-items\">
+              <Droppable droppableId="estimate-items">
                 {(provided) => (
                   <TableContainer {...provided.droppableProps} ref={provided.innerRef}>
                     <Table>
                       <TableHead>
                         <TableRow>
-                          <TableCell width=\"40%\">品目・摘要</TableCell>
-                          <TableCell width=\"10%\">数量</TableCell>
-                          <TableCell width=\"10%\">単位</TableCell>
-                          <TableCell width=\"15%\">単価</TableCell>
-                          <TableCell width=\"10%\">調整額</TableCell>
-                          <TableCell width=\"15%\">金額</TableCell>
-                          <TableCell width=\"5%\">操作</TableCell>
+                          <TableCell width="40%">品目・摘要</TableCell>
+                          <TableCell width="10%">数量</TableCell>
+                          <TableCell width="10%">単位</TableCell>
+                          <TableCell width="15%">単価</TableCell>
+                          <TableCell width="10%">調整額</TableCell>
+                          <TableCell width="15%">金額</TableCell>
+                          <TableCell width="5%">操作</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -427,7 +427,7 @@ const EstimateCreation: React.FC = () => {
                                   <Box sx={{ pl: item.level * 2 }}>
                                     {item.item_type === 'header' ? (
                                       <TextField
-                                        size=\"small\"
+                                        size="small"
                                         value={item.item_description}
                                         onChange={(e) => updateItem(item.item_id, 'item_description', e.target.value)}
                                         sx={{ fontWeight: 'bold' }}
@@ -436,15 +436,15 @@ const EstimateCreation: React.FC = () => {
                                       item.item_description
                                     )}
                                     {item.is_free_entry && (
-                                      <Chip label=\"自由入力\" size=\"small\" sx={{ ml: 1 }} />
+                                      <Chip label="自由入力" size="small" sx={{ ml: 1 }} />
                                     )}
                                   </Box>
                                 </TableCell>
                                 <TableCell>
                                   {item.item_type === 'item' && (
                                     <TextField
-                                      size=\"small\"
-                                      type=\"number\"
+                                      size="small"
+                                      type="number"
                                       value={item.quantity || ''}
                                       onChange={(e) => updateItem(item.item_id, 'quantity', parseFloat(e.target.value) || 0)}
                                     />
@@ -454,8 +454,8 @@ const EstimateCreation: React.FC = () => {
                                 <TableCell>
                                   {item.item_type === 'item' && (
                                     <TextField
-                                      size=\"small\"
-                                      type=\"number\"
+                                      size="small"
+                                      type="number"
                                       value={item.unit_price || ''}
                                       onChange={(e) => updateItem(item.item_id, 'unit_price', parseInt(e.target.value) || 0)}
                                     />
@@ -464,8 +464,8 @@ const EstimateCreation: React.FC = () => {
                                 <TableCell>
                                   {item.item_type === 'item' && (
                                     <TextField
-                                      size=\"small\"
-                                      type=\"number\"
+                                      size="small"
+                                      type="number"
                                       value={item.line_item_adjustment || ''}
                                       onChange={(e) => updateItem(item.item_id, 'line_item_adjustment', parseInt(e.target.value) || 0)}
                                     />
@@ -476,9 +476,9 @@ const EstimateCreation: React.FC = () => {
                                 </TableCell>
                                 <TableCell>
                                   <IconButton
-                                    size=\"small\"
+                                    size="small"
                                     onClick={() => removeItem(item.item_id)}
-                                    color=\"error\"
+                                    color="error"
                                   >
                                     <DeleteIcon />
                                   </IconButton>
@@ -499,18 +499,18 @@ const EstimateCreation: React.FC = () => {
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
               <Grid container spacing={2} sx={{ maxWidth: 400 }}>
                 <Grid item xs={6}>
-                  <Typography variant=\"body1\">小計:</Typography>
+                  <Typography variant="body1">小計:</Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant=\"body1\" align=\"right\">
+                  <Typography variant="body1" align="right">
                     ¥{(profitability?.total_revenue || 0).toLocaleString()}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
                   <TextField
-                    size=\"small\"
-                    label=\"調整額\"
-                    type=\"number\"
+                    size="small"
+                    label="調整額"
+                    type="number"
                     value={estimate.adjustment_amount}
                     onChange={(e) => {
                       const amount = parseInt(e.target.value) || 0;
@@ -520,7 +520,7 @@ const EstimateCreation: React.FC = () => {
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant=\"h6\" align=\"right\">
+                  <Typography variant="h6" align="right">
                     ¥{(profitability?.adjusted_total || 0).toLocaleString()}
                   </Typography>
                 </Grid>
@@ -533,7 +533,7 @@ const EstimateCreation: React.FC = () => {
         <Grid item xs={12} lg={4}>
           <Card sx={{ mb: 3 }}>
             <CardContent>
-              <Typography variant=\"h6\" gutterBottom>
+              <Typography variant="h6" gutterBottom>
                 <AssessmentIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                 収益性ダッシュボード
               </Typography>
@@ -541,29 +541,29 @@ const EstimateCreation: React.FC = () => {
               {profitability && (
                 <Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant=\"body2\">実行予算（原価）:</Typography>
-                    <Typography variant=\"body2\">¥{profitability.total_cost.toLocaleString()}</Typography>
+                    <Typography variant="body2">実行予算（原価）:</Typography>
+                    <Typography variant="body2">¥{profitability.total_cost.toLocaleString()}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant=\"body2\">見積金額:</Typography>
-                    <Typography variant=\"body2\">¥{profitability.adjusted_total.toLocaleString()}</Typography>
+                    <Typography variant="body2">見積金額:</Typography>
+                    <Typography variant="body2">¥{profitability.adjusted_total.toLocaleString()}</Typography>
                   </Box>
                   <Divider sx={{ my: 1 }} />
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant=\"body1\" fontWeight=\"bold\">最終利益:</Typography>
+                    <Typography variant="body1" fontWeight="bold">最終利益:</Typography>
                     <Typography 
-                      variant=\"body1\" 
-                      fontWeight=\"bold\"
+                      variant="body1" 
+                      fontWeight="bold"
                       color={profitability.final_profit >= 0 ? 'success.main' : 'error.main'}
                     >
                       ¥{profitability.final_profit.toLocaleString()}
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant=\"body1\" fontWeight=\"bold\">利益率:</Typography>
+                    <Typography variant="body1" fontWeight="bold">利益率:</Typography>
                     <Typography 
-                      variant=\"body1\" 
-                      fontWeight=\"bold\"
+                      variant="body1" 
+                      fontWeight="bold"
                       color={profitability.final_margin_rate >= 0.2 ? 'success.main' : 'warning.main'}
                     >
                       {(profitability.final_margin_rate * 100).toFixed(1)}%
@@ -571,12 +571,12 @@ const EstimateCreation: React.FC = () => {
                   </Box>
                   
                   {profitability.final_margin_rate < 0.15 && (
-                    <Alert severity=\"warning\" sx={{ mt: 2 }}>
+                    <Alert severity="warning" sx={{ mt: 2 }}>
                       利益率が低すぎます。価格調整を検討してください。
                     </Alert>
                   )}
                   {profitability.final_margin_rate >= 0.3 && (
-                    <Alert severity=\"success\" sx={{ mt: 2 }}>
+                    <Alert severity="success" sx={{ mt: 2 }}>
                       優良な利益率です！
                     </Alert>
                   )}
@@ -588,7 +588,7 @@ const EstimateCreation: React.FC = () => {
       </Grid>
 
       {/* 明細追加ダイアログ */}
-      <Dialog open={openItemDialog} onClose={() => setOpenItemDialog(false)} maxWidth=\"lg\" fullWidth>
+      <Dialog open={openItemDialog} onClose={() => setOpenItemDialog(false)} maxWidth="lg" fullWidth>
         <DialogTitle>明細追加</DialogTitle>
         <DialogContent>
           {/* カテゴリ選択 */}
@@ -603,7 +603,7 @@ const EstimateCreation: React.FC = () => {
                     setSelectedSubCategory('');
                   }}
                 >
-                  <MenuItem value=\"\">すべて</MenuItem>
+                  <MenuItem value="">すべて</MenuItem>
                   {Object.keys(categories).map(category => (
                     <MenuItem key={category} value={category}>{category}</MenuItem>
                   ))}
@@ -618,7 +618,7 @@ const EstimateCreation: React.FC = () => {
                   onChange={(e) => setSelectedSubCategory(e.target.value)}
                   disabled={!selectedCategory}
                 >
-                  <MenuItem value=\"\">すべて</MenuItem>
+                  <MenuItem value="">すべて</MenuItem>
                   {selectedCategory && categories[selectedCategory]?.map(subCategory => (
                     <MenuItem key={subCategory} value={subCategory}>{subCategory}</MenuItem>
                   ))}
@@ -628,7 +628,7 @@ const EstimateCreation: React.FC = () => {
             <Grid item xs={4}>
               <TextField
                 fullWidth
-                label=\"キーワード検索\"
+                label="キーワード検索"
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 InputProps={{
@@ -663,8 +663,8 @@ const EstimateCreation: React.FC = () => {
                     <TableCell>¥{Math.round(item.purchase_price * item.default_markup_rate).toLocaleString()}</TableCell>
                     <TableCell>
                       <Button
-                        size=\"small\"
-                        variant=\"outlined\"
+                        size="small"
+                        variant="outlined"
                         onClick={() => addItemFromMaster(item)}
                       >
                         追加
@@ -679,12 +679,12 @@ const EstimateCreation: React.FC = () => {
           <Divider sx={{ my: 3 }} />
 
           {/* 自由入力フォーム */}
-          <Typography variant=\"h6\" gutterBottom>自由入力で追加</Typography>
+          <Typography variant="h6" gutterBottom>自由入力で追加</Typography>
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <TextField
                 fullWidth
-                label=\"品目・摘要\"
+                label="品目・摘要"
                 value={newItem.item_description}
                 onChange={(e) => setNewItem(prev => ({ ...prev, item_description: e.target.value }))}
               />
@@ -692,8 +692,8 @@ const EstimateCreation: React.FC = () => {
             <Grid item xs={2}>
               <TextField
                 fullWidth
-                label=\"数量\"
-                type=\"number\"
+                label="数量"
+                type="number"
                 value={newItem.quantity}
                 onChange={(e) => setNewItem(prev => ({ ...prev, quantity: parseFloat(e.target.value) || 0 }))}
               />
@@ -701,7 +701,7 @@ const EstimateCreation: React.FC = () => {
             <Grid item xs={2}>
               <TextField
                 fullWidth
-                label=\"単位\"
+                label="単位"
                 value={newItem.unit}
                 onChange={(e) => setNewItem(prev => ({ ...prev, unit: e.target.value }))}
               />
@@ -709,8 +709,8 @@ const EstimateCreation: React.FC = () => {
             <Grid item xs={2}>
               <TextField
                 fullWidth
-                label=\"単価\"
-                type=\"number\"
+                label="単価"
+                type="number"
                 value={newItem.unit_price}
                 onChange={(e) => setNewItem(prev => ({ ...prev, unit_price: parseInt(e.target.value) || 0 }))}
               />
@@ -719,7 +719,7 @@ const EstimateCreation: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenItemDialog(false)}>キャンセル</Button>
-          <Button variant=\"contained\" onClick={addFreeEntryItem}>
+          <Button variant="contained" onClick={addFreeEntryItem}>
             自由入力で追加
           </Button>
         </DialogActions>

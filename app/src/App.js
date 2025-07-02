@@ -16,6 +16,7 @@ import PDFGenerator from './components/PDFGenerator';
 import LoginPage from './components/auth/LoginPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { checkEnvironmentVariables } from './utils/apiErrorHandler';
+import { log } from './utils/logger';
 
 // アプリケーションコンテンツ
 const AppContent = () => {
@@ -39,7 +40,7 @@ const AppContent = () => {
     if (process.env.REACT_APP_ENVIRONMENT === 'development') {
       const envCheck = checkEnvironmentVariables();
       if (!envCheck.isValid) {
-        console.warn('🚨 環境変数が不足しています:', envCheck.missing);
+        log.warn('🚨 環境変数が不足しています:', envCheck.missing);
       }
     }
   }, []);

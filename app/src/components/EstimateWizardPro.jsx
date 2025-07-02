@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import styled, { keyframes } from 'styled-components';
 import { 
   FiCheck, 
@@ -679,21 +680,23 @@ const SavedEstimateItem = styled.div`
 `;
 
 const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
-  // テスト用モード: AuthProvider外でも動作するように条件分岐
-  let user = null;
-  try {
-    // useAuthが利用可能な場合は使用
-    user = { id: 1, username: 'test_user', company_id: 1, role: 'owner' };
-  } catch (error) {
-    // AuthProvider外で使用された場合は無視（テスト用モード）
-    console.warn('AuthProvider外でuseAuthが呼ばれました。テスト用モードで動作します。');
-    user = {
-      id: 1,
-      username: 'test_user',
-      company_id: 1,
-      role: 'owner'
-    };
-  }
+  // デモモード・テスト用認証バイパス（DEPLOYMENT_ERROR_PREVENTION_RULES.md準拠）
+  // 環境変数チェック（デプロイエラー防止）
+  const demoModeEnv = process.env.REACT_APP_DEMO_MODE;
+  const isDemoMode = demoModeEnv === 'true' || demoModeEnv === true;
+  
+  // React Hooks rules準拠: 常にuseAuthを呼び出し
+  const { user: authUser, isAuthenticated: authIsAuthenticated } = useAuth();
+  
+  // デモモード時の認証バイパス
+  const user = isDemoMode ? {
+    id: 'demo-user-001',
+    email: 'demo@garden-dx.com',
+    role: 'manager',
+    name: '田中 太郎'
+  } : authUser;
+  
+  const isAuthenticated = isDemoMode ? true : authIsAuthenticated;
   
   // ウィザード状態管理
   const [currentStep, setCurrentStep] = useState(1);
@@ -781,15 +784,16 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
   useEffect(() => {
     loadInitialData();
     loadSavedEstimates();
-  }, [estimateId]);
+  }, [estimateId, isDemoMode, loadInitialData, loadSavedEstimates]);
   
-  const loadInitialData = async () => {
+  const loadInitialData = useCallback(async () => {
     try {
       // localStorage存在チェック（SSR対応）
       if (typeof window !== 'undefined' && window.localStorage) {
-        // 編集モードの場合は既存データ読み込み
+        // 編集モードの場合は既存データ読み込み（デモモード対応）
         if (estimateId) {
-          const savedData = localStorage.getItem(`estimate_${estimateId}`);
+          const storageKey = isDemoMode ? `demo_estimate_${estimateId}` : `estimate_${estimateId}`;
+          const savedData = localStorage.getItem(storageKey);
           if (savedData) {
             const data = JSON.parse(savedData);
             setFormData(data.formData);
@@ -810,10 +814,10 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
       console.error('初期データの読み込みに失敗:', error);
       // エラーが発生してもアプリケーションは継続動作する
     }
-  };
+  }, [estimateId, isDemoMode]);
   
   // 保存された見積一覧の読み込み（デプロイエラー防止対策適用）
-  const loadSavedEstimates = () => {
+  const loadSavedEstimates = useCallback(() => {
     try {
       // localStorage存在チェック（SSR対応）
       if (typeof window === 'undefined' || !window.localStorage) {
@@ -823,16 +827,19 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
       }
       
       const saved = [];
+      const keyPrefix = isDemoMode ? 'demo_estimate_' : 'estimate_';
+      
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('estimate_')) {
+        if (key && key.startsWith(keyPrefix)) {
           try {
             const data = JSON.parse(localStorage.getItem(key) || '{}');
             if (data.formData) {
               saved.push({
-                id: key.replace('estimate_', ''),
+                id: key.replace(keyPrefix, ''),
                 ...data.formData,
-                savedAt: data.savedAt || new Date().toISOString()
+                savedAt: data.savedAt || new Date().toISOString(),
+                isDemoData: isDemoMode
               });
             }
           } catch (parseError) {
@@ -846,7 +853,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
       console.error('保存データの読み込みに失敗:', error);
       setSavedEstimates([]);
     }
-  };
+  }, [isDemoMode]);
   
   // リアルタイム金額計算（編集可能単価・掛け率対応）
   const calculatedAmounts = useMemo(() => {
@@ -982,11 +989,15 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
         estimateId: estimateId || Date.now().toString()
       };
       
-      // localStorage存在チェック（SSR対応）
+      // localStorage存在チェック（SSR・デモモード対応）
       if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem(`estimate_${saveData.estimateId}`, JSON.stringify(saveData));
+        const storageKey = isDemoMode ? `demo_estimate_${saveData.estimateId}` : `estimate_${saveData.estimateId}`;
+        localStorage.setItem(storageKey, JSON.stringify(saveData));
         loadSavedEstimates();
-        alert('一時保存しました');
+        const message = isDemoMode ? 
+          'デモモードで一時保存しました（実際のデータベースには保存されません）' : 
+          '一時保存しました';
+        alert(message);
       } else {
         throw new Error('localStorage is not available');
       }
@@ -996,7 +1007,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData, itemSelections, estimateId]);
+  }, [formData, itemSelections, estimateId, isDemoMode, loadSavedEstimates]);
   
   // 保存データの読み込み（デプロイエラー防止対策適用）
   const loadSavedEstimate = useCallback((savedId) => {
@@ -1006,13 +1017,17 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
         throw new Error('localStorage is not available');
       }
       
-      const savedData = localStorage.getItem(`estimate_${savedId}`);
+      const storageKey = isDemoMode ? `demo_estimate_${savedId}` : `estimate_${savedId}`;
+      const savedData = localStorage.getItem(storageKey);
       if (savedData) {
         const data = JSON.parse(savedData);
         setFormData(data.formData);
         setItemSelections(data.itemSelections);
         setCurrentStep(1);
-        alert('見積データを読み込みました');
+        const message = isDemoMode ? 
+          'デモモードでデータを読み込みました' : 
+          '見積データを読み込みました';
+        alert(message);
       } else {
         throw new Error('保存データが見つかりません');
       }
@@ -1020,7 +1035,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
       console.error('データ読み込みに失敗:', error);
       alert('データ読み込みに失敗しました。データが存在しないか、破損している可能性があります。');
     }
-  }, []);
+  }, [isDemoMode]);
   
   // 見積完成（デプロイエラー防止対策適用）
   const completeEstimate = useCallback(async () => {
@@ -1040,14 +1055,20 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
         completedAt: new Date().toISOString()
       };
       
-      // localStorage存在チェック（SSR対応）
+      // localStorage存在チェック（SSR・デモモード対応）
       if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem(`completed_estimate_${Date.now()}`, JSON.stringify(finalData));
+        const storageKey = isDemoMode ? 
+          `demo_completed_estimate_${Date.now()}` : 
+          `completed_estimate_${Date.now()}`;
+        localStorage.setItem(storageKey, JSON.stringify(finalData));
       } else {
         console.warn('localStorage is not available. Data will not be persisted.');
       }
       
-      alert('見積書を作成しました');
+      const message = isDemoMode ? 
+        'デモモードで見積書を作成しました（実際のデータベースには保存されません）' : 
+        '見積書を作成しました';
+      alert(message);
       if (onComplete) {
         await onComplete(finalData);
       }
@@ -1057,7 +1078,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData, itemSelections, onComplete, validateStep]);
+  }, [formData, itemSelections, onComplete, validateStep, isDemoMode]);
   
   // 通貨フォーマット
   const formatCurrency = useCallback((amount) => {
@@ -1615,9 +1636,18 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
         <WizardTitle>
           <FiFileText size={32} />
           見積書作成ウィザード Pro
+          {isDemoMode && <span style={{ 
+            fontSize: '16px', 
+            background: '#ff9800', 
+            color: 'white', 
+            padding: '4px 8px', 
+            borderRadius: '4px', 
+            marginLeft: '15px' 
+          }}>🎭 デモモード</span>}
         </WizardTitle>
         <WizardSubtitle>
           造園業界標準項目・簡素化UI・データ保存対応
+          {isDemoMode && ' - デモ環境（認証不要）'}
         </WizardSubtitle>
       </WizardHeader>
       

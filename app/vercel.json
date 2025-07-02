@@ -4,6 +4,12 @@
   "framework": null,
   "installCommand": "npm install",
   "devCommand": "npm start",
+  "env": {
+    "REACT_APP_DEMO_MODE": "true",
+    "REACT_APP_ENVIRONMENT": "demo",
+    "CI": "false",
+    "GENERATE_SOURCEMAP": "false"
+  },
   "rewrites": [
     {
       "source": "/(.*)",

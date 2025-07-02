@@ -59,22 +59,58 @@ export const supabase = supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey, supabaseOptions)
   : null;
 
-// 開発用フォールバック関数
-const createMockSupabase = () => ({
-  auth: {
-    signInWithPassword: async () => ({ data: null, error: new Error('開発モード') }),
-    signUp: async () => ({ data: null, error: new Error('開発モード') }),
-    signOut: async () => ({ error: null }),
-    getSession: async () => ({ data: { session: null }, error: null }),
-    onAuthStateChange: () => ({ data: { subscription: null } })
-  },
-  from: () => ({
-    select: () => ({ data: [], error: null }),
-    insert: () => ({ data: null, error: new Error('開発モード') }),
-    update: () => ({ data: null, error: new Error('開発モード') }),
-    delete: () => ({ data: null, error: new Error('開発モード') })
-  })
-});
+// 開発・デモ用フォールバック関数
+const createMockSupabase = () => {
+  const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true';
+  const modeText = isDemoMode ? 'デモモード' : '開発モード';
+  
+  return {
+    auth: {
+      signInWithPassword: async () => ({ 
+        data: isDemoMode ? { 
+          user: { 
+            id: 'demo-user-001', 
+            email: 'demo@garden-dx.com',
+            user_metadata: { role: 'manager' }
+          } 
+        } : null, 
+        error: isDemoMode ? null : new Error(modeText) 
+      }),
+      signUp: async () => ({ data: null, error: new Error(modeText) }),
+      signOut: async () => ({ error: null }),
+      getSession: async () => ({ 
+        data: { 
+          session: isDemoMode ? { 
+            user: { 
+              id: 'demo-user-001', 
+              email: 'demo@garden-dx.com' 
+            } 
+          } : null 
+        }, 
+        error: null 
+      }),
+      onAuthStateChange: () => ({ data: { subscription: null } })
+    },
+    from: () => ({
+      select: () => ({ 
+        data: isDemoMode ? [] : [], 
+        error: isDemoMode ? null : new Error(modeText) 
+      }),
+      insert: () => ({ 
+        data: isDemoMode ? { id: 'demo-id' } : null, 
+        error: isDemoMode ? null : new Error(modeText) 
+      }),
+      update: () => ({ 
+        data: isDemoMode ? { id: 'demo-id' } : null, 
+        error: isDemoMode ? null : new Error(modeText) 
+      }),
+      delete: () => ({ 
+        data: isDemoMode ? { id: 'demo-id' } : null, 
+        error: isDemoMode ? null : new Error(modeText) 
+      })
+    })
+  };
+};
 
 // エクスポート用クライアント（フォールバック対応）
 export const supabaseClient = supabase || createMockSupabase();

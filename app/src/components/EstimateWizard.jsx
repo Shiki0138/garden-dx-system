@@ -643,9 +643,9 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
   // 初期データ読み込み
   useEffect(() => {
     loadInitialData();
-  }, [estimateId]);
+  }, [estimateId, loadInitialData]);
   
-  const loadInitialData = async () => {
+  const loadInitialData = useCallback(async () => {
     try {
       // 単価マスタデータ取得
       const response = await fetch('/api/demo/price-master');
@@ -678,7 +678,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
     } catch (error) {
       console.error('初期データの読み込みに失敗:', error);
     }
-  };
+  }, [estimateId]);
   
   // リアルタイム金額計算
   const calculatedAmounts = useMemo(() => {

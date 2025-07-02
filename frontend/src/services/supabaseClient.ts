@@ -357,7 +357,13 @@ export const getPaginatedData = async <T>(
   pageSize: number = 20,
   filters?: Record<string, any>,
   orderBy?: { column: string; ascending: boolean }
-) => {
+): Promise<{
+  data: T[];
+  count: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}> => {
   try {
     const start = (page - 1) * pageSize;
     const end = start + pageSize - 1;
@@ -385,7 +391,7 @@ export const getPaginatedData = async <T>(
     if (error) throw error;
 
     return {
-      data: data || [],
+      data: (data || []) as T[],
       count: count || 0,
       page,
       pageSize,

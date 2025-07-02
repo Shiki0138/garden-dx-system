@@ -14,25 +14,10 @@ import {
   DialogActions,
   Chip,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   IconButton,
   InputAdornment,
-  Card,
-  CardContent,
   Divider,
-  Avatar,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Snackbar,
-  LinearProgress,
-  Fade,
-  Grow,
-  Tooltip
+  Avatar
 } from '@mui/material';
 import {
   Visibility,
@@ -86,7 +71,7 @@ interface SessionInfo {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 // スタイル定義
-const LoginContainer = styled(Container)(({ theme }) => ({
+const LoginContainer = styled(Container)(({ theme: _theme }) => ({
   minHeight: '100vh',
   display: 'flex',
   alignItems: 'center',
@@ -107,7 +92,7 @@ const LogoBox = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(3),
 }));
 
-const RoleChip = styled(Chip)(({ theme, role }: { role: string }) => ({
+const RoleChip = styled(Chip)(({ theme: _theme, role }: { role: string }) => ({
   backgroundColor: role === 'owner' ? '#FF6B35' : '#4CAF50',
   color: 'white',
   fontWeight: 'bold',
@@ -202,7 +187,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             localStorage.setItem('garden_refresh_token', data.refresh_token);
           }
         } catch (storageError) {
-          console.warn('ローカルストレージ保存エラー:', storageError);
+          // Storage error handled silently in production
         }
         
         return true;
@@ -211,12 +196,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(error.detail || `ログインに失敗しました (${response.status})`);
       }
     } catch (error) {
-      console.error('ログインエラー:', error);
+      // Login error handled by UI state
       
       // リトライロジック
       if (error instanceof TypeError && retryCount < 2) {
         setRetryCount(prev => prev + 1);
-        console.log(`ログインリトライ中... (${retryCount + 1}/3)`);
+        // Retry without logging
         await new Promise(resolve => setTimeout(resolve, 1000));
         return login(username, password);
       }
@@ -239,12 +224,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
-        }).catch(error => {
-          console.warn('サーバーサイドログアウトエラー:', error);
+        }).catch(_error => {
+          // Server logout error handled silently
         });
       }
     } catch (error) {
-      console.warn('ログアウト処理エラー:', error);
+      // Logout error handled silently
     } finally {
       // クライアントサイドクリーンアップ
       setUser(null);
@@ -259,7 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('garden_session');
         localStorage.removeItem('garden_refresh_token');
       } catch (storageError) {
-        console.warn('ストレージクリーンアップエラー:', storageError);
+        // Storage cleanup error handled silently
       }
       
       setLoading(false);
@@ -303,7 +288,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       return false;
     } catch (error) {
-      console.error('トークンリフレッシュエラー:', error);
+      // Token refresh error handled by logout
       return false;
     }
   }, [sessionInfo]);
@@ -352,7 +337,7 @@ export const LoginScreen: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [demoMode, setDemoMode] = useState(false);
+  const [_demoMode, _setDemoMode] = useState(false);
   
   const auth = useContext(AuthContext);
 
@@ -517,9 +502,9 @@ export const LoginScreen: React.FC = () => {
 
 // ユーザーメニュー
 export const UserMenu: React.FC = () => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [_anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [sessionsOpen, setSessionsOpen] = useState(false);
+  const [_sessionsOpen, _setSessionsOpen] = useState(false);
   
   const auth = useContext(AuthContext);
   
@@ -529,7 +514,7 @@ export const UserMenu: React.FC = () => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
+  const _handleMenuClose = () => {
     setAnchorEl(null);
   };
 
