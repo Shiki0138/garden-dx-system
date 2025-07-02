@@ -3,7 +3,7 @@
  * 造園業DXシステム用認証管理
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { 
   supabaseClient, 
   isSupabaseConnected, 

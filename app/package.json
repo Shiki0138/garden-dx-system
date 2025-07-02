@@ -35,11 +35,23 @@
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "typecheck": "tsc --noEmit",
+    "typecheck:perf": "tsc --noEmit --project tsconfig.performance.json",
     "quality": "npm run format && npm run lint && npm run typecheck",
     "pre-commit": "npm run quality && npm run test -- --watchAll=false",
-    "build:analyze": "npm run build && npx source-map-explorer 'build/static/js/*.js'",
+    "build:analyze": "npm run build && npx webpack-bundle-analyzer build/static/js/*.js",
     "build:production": "CI=false npm run build",
-    "preview": "npx serve -s build"
+    "build:perf": "NODE_ENV=production npm run build && npm run analyze:size",
+    "preview": "npx serve -s build",
+    "analyze:bundle": "node scripts/bundle-analyzer.js",
+    "analyze:size": "node scripts/bundle-analyzer.js",
+    "analyze:interactive": "node scripts/bundle-analyzer.js --analyzer",
+    "perf:audit": "npm run typecheck:perf && npm run analyze:size",
+    "optimize": "npm run build:perf && npm run analyze:interactive",
+    "security:audit": "node ../scripts/security-audit.js",
+    "security:vuln-scan": "node ../scripts/vulnerability-scan.js",
+    "security:type-safety": "node ../scripts/type-safety-audit.js",
+    "security:full": "../scripts/run-security-audit.sh",
+    "security:check": "npm run security:audit && npm run security:vuln-scan"
   },
   "eslintConfig": {
     "extends": [
