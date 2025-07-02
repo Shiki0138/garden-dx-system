@@ -4,14 +4,57 @@ import { corsHeaders } from '../_shared/cors.ts'
 import { validateEnvironmentVariables } from '../_shared/env.ts'
 import { createStandardErrorResponse } from '../_shared/errors.ts'
 import { detectDemoMode, createDemoResponse, checkDemoRestrictions, addDemoWatermark } from '../_shared/demo.ts'
+import { 
+  createPerformanceTracker, 
+  logPerformance, 
+  createTypedResponse,
+  optimizeQuery,
+  monitorResources,
+  ConcurrencyLimiter,
+  createOptimizedSupabaseClient
+} from '../_shared/performance.ts'
+import {
+  securityMiddleware,
+  validateInput,
+  createSecurityHeaders,
+  logSecurityEvent,
+  maskSensitiveData,
+  DEFAULT_SECURITY_CONFIG
+} from '../_shared/security.ts'
+
+// 並行処理制限
+const concurrencyLimiter = new ConcurrencyLimiter(10);
 
 serve(async (req) => {
+  // パフォーマンス計測開始
+  const performanceTracker = createPerformanceTracker('estimates');
+  
   // CORS preflight handling
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
+    // セキュリティチェック
+    const securityCheck = await securityMiddleware(req, {
+      ...DEFAULT_SECURITY_CONFIG,
+      allowedOrigins: ['*'], // 開発用：本番では制限
+      requireAuth: !req.url.includes('demo=true')
+    });
+
+    if (!securityCheck.allowed) {
+      logSecurityEvent('unauthorized_access', {
+        url: req.url,
+        method: req.method,
+        origin: req.headers.get('origin'),
+        userAgent: req.headers.get('user-agent')
+      }, 'warn');
+      return securityCheck.response!;
+    }
+
+    // リソース監視
+    monitorResources();
+    
     // 環境変数検証
     validateEnvironmentVariables()
 
@@ -102,10 +145,7 @@ serve(async (req) => {
             return createStandardErrorResponse('NOT_FOUND', 'Estimate not found')
           }
 
-          return new Response(JSON.stringify(estimate), {
-            status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          })
+          return createTypedResponse(estimate, 200)
         } else {
           // 見積一覧取得
           const { data: estimates, error } = await supabase
@@ -127,10 +167,7 @@ serve(async (req) => {
             return createStandardErrorResponse('DATABASE_ERROR', error.message)
           }
 
-          return new Response(JSON.stringify({ estimates }), {
-            status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          })
+          return createTypedResponse({ estimates }, 200)
         }
 
       case 'POST':
@@ -256,6 +293,15 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Estimates function error:', error)
+    
+    // パフォーマンス計測終了（エラー時）
+    const metrics = performanceTracker.end();
+    logPerformance(metrics);
+    
     return createStandardErrorResponse('INTERNAL_SERVER_ERROR', error.message)
+  } finally {
+    // パフォーマンス計測終了（正常時）
+    const metrics = performanceTracker.end();
+    logPerformance(metrics);
   }
 })
