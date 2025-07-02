@@ -1,0 +1,167 @@
+/* デモバナーのスタイル */
+.demo-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.demo-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.demo-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.demo-banner-icon {
+  font-size: 20px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.demo-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.demo-banner-text strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.demo-banner-text span {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.demo-banner-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.demo-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.demo-user-label {
+  opacity: 0.8;
+}
+
+.demo-user-name {
+  font-weight: 600;
+}
+
+.demo-user-role {
+  opacity: 0.8;
+  font-size: 11px;
+}
+
+.demo-banner-right {
+  display: flex;
+  align-items: center;
+}
+
+.demo-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.demo-user-selector {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.demo-user-selector:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.demo-user-selector option {
+  background: #333;
+  color: white;
+}
+
+.demo-exit-btn {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.demo-exit-btn:hover {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-1px);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .demo-banner-content {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 15px;
+  }
+  
+  .demo-banner-center {
+    order: -1;
+  }
+  
+  .demo-controls {
+    gap: 8px;
+  }
+  
+  .demo-user-selector {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+  
+  .demo-exit-btn {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+}
+
+/* アプリケーション本体のマージン調整 */
+body.demo-mode {
+  padding-top: 50px;
+}
+
+@media (max-width: 768px) {
+  body.demo-mode {
+    padding-top: 80px;
+  }
+}
