@@ -15,7 +15,7 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   message?: string;
-  details?: unknown;
+  details?: Record<string, unknown>;
 }
 
 export interface PaginationParams {
@@ -372,4 +372,73 @@ export interface ActivityItem {
   description: string;
   timestamp: string;
   user: string;
+}
+
+// Utility types for better type safety
+export type EntityId<T extends BaseEntity> = T['id'];
+
+export type CreateRequest<T extends BaseEntity> = Omit<T, keyof BaseEntity>;
+
+export type UpdateRequest<T extends BaseEntity> = Partial<Omit<T, keyof BaseEntity | 'id'>>;
+
+export type WithoutTimestamps<T extends BaseEntity> = Omit<T, 'created_at' | 'updated_at'>;
+
+export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
+
+export type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+// Type guards for runtime type checking
+export function isApiError(response: unknown): response is ApiError {
+  return typeof response === 'object' && 
+         response !== null && 
+         'code' in response && 
+         'message' in response;
+}
+
+export function isSuccessResponse<T>(response: ApiResponse<T>): response is ApiResponse<T> & { success: true; data: T } {
+  return response.success === true && response.data !== undefined;
+}
+
+export function isErrorResponse(response: ApiResponse<unknown>): response is ApiResponse<never> & { success: false; error: string } {
+  return response.success === false && typeof response.error === 'string';
+}
+
+// Constants for better type safety
+export const ESTIMATE_STATUSES = ['draft', 'submitted', 'approved', 'rejected', 'completed'] as const;
+export const PROJECT_STATUSES = ['planning', 'active', 'on_hold', 'completed', 'cancelled'] as const;
+export const INVOICE_STATUSES = ['draft', 'sent', 'paid', 'overdue', 'cancelled'] as const;
+export const ITEM_TYPES = ['item', 'header', 'separator', 'note'] as const;
+export const USER_ROLES = ['owner', 'employee'] as const;
+
+// Branded types for better type safety
+export type EstimateId = number & { readonly __brand: 'EstimateId' };
+export type CustomerId = number & { readonly __brand: 'CustomerId' };
+export type ProjectId = number & { readonly __brand: 'ProjectId' };
+export type InvoiceId = number & { readonly __brand: 'InvoiceId' };
+export type UserId = number & { readonly __brand: 'UserId' };
+export type CompanyId = number & { readonly __brand: 'CompanyId' };
+
+// Helper functions for branded types
+export function createEstimateId(id: number): EstimateId {
+  return id as EstimateId;
+}
+
+export function createCustomerId(id: number): CustomerId {
+  return id as CustomerId;
+}
+
+export function createProjectId(id: number): ProjectId {
+  return id as ProjectId;
+}
+
+export function createInvoiceId(id: number): InvoiceId {
+  return id as InvoiceId;
+}
+
+export function createUserId(id: number): UserId {
+  return id as UserId;
+}
+
+export function createCompanyId(id: number): CompanyId {
+  return id as CompanyId;
 }

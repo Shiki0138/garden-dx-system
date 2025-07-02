@@ -13,7 +13,7 @@ import { supabaseApiCall, handleErrorResponse } from '../utils/apiErrorHandler';
 export const estimateApi = {
   // 見積一覧取得
   getEstimates: async (userId = null, filters = {}) => {
-    return await supabaseApiCall(
+    return supabaseApiCall(
       supabaseClient,
       (client) => {
         let query = client
@@ -486,7 +486,8 @@ export const unsubscribeFromTable = (subscription) => {
   }
 };
 
-const supabaseApi = {
+// SupabaseAPIサービスの統合エクスポート
+export const supabaseApiService = {
   estimateApi,
   invoiceApi,
   customerApi,
@@ -497,4 +498,4 @@ const supabaseApi = {
   unsubscribeFromTable
 };
 
-export default supabaseApi;
+export default supabaseApiService;

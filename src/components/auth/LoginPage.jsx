@@ -173,6 +173,26 @@ const Links = styled.div`
   }
 `;
 
+const LinkButton = styled.button`
+  background: none;
+  border: none;
+  color: #1a472a;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+  
+  &:focus {
+    outline: 2px solid #1a472a;
+    outline-offset: 2px;
+  }
+`;
+
 const DevMode = styled.div`
   background: #fef3cd;
   border: 1px solid #fbbf24;
@@ -369,17 +389,25 @@ const LoginPage = () => {
             <>
               <p>
                 アカウントをお持ちでない方は{' '}
-                <a href="#" onClick={(e) => { e.preventDefault(); setMode('signup'); }}>
+                <LinkButton 
+                  type="button"
+                  onClick={() => setMode('signup')}
+                  aria-label="アカウント作成ページに切り替え"
+                >
                   こちら
-                </a>
+                </LinkButton>
               </p>
             </>
           ) : (
             <p>
               既にアカウントをお持ちの方は{' '}
-              <a href="#" onClick={(e) => { e.preventDefault(); setMode('login'); }}>
+              <LinkButton 
+                type="button"
+                onClick={() => setMode('login')}
+                aria-label="ログインページに切り替え"
+              >
                 ログイン
-              </a>
+              </LinkButton>
             </p>
           )}
         </Links>

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { downloadLandscapingInvoicePDF } from '../../utils/landscapingInvoicePDFGenerator';
 import { useAuth, useInvoicePermissions, ManagerOnlyComponent, ProtectedComponent, PERMISSIONS } from '../../hooks/useAuth';
+import { log } from '../../utils/logger';
+import { showError, showSuccess, showWarning, showConfirmDialog } from '../../utils/notifications';
 
 // アニメーション定義（UX向上）
 const fadeInUp = keyframes`
@@ -435,14 +437,14 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   useEffect(() => {
     // TODO: 顧客・プロジェクト・見積データの取得
     loadInitialData();
-  }, [invoiceId, estimateId]);
+  }, [invoiceId, estimateId, loadInitialData]);
 
   // 計算値の更新（最適化）
   useEffect(() => {
     setTotals(calculatedTotals);
   }, [calculatedTotals]);
 
-  const loadInitialData = async () => {
+  const loadInitialData = useCallback(async () => {
     try {
       // 仮データ
       setCustomers([
@@ -470,9 +472,10 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
         generateInvoiceNumber();
       }
     } catch (error) {
-      console.error('初期データの読み込みに失敗:', error);
+      log.error('初期データの読み込みに失敗:', error);
+      showError('初期データの読み込みに失敗しました。再度お試しください。');
     }
-  };
+  }, [estimateId, invoiceId]);
 
   const generateInvoiceNumber = () => {
     const date = new Date();
@@ -523,7 +526,8 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
         setItems(mockItems);
       }
     } catch (error) {
-      console.error('見積からの請求書生成に失敗:', error);
+      log.error('見積からの請求書生成に失敗:', error);
+      showError('見積からの請求書生成に失敗しました。');
     }
   };
 
@@ -636,7 +640,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   const handleSave = useCallback(async () => {
     // 権限チェック：経営者のみ請求書保存可能
     if (!invoicePermissions.canCreate && !invoicePermissions.canEdit) {
-      alert('請求書の保存権限がありません。経営者にお問い合わせください。');
+      showError('請求書の保存権限がありません。経営者にお問い合わせください。');
       return;
     }
     
@@ -662,19 +666,20 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
       };
 
       // TODO: API呼び出し
-      console.log('請求書保存:', invoiceData);
+      log.info('請求書保存:', invoiceData);
       
       // 成功時の処理
-      alert('請求書を保存しました');
+      showSuccess('請求書を保存しました');
       setIsDirty(false);
       
     } catch (error) {
-      console.error('請求書の保存に失敗:', error);
+      log.error('請求書の保存に失敗:', error);
+      showError('保存に失敗しました。再度お試しください。');
       setErrors({ general: '保存に失敗しました。再度お試しください。' });
     } finally {
       setIsLoading(false);
     }
-  }, [formData, items, totals, user, invoicePermissions]);
+  }, [formData, items, totals, user, invoicePermissions, validateForm]);
 
   const handlePreviewPDF = useCallback(async () => {
     setIsLoading(true);
@@ -712,8 +717,8 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
       });
       
     } catch (error) {
-      console.error('PDF生成に失敗:', error);
-      alert('PDF生成に失敗しました。再度お試しください。');
+      log.error('PDF生成に失敗:', error);
+      showError('PDF生成に失敗しました。再度お試しください。');
     } finally {
       setIsLoading(false);
     }
@@ -734,6 +739,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
       if (isDirty) {
         e.preventDefault();
         e.returnValue = '未保存の変更があります。ページを離れますか？';
+        log.warn('ページ離脱警告: 未保存の変更があります');
       }
     };
     

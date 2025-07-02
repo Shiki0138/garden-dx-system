@@ -784,9 +784,9 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
   useEffect(() => {
     loadInitialData();
     loadSavedEstimates();
-  }, [estimateId]);
+  }, [estimateId, isDemoMode, loadInitialData, loadSavedEstimates]);
   
-  const loadInitialData = async () => {
+  const loadInitialData = useCallback(async () => {
     try {
       // localStorage存在チェック（SSR対応）
       if (typeof window !== 'undefined' && window.localStorage) {
@@ -814,10 +814,10 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
       console.error('初期データの読み込みに失敗:', error);
       // エラーが発生してもアプリケーションは継続動作する
     }
-  };
+  }, [estimateId, isDemoMode]);
   
   // 保存された見積一覧の読み込み（デプロイエラー防止対策適用）
-  const loadSavedEstimates = () => {
+  const loadSavedEstimates = useCallback(() => {
     try {
       // localStorage存在チェック（SSR対応）
       if (typeof window === 'undefined' || !window.localStorage) {
@@ -853,7 +853,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
       console.error('保存データの読み込みに失敗:', error);
       setSavedEstimates([]);
     }
-  };
+  }, [isDemoMode]);
   
   // リアルタイム金額計算（編集可能単価・掛け率対応）
   const calculatedAmounts = useMemo(() => {
@@ -1007,7 +1007,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData, itemSelections, estimateId]);
+  }, [formData, itemSelections, estimateId, isDemoMode, loadSavedEstimates]);
   
   // 保存データの読み込み（デプロイエラー防止対策適用）
   const loadSavedEstimate = useCallback((savedId) => {
@@ -1035,7 +1035,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
       console.error('データ読み込みに失敗:', error);
       alert('データ読み込みに失敗しました。データが存在しないか、破損している可能性があります。');
     }
-  }, []);
+  }, [isDemoMode]);
   
   // 見積完成（デプロイエラー防止対策適用）
   const completeEstimate = useCallback(async () => {
@@ -1078,7 +1078,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData, itemSelections, onComplete, validateStep]);
+  }, [formData, itemSelections, onComplete, validateStep, isDemoMode]);
   
   // 通貨フォーマット
   const formatCurrency = useCallback((amount) => {

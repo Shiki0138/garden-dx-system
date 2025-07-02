@@ -3,8 +3,10 @@
  * 認証不要でUIの動作を確認できるページ
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './DemoUITest.css';
+import { log } from '../utils/logger';
+import { showSuccess, showError, showInfo } from '../utils/notifications';
 
 const DemoUITest = () => {
   const [estimates, setEstimates] = useState([]);
@@ -18,8 +20,8 @@ const DemoUITest = () => {
     notes: ''
   });
 
-  // デモデータ
-  const demoEstimates = [
+  // デモデータ（useMemoで最適化）
+  const demoEstimates = useMemo(() => [
     {
       estimate_id: 1,
       estimate_number: "EST-2025-001",
@@ -38,9 +40,9 @@ const DemoUITest = () => {
       total_amount: 580000,
       status: "approved"
     }
-  ];
+  ], []);
 
-  const demoPriceMaster = [
+  const demoPriceMaster = useMemo(() => [
     {
       item_id: 1,
       category: "植栽工事",
@@ -73,12 +75,12 @@ const DemoUITest = () => {
       unit: "m",
       unit_price: 10000
     }
-  ];
+  ], []);
 
   useEffect(() => {
     setEstimates(demoEstimates);
     setPriceMaster(demoPriceMaster);
-  }, []);
+  }, [demoEstimates, demoPriceMaster]);
 
   const addItemToEstimate = (item) => {
     const newItem = {
@@ -106,7 +108,9 @@ const DemoUITest = () => {
   };
 
   const generatePDF = () => {
-    alert(`PDF生成機能デモ\n\n見積書: ${currentEstimate.estimate_number}\n顧客: ${currentEstimate.customer_name}\n工事名: ${currentEstimate.project_name}\n合計金額: ¥${calculateTotal().toLocaleString()}\n\n実際の本番環境ではPDFが生成されます。`);
+    const pdfInfo = `見積書: ${currentEstimate.estimate_number}\n顧客: ${currentEstimate.customer_name}\n工事名: ${currentEstimate.project_name}\n合計金額: ¥${calculateTotal().toLocaleString()}`;
+    log.info('PDF生成機能デモ実行:', { pdfInfo });
+    showInfo(`PDF生成機能デモ\n\n${pdfInfo}\n\n実際の本番環境ではPDFが生成されます。`);
   };
 
   const saveEstimate = () => {
@@ -119,7 +123,8 @@ const DemoUITest = () => {
     };
     
     setEstimates([...estimates, newEstimate]);
-    alert('見積書が保存されました！');
+    log.info('見積書保存:', newEstimate);
+    showSuccess('見積書が保存されました！');
     
     // フォームリセット
     setCurrentEstimate({
