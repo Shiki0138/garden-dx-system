@@ -1030,3 +1030,16 @@ Worker3担当分の緊急エラー修正100%完了！
 実行タスク: コードレビューと改善
 自動継続システムにより新規タスクを配布しました。
 [2025-07-02 14:47:09] [COMMUNICATION] [garden] boss1: "重要指示：デプロイエラー防止ルールを全チームに徹底してください。development/DEPLOYMENT_ERROR_PREVENTION_RULES.md と instructions/deployment-error-prevention-directive.md を確認し、全Workerに周知・実行させてください。本番環境でのエラーゼロを目指します。"
+[2025-07-02 14:47:31] [CRITICAL_DIRECTIVE] [garden] [boss1] デプロイエラー防止ルール徹底開始。本番環境エラーゼロ目標。全Worker必須遵守事項：1)環境変数存在チェック実装 2)全非同期処理try-catch実装 3)ビルド前必須確認 4)ESLint/TypeScriptエラー完全解消
+[2025-07-02 14:47:43] [COMMUNICATION] [garden] worker1: "【最重要：デプロイエラー防止ルール徹底】development/DEPLOYMENT_ERROR_PREVENTION_RULES.mdを必読し、以下を徹底してください：1)環境変数使用時は必ず存在チェック実装（if (!process.env.NEXT_PUBLIC_SUPABASE_URL) throw new Error）2)全非同期処理にtry-catch実装 3)コミット前npm run build確認 4)ESLint/TypeScriptエラー完全解消。EstimateWizardPro修正時も必ず適用。本番エラーゼロ厳守！"
+[2025-07-02 14:47:54] [COMMUNICATION] [garden] worker2: "【最重要：デプロイエラー防止ルール徹底】development/DEPLOYMENT_ERROR_PREVENTION_RULES.mdを必読し、以下を徹底してください：1)Supabase RLSポリシー設定時のエラーハンドリング徹底 2)マイグレーションスクリプトにロールバック機能実装 3)データベース接続はSupavisor URL使用（IPv6対応）4)環境変数POSTGRES_URL等の存在チェック必須。本番エラーゼロ厳守！"
+[2025-07-02 14:48:05] [COMMUNICATION] [garden] worker3: "【最重要：デプロイエラー防止ルール徹底】development/DEPLOYMENT_ERROR_PREVENTION_RULES.mdを必読し、以下を徹底してください：1)Vercel環境変数設定（NEXT_PUBLIC_プレフィックス必須）2)SupabaseクライアントCORS設定確認 3)ビルド時CI=false設定で警告無視 4)全APIコールにタイムアウト・エラーハンドリング実装 5)プレビューデプロイでテスト後本番へ。本番エラーゼロ厳守！"
+[2025-07-02 14:48:14] [COMMUNICATION] [garden] worker4: "【最重要：デプロイエラー防止ルール徹底】development/DEPLOYMENT_ERROR_PREVENTION_RULES.mdを必読し、以下を徹底してください：1)Supabase RLSポリシーのエラーハンドリング実装 2)認証フローの全箇所でtry-catch実装 3)権限チェック失敗時の適切なエラーメッセージ 4)CORS設定でVercelドメイン許可確認 5)セキュリティテスト実施記録。本番エラーゼロ厳守！"
+[2025-07-02 14:48:32] [COMMUNICATION] [garden] worker5: "【最重要：デプロイエラー防止ルール徹底】development/DEPLOYMENT_ERROR_PREVENTION_RULES.mdを必読し、以下を徹底してください：1)Edge Functions実装時の環境変数チェック必須 2)Deno/TypeScript変換時の型安全性確保 3)タイムアウト設定（デフォルト10秒→適切に調整）4)エラーレスポンスの標準化 5)CORS設定含むデプロイ手順書作成。本番エラーゼロ厳守！"
+[2025-07-02 15:06:02] [COMMUNICATION] [garden] boss1: "重要指示：デモモードでテストユーザーが利用できる状態まで一気に開発を進めてください。現在デモモード実装の基盤は完成していますが、以下を全Workerに分担して実装してください：
+1. デモ環境変数設定の最終調整（.env関連）
+2. エラーハンドリングの徹底（SupabaseAuthContext等）
+3. ビルドエラーの完全解消
+4. デモモード時の認証バイパス機能
+5. 最終的なVercelデプロイ設定
+development/DEPLOYMENT_ERROR_PREVENTION_RULES.mdを必ず参照し、エラーゼロのデプロイを実現してください。"

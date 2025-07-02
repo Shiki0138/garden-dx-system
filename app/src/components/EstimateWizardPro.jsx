@@ -785,13 +785,16 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
   
   const loadInitialData = async () => {
     try {
-      // 編集モードの場合は既存データ読み込み
-      if (estimateId) {
-        const savedData = localStorage.getItem(`estimate_${estimateId}`);
-        if (savedData) {
-          const data = JSON.parse(savedData);
-          setFormData(data.formData);
-          setItemSelections(data.itemSelections);
+      // localStorage存在チェック（SSR対応）
+      if (typeof window !== 'undefined' && window.localStorage) {
+        // 編集モードの場合は既存データ読み込み
+        if (estimateId) {
+          const savedData = localStorage.getItem(`estimate_${estimateId}`);
+          if (savedData) {
+            const data = JSON.parse(savedData);
+            setFormData(data.formData);
+            setItemSelections(data.itemSelections);
+          }
         }
       }
       
@@ -805,27 +808,43 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
       
     } catch (error) {
       console.error('初期データの読み込みに失敗:', error);
+      // エラーが発生してもアプリケーションは継続動作する
     }
   };
   
-  // 保存された見積一覧の読み込み
+  // 保存された見積一覧の読み込み（デプロイエラー防止対策適用）
   const loadSavedEstimates = () => {
     try {
+      // localStorage存在チェック（SSR対応）
+      if (typeof window === 'undefined' || !window.localStorage) {
+        console.warn('localStorage is not available');
+        setSavedEstimates([]);
+        return;
+      }
+      
       const saved = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('estimate_')) {
-          const data = JSON.parse(localStorage.getItem(key));
-          saved.push({
-            id: key.replace('estimate_', ''),
-            ...data.formData,
-            savedAt: data.savedAt || new Date().toISOString()
-          });
+          try {
+            const data = JSON.parse(localStorage.getItem(key) || '{}');
+            if (data.formData) {
+              saved.push({
+                id: key.replace('estimate_', ''),
+                ...data.formData,
+                savedAt: data.savedAt || new Date().toISOString()
+              });
+            }
+          } catch (parseError) {
+            console.error(`Failed to parse saved estimate ${key}:`, parseError);
+            // 破損したデータはスキップして続行
+          }
         }
       }
       setSavedEstimates(saved.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt)));
     } catch (error) {
       console.error('保存データの読み込みに失敗:', error);
+      setSavedEstimates([]);
     }
   };
   
@@ -952,7 +971,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   }, []);
   
-  // 一時保存
+  // 一時保存（デプロイエラー防止対策適用）
   const saveTemporary = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -963,20 +982,30 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
         estimateId: estimateId || Date.now().toString()
       };
       
-      localStorage.setItem(`estimate_${saveData.estimateId}`, JSON.stringify(saveData));
-      loadSavedEstimates();
-      alert('一時保存しました');
+      // localStorage存在チェック（SSR対応）
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(`estimate_${saveData.estimateId}`, JSON.stringify(saveData));
+        loadSavedEstimates();
+        alert('一時保存しました');
+      } else {
+        throw new Error('localStorage is not available');
+      }
     } catch (error) {
       console.error('一時保存に失敗:', error);
-      alert('一時保存に失敗しました');
+      alert('一時保存に失敗しました。ブラウザの設定を確認してください。');
     } finally {
       setIsLoading(false);
     }
   }, [formData, itemSelections, estimateId]);
   
-  // 保存データの読み込み
+  // 保存データの読み込み（デプロイエラー防止対策適用）
   const loadSavedEstimate = useCallback((savedId) => {
     try {
+      // localStorage存在チェック（SSR対応）
+      if (typeof window === 'undefined' || !window.localStorage) {
+        throw new Error('localStorage is not available');
+      }
+      
       const savedData = localStorage.getItem(`estimate_${savedId}`);
       if (savedData) {
         const data = JSON.parse(savedData);
@@ -984,34 +1013,47 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
         setItemSelections(data.itemSelections);
         setCurrentStep(1);
         alert('見積データを読み込みました');
+      } else {
+        throw new Error('保存データが見つかりません');
       }
     } catch (error) {
       console.error('データ読み込みに失敗:', error);
-      alert('データ読み込みに失敗しました');
+      alert('データ読み込みに失敗しました。データが存在しないか、破損している可能性があります。');
     }
   }, []);
   
-  // 見積完成
+  // 見積完成（デプロイエラー防止対策適用）
   const completeEstimate = useCallback(async () => {
     if (!validateStep(4)) return;
     
     setIsLoading(true);
     try {
       const selectedItems = Object.values(itemSelections).filter(item => item.selected && item.quantity > 0);
+      
+      if (selectedItems.length === 0) {
+        throw new Error('工事項目が選択されていません');
+      }
+      
       const finalData = {
         ...formData,
         items: selectedItems,
         completedAt: new Date().toISOString()
       };
       
-      // 完成データを保存
-      localStorage.setItem(`completed_estimate_${Date.now()}`, JSON.stringify(finalData));
+      // localStorage存在チェック（SSR対応）
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(`completed_estimate_${Date.now()}`, JSON.stringify(finalData));
+      } else {
+        console.warn('localStorage is not available. Data will not be persisted.');
+      }
       
       alert('見積書を作成しました');
-      if (onComplete) onComplete(finalData);
+      if (onComplete) {
+        await onComplete(finalData);
+      }
     } catch (error) {
       console.error('見積作成に失敗:', error);
-      alert('見積作成に失敗しました');
+      alert(`見積作成に失敗しました: ${error.message || 'システムエラーが発生しました'}`);
     } finally {
       setIsLoading(false);
     }

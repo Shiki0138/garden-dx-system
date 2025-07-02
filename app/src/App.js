@@ -1,42 +1,74 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext';
+import { DemoModeProvider, useDemoMode } from './contexts/DemoModeContext';
+import ErrorBoundary from './components/ErrorBoundary';
+import DemoBanner from './components/DemoBanner';
 import EstimateCreator from './components/EstimateCreator';
 import InvoiceForm from './components/invoices/InvoiceForm';
 import InvoiceList from './components/invoices/InvoiceList';
 import DemoUITest from './components/DemoUITest';
+import DemoLandingPage from './components/DemoLandingPage';
 import EstimateWizardTest from './components/EstimateWizardTest';
 import EstimateWizardPro from './components/EstimateWizardPro';
 import PDFGenerator from './components/PDFGenerator';
 import LoginPage from './components/auth/LoginPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import { checkEnvironmentVariables } from './utils/apiErrorHandler';
 
-function App() {
+// アプリケーションコンテンツ
+const AppContent = () => {
+  const { isDemoMode } = useDemoMode();
+
+  // デモモード時にbodyクラス設定
+  useEffect(() => {
+    if (isDemoMode) {
+      document.body.classList.add('demo-mode');
+    } else {
+      document.body.classList.remove('demo-mode');
+    }
+    
+    return () => {
+      document.body.classList.remove('demo-mode');
+    };
+  }, [isDemoMode]);
+
+  // 環境変数チェック（開発環境のみ）
+  useEffect(() => {
+    if (process.env.REACT_APP_ENVIRONMENT === 'development') {
+      const envCheck = checkEnvironmentVariables();
+      if (!envCheck.isValid) {
+        console.warn('🚨 環境変数が不足しています:', envCheck.missing);
+      }
+    }
+  }, []);
+
   return (
-    <SupabaseAuthProvider>
-      <AuthProvider>
-        <Router>
-          <div className="App">
-            <nav style={{ 
-              padding: '20px', 
-              background: '#4a7c59', 
-              marginBottom: '20px',
-              display: 'flex',
-              gap: '20px',
-              alignItems: 'center'
-            }}>
-              <h2 style={{ color: 'white', margin: 0 }}>🏡 Garden DX システム（本番版）</h2>
-              <Link to="/demo" style={{ 
-                color: 'white', 
-                textDecoration: 'none', 
-                padding: '8px 16px',
-                background: '#2d5016',
-                borderRadius: '5px',
-                fontWeight: 'bold'
-              }}>
-                ✨ UI動作確認デモ
-              </Link>
+    <Router>
+      <div className="App">
+        <DemoBanner />
+        <nav style={{ 
+          padding: '20px', 
+          background: '#4a7c59', 
+          marginBottom: '20px',
+          display: 'flex',
+          gap: '20px',
+          alignItems: 'center'
+        }}>
+          <h2 style={{ color: 'white', margin: 0 }}>
+            🏡 Garden DX システム{isDemoMode ? '（デモ版）' : '（本番版）'}
+          </h2>
+          <Link to="/demo" style={{ 
+            color: 'white', 
+            textDecoration: 'none', 
+            padding: '8px 16px',
+            background: isDemoMode ? '#ff9800' : '#2d5016',
+            borderRadius: '5px',
+            fontWeight: 'bold'
+          }}>
+            {isDemoMode ? '🎭 デモ体験中' : '✨ UI動作確認デモ'}
+          </Link>
               <Link to="/wizard" style={{ 
                 color: 'white', 
                 textDecoration: 'none', 
@@ -81,7 +113,8 @@ function App() {
             
             <Routes>
               {/* パブリックルート */}
-              <Route path="/demo" element={<DemoUITest />} />
+              <Route path="/demo" element={<DemoLandingPage />} />
+              <Route path="/demo/ui" element={<DemoUITest />} />
               <Route path="/login" element={<LoginPage />} />
               
               {/* 保護されたルート */}
@@ -120,11 +153,24 @@ function App() {
                   <InvoiceForm />
                 </ProtectedRoute>
               } />
-            </Routes>
-          </div>
-        </Router>
-      </AuthProvider>
-    </SupabaseAuthProvider>
+        </Routes>
+      </div>
+    </Router>
+  );
+};
+
+// メインアプリコンポーネント
+function App() {
+  return (
+    <ErrorBoundary>
+      <DemoModeProvider>
+        <SupabaseAuthProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </SupabaseAuthProvider>
+      </DemoModeProvider>
+    </ErrorBoundary>
   );
 }
 

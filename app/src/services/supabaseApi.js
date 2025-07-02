@@ -4,6 +4,7 @@
  */
 
 import { supabaseClient, TABLES, withRLS, handleSupabaseError } from '../lib/supabase';
+import { supabaseApiCall, handleErrorResponse } from '../utils/apiErrorHandler';
 
 // =====================================
 // 見積関連API
@@ -12,42 +13,44 @@ import { supabaseClient, TABLES, withRLS, handleSupabaseError } from '../lib/sup
 export const estimateApi = {
   // 見積一覧取得
   getEstimates: async (userId = null, filters = {}) => {
-    try {
-      let query = supabaseClient
-        .from(TABLES.ESTIMATES)
-        .select(`
-          *,
-          customer:customers(*),
-          items:estimate_items(*)
-        `)
-        .order('created_at', { ascending: false });
+    return await supabaseApiCall(
+      supabaseClient,
+      (client) => {
+        let query = client
+          .from(TABLES.ESTIMATES)
+          .select(`
+            *,
+            customer:customers(*),
+            items:estimate_items(*)
+          `)
+          .order('created_at', { ascending: false });
 
-      // RLS適用
-      if (userId) {
-        query = withRLS(query, userId);
-      }
+        // RLS適用
+        if (userId) {
+          query = withRLS(query, userId);
+        }
 
-      // フィルター適用
-      if (filters.status) {
-        query = query.eq('status', filters.status);
-      }
-      if (filters.customer_id) {
-        query = query.eq('customer_id', filters.customer_id);
-      }
-      if (filters.date_from) {
-        query = query.gte('estimate_date', filters.date_from);
-      }
-      if (filters.date_to) {
-        query = query.lte('estimate_date', filters.date_to);
-      }
+        // フィルター適用
+        if (filters.status) {
+          query = query.eq('status', filters.status);
+        }
+        if (filters.customer_id) {
+          query = query.eq('customer_id', filters.customer_id);
+        }
+        if (filters.date_from) {
+          query = query.gte('estimate_date', filters.date_from);
+        }
+        if (filters.date_to) {
+          query = query.lte('estimate_date', filters.date_to);
+        }
 
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (error) {
-      return { data: null, error: handleSupabaseError(error) };
-    }
+        return query;
+      },
+      {
+        timeout: 15000,
+        mockData: [] // 開発モード用モックデータ
+      }
+    );
   },
 
   // 見積詳細取得

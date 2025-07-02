@@ -9,9 +9,21 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
+// 環境変数デバッグ出力（開発環境のみ）
+if (process.env.REACT_APP_ENVIRONMENT === 'development') {
+  console.log('Supabase Environment Check:', {
+    url: supabaseUrl ? 'Set' : 'Missing',
+    key: supabaseAnonKey ? 'Set' : 'Missing',
+    env: process.env.REACT_APP_ENVIRONMENT,
+    allEnvVars: Object.keys(process.env).filter(key => key.startsWith('REACT_APP_'))
+  });
+}
+
 // 設定値の検証
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase環境変数が設定されていません。ローカル開発モードで動作します。');
+  console.warn('⚠️ Supabase環境変数が設定されていません。');
+  console.warn('必要な環境変数: REACT_APP_SUPABASE_URL, REACT_APP_SUPABASE_ANON_KEY');
+  console.warn('開発モードで動作します。');
 }
 
 // Supabaseクライアント設定オプション
