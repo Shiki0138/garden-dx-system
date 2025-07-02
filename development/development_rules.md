@@ -10,6 +10,14 @@
 
 ## 🚨 重要な開発ルール
 
+### 0. 🛡️ デプロイエラー防止（最重要）
+- **本番環境でのエラーを防ぐ開発を徹底すること**
+- 環境変数の設定ミスを防ぐ（特にSupabase関連）
+- CORS設定を事前に確認する
+- ビルド前に必ずローカルでテストする
+- エラーハンドリングを全ての処理に実装する
+- 詳細は `DEPLOYMENT_ERROR_PREVENTION_RULES.md` を必読
+
 ### 1. 🎨 UX/UI デザイン変更ルール
 - **大幅なデザイン変更を行う前には必ずPRESIDENTの確認を取ること**
 - UI変更時はユーザビリティを最優先に検討する
@@ -51,7 +59,10 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] [START] [AGENT_NAME] 作業内容" >> devel
 # 2. 開発ルールを確認
 cat development/development_rules.md
 
-# 3. プロジェクト状況を把握
+# 3. デプロイエラー防止ルールを確認（重要）
+cat development/DEPLOYMENT_ERROR_PREVENTION_RULES.md
+
+# 4. プロジェクト状況を把握
 git status
 ```
 
@@ -65,12 +76,18 @@ git status
 # 1. 開発ログに完了を記録
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [COMPLETE] [AGENT_NAME] 作業完了: 具体的な成果" >> development/development_log.txt
 
-# 2. テスト実行
+# 2. ビルド確認（エラー防止のため必須）
+npm run build
+
+# 3. テスト実行
 npm test  # または適切なテストコマンド
 
-# 3. 品質確認
+# 4. 品質確認
 npm run lint
 npm run typecheck
+
+# 5. 環境変数チェック
+# 使用している環境変数が全て定義されているか確認
 ```
 
 ---
@@ -122,7 +139,7 @@ npm run typecheck
 
 ---
 
-**最終更新**: 2024-12-26
+**最終更新**: 2025-07-02
 **管理者**: PRESIDENT
 **バージョン**: 1.0
 
@@ -134,6 +151,10 @@ npm run typecheck
 ---
 
 ## Phase 1: 最重要（絶対守る）
+
+0. **デプロイエラー防止策の徹底**  
+   環境変数チェック、エラーハンドリング、CORS設定を必ず確認。  
+   本番環境でのエラーゼロを目指す。
 
 1. **diff表示・承認待機・実装開始**  
    `diff` 表示後は必ず「承認をお待ちします」と明記し、  
