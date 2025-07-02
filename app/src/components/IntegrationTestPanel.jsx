@@ -192,7 +192,7 @@ const IntegrationTestPanel = () => {
 
   // 統合PDF生成テスト
   const testIntegratedPDF = async () => {
-    return await invoiceIntegrationService.testIntegratedPDFGeneration(testEstimateId);
+    return invoiceIntegrationService.testIntegratedPDFGeneration(testEstimateId);
   };
 
   // 全テスト実行
@@ -247,7 +247,7 @@ const IntegrationTestPanel = () => {
           <input
             type="number"
             value={testEstimateId}
-            onChange={(e) => setTestEstimateId(parseInt(e.target.value))}
+            onChange={(e) => setTestEstimateId(parseInt(e.target.value, 10))}
             style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
           />
         </div>

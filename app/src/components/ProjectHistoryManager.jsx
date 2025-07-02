@@ -7,7 +7,6 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { 
   Search, 
-  Filter, 
   Calendar,
   MapPin,
   User,
@@ -18,11 +17,10 @@ import {
   Download,
   Eye,
   Edit,
-  Trash2,
-  Plus,
   RefreshCw,
   ChevronDown,
   ChevronUp,
+  MessageCircle,
   FileText,
   Settings
 } from 'lucide-react';

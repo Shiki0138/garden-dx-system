@@ -1,4 +1,4 @@
-import { dbClient, storage } from '../lib/supabase';
+import { dbClient, storage, supabase } from '../lib/supabase';
 
 /**
  * 見積サービス
@@ -218,10 +218,10 @@ export const getEstimateForPDF = async (estimateId) => {
 };
 
 // ファイルアップロード
-export const uploadEstimateFile = async (estimateId, file, fileType = 'pdf') => {
+export const uploadEstimateFile = async (estimateId, file, fileType = 'pdf', companyId) => {
   try {
     const fileName = `estimates/${estimateId}/${fileType}_${Date.now()}_${file.name}`;
-    const { data, error } = await storage.upload('garden-dx-files', fileName, file);
+    const { error } = await storage.upload('garden-dx-files', fileName, file);
     
     if (error) throw error;
 

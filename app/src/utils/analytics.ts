@@ -4,6 +4,8 @@
  * プライバシー保護・GDPR準拠・企業級データ分析
  */
 
+import React from 'react';
+
 // ユーザーアクション型定義
 export type UserActionType = 
   | 'estimate_create'
@@ -58,7 +60,7 @@ class AnalyticsService {
   private config: AnalyticsConfig;
   private queue: UserAction[] = [];
   private sessionId: string;
-  private flushTimer: NodeJS.Timeout | null = null;
+  private flushTimer: ReturnType<typeof setTimeout> | null = null;
 
   private constructor(config: Partial<AnalyticsConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };

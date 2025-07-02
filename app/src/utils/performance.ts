@@ -159,7 +159,7 @@ export const calculateVisibleRange = (
 // リサイズ観察最適化
 export const createResizeObserver = (
   callback: (_entries: ResizeObserverEntry[]) => void,
-  _options?: ResizeObserverOptions
+  _options?: any
 ): ResizeObserver => {
   const throttledCallback = throttle(callback, 16); // 60fps制限
   return new ResizeObserver(throttledCallback);
@@ -168,7 +168,7 @@ export const createResizeObserver = (
 // Intersection Observer最適化
 export const createIntersectionObserver = (
   callback: (_entries: IntersectionObserverEntry[]) => void,
-  options?: IntersectionObserverInit  
+  options?: any  
 ): IntersectionObserver => {
   const throttledCallback = throttle(callback, 100);
   return new IntersectionObserver(throttledCallback, {

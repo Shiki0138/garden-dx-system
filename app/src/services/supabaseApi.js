@@ -460,7 +460,7 @@ export const dashboardApi = {
 export const subscribeToTable = (tableName, callback, filters = {}) => {
   if (!supabaseClient) return null;
 
-  let subscription = supabaseClient
+  const subscription = supabaseClient
     .channel(`public:${tableName}`)
     .on('postgres_changes', 
       { 
@@ -483,7 +483,7 @@ export const unsubscribeFromTable = (subscription) => {
   }
 };
 
-export default {
+const supabaseApi = {
   estimateApi,
   invoiceApi,
   customerApi,
@@ -493,3 +493,5 @@ export default {
   subscribeToTable,
   unsubscribeFromTable
 };
+
+export default supabaseApi;
