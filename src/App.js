@@ -49,7 +49,7 @@ const AppContent = () => {
   return (
     <Router>
       <div className="App">
-        <DebugInfo />
+        {/* <DebugInfo /> */}
         <DemoBanner />
         <nav style={{ 
           padding: '20px', 
