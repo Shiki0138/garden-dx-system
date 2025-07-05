@@ -73,17 +73,25 @@ const InputWrapper = styled.div`
 
 const Input = styled.input`
   width: 100%;
-  padding: 12px 40px 12px 40px;
+  padding: 12px 40px;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.3s ease;
   box-sizing: border-box;
+  display: block;
+  background-color: white;
+  color: #1a472a;
+  height: 48px;
 
   &:focus {
     outline: none;
     border-color: #1a472a;
     box-shadow: 0 0 0 3px rgba(26, 71, 42, 0.1);
+  }
+
+  &::placeholder {
+    color: #9ca3af;
   }
 
   ${props =>
@@ -303,6 +311,9 @@ const LoginPage = () => {
     }, 100);
   };
 
+  // デモモードの確認
+  const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true';
+
   return (
     <LoginContainer>
       <LoginCard>
@@ -312,10 +323,12 @@ const LoginPage = () => {
           <p>造園業向け統合業務管理システム</p>
         </Logo>
 
-        {!isConnected && (
+        {isDemoMode && (
           <DevMode>
             <p>
-              🔧 開発モード（Supabase未接続）
+              🎭 デモ版（本番リリース前）
+              <br />
+              <small>ログイン機能は本番リリース時に有効化されます</small>
               <br />
               <button
                 type="button"
@@ -331,12 +344,13 @@ const LoginPage = () => {
                   fontWeight: 'bold',
                 }}
               >
-                デモ用ログイン
+                デモ版を体験
               </button>
             </p>
           </DevMode>
         )}
 
+        {!isDemoMode && (
         <Form onSubmit={handleSubmit}>
           <InputGroup>
             <label htmlFor="email">メールアドレス</label>
@@ -390,7 +404,9 @@ const LoginPage = () => {
             {mode === 'login' ? 'ログイン' : 'アカウント作成'}
           </Button>
         </Form>
+        )}
 
+        {!isDemoMode && (
         <Links>
           {mode === 'login' ? (
             <>
@@ -418,6 +434,7 @@ const LoginPage = () => {
             </p>
           )}
         </Links>
+        )}
       </LoginCard>
     </LoginContainer>
   );
