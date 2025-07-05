@@ -1,12 +1,15 @@
 {
-  "buildCommand": "CI=false npm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "build",
   "framework": null,
   "installCommand": "npm install",
   "devCommand": "npm start",
   "env": {
+    "REACT_APP_SUPABASE_URL": "https://ppplfluvazaufassdkra.supabase.co",
+    "REACT_APP_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwcGxmbHV2YXphdWZhc3Nka3JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTk5NjczOTYsImV4cCI6MjAzNTU0MzM5Nn0.IWHrTSjfE-fKKgJOVXHECtWo8DGOLGe0Nx0z-vbpyWQ",
+    "REACT_APP_API_BASE_URL": "https://ppplfluvazaufassdkra.supabase.co",
     "REACT_APP_DEMO_MODE": "true",
-    "REACT_APP_ENVIRONMENT": "demo",
+    "REACT_APP_ENVIRONMENT": "production",
     "CI": "false",
     "GENERATE_SOURCEMAP": "false"
   },
@@ -16,4 +19,35 @@
       "destination": "/index.html"
     }
   ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
 }
