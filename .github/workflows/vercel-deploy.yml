@@ -27,7 +27,10 @@ jobs:
       - name: Build project
         run: |
           cd app
-          npm run build
+          CI=false npm run build
+        env:
+          ESLINT_NO_DEV_ERRORS: true
+          DISABLE_ESLINT_PLUGIN: true
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25

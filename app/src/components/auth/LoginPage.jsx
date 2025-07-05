@@ -17,6 +17,7 @@ const LoginContainer = styled.div`
   justify-content: center;
   background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
   padding: 20px;
+  box-sizing: border-box;
 `;
 
 const LoginCard = styled.div`
@@ -26,6 +27,8 @@ const LoginCard = styled.div`
   width: 100%;
   max-width: 400px;
   box-shadow: 0 20px 60px rgba(26, 71, 42, 0.3);
+  box-sizing: border-box;
+  margin: 0 auto;
 `;
 
 const Logo = styled.div`
@@ -75,6 +78,7 @@ const Input = styled.input`
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.3s ease;
+  box-sizing: border-box;
 
   &:focus {
     outline: none;
@@ -125,6 +129,7 @@ const Button = styled.button`
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-sizing: border-box;
 
   &:hover:not(:disabled) {
     background: #2d5a3d;

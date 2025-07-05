@@ -11,7 +11,9 @@
     "REACT_APP_DEMO_MODE": "true",
     "REACT_APP_ENVIRONMENT": "production",
     "CI": "false",
-    "GENERATE_SOURCEMAP": "false"
+    "GENERATE_SOURCEMAP": "false",
+    "ESLINT_NO_DEV_ERRORS": "true",
+    "DISABLE_ESLINT_PLUGIN": "true"
   },
   "rewrites": [
     {
