@@ -80,8 +80,11 @@ const ProtectedRoute = ({ children, requireRole = null, requirePermission = null
   const { loading, isAuthenticated, hasRole, user, isConnected } = useSupabaseAuth();
   const { isDemoMode, demoUser } = useDemoMode();
 
+  // 本番リリース前はデモモードとして扱う
+  const isInDemoMode = process.env.REACT_APP_DEMO_MODE === 'true' || isDemoMode;
+
   // デモモードの場合はローディングをスキップして即座に表示
-  if (isDemoMode) {
+  if (isInDemoMode) {
     // デモモードでは権限チェックのみ実施
     if (requireRole && demoUser && demoUser.role !== requireRole && requireRole !== 'employee') {
       return (

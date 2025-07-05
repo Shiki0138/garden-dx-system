@@ -134,7 +134,7 @@ const AppContent = () => {
           {/* パブリックルート */}
           <Route
             path="/login"
-            element={isDemoMode ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+            element={process.env.REACT_APP_DEMO_MODE === 'true' ? <Navigate to="/dashboard" replace /> : <LoginPage />}
           />
           <Route path="/test" element={<ConnectionTest />} />
           {isDemoMode && (

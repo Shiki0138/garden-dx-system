@@ -112,6 +112,13 @@ export const SupabaseAuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
+      // 本番リリース前はログイン機能を無効化
+      if (process.env.REACT_APP_DEMO_MODE === 'true') {
+        const errorMessage = '現在デモ版のため、ログイン機能は利用できません。「デモ版を体験」ボタンをご利用ください。';
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
       if (!isSupabaseConnected()) {
         // Supabase接続が必須
         const errorMessage = 'Supabaseが設定されていません。環境変数を確認してください。';
@@ -145,6 +152,11 @@ export const SupabaseAuthProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
+
+      // 本番リリース前はサインアップ機能を無効化
+      if (process.env.REACT_APP_DEMO_MODE === 'true') {
+        return { success: false, error: '現在デモ版のため、アカウント作成機能は利用できません。' };
+      }
 
       if (!isSupabaseConnected()) {
         return { success: false, error: '開発モードではサインアップできません' };
