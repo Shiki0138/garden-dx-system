@@ -154,7 +154,24 @@ const EstimateCreator = ({ estimateId }) => {
 
   // 見積データ読み込み
   const loadEstimate = useCallback(async () => {
-    if (!estimateId) return;
+    // デモモード時またはestimateIdがない場合は初期データを設定
+    if (!estimateId || process.env.REACT_APP_DEMO_MODE === 'true') {
+      const demoEstimate = {
+        estimate_id: 'demo-001',
+        estimate_name: 'デモ見積書',
+        client_name: '山田花子',
+        site_address: '東京都世田谷区駒沢2-2-2',
+        notes: 'デモ用見積書です',
+        adjustment_amount: 0,
+        total_amount: 0,
+        created_at: new Date().toISOString(),
+      };
+      
+      setEstimate(demoEstimate);
+      setItems([]);
+      setProfitability({ margin_rate: 0, profit_amount: 0 });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -184,6 +201,13 @@ const EstimateCreator = ({ estimateId }) => {
   const handleSave = async () => {
     if (!estimate) return;
 
+    // デモモード時は実際の保存をスキップ
+    if (process.env.REACT_APP_DEMO_MODE === 'true') {
+      setIsDirty(false);
+      alert('見積を保存しました。（デモモード）');
+      return;
+    }
+
     setLoading(true);
     try {
       await estimateApi.updateEstimate(estimate.estimate_id, {
@@ -206,6 +230,20 @@ const EstimateCreator = ({ estimateId }) => {
   // 明細追加
   const handleAddItem = async itemData => {
     if (!estimate) return;
+
+    // デモモード時はローカル状態のみ更新
+    if (process.env.REACT_APP_DEMO_MODE === 'true') {
+      const newItem = {
+        id: `demo-item-${Date.now()}`,
+        ...itemData,
+        sort_order: items.length,
+        amount: (itemData.quantity || 0) * (itemData.unit_price || 0),
+      };
+
+      setItems(prev => [...prev, newItem]);
+      setIsDirty(true);
+      return;
+    }
 
     setLoading(true);
     try {
