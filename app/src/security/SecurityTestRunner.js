@@ -395,7 +395,7 @@ export class SecurityTestRunner {
  */
 export const runSecurityTests = async () => {
   const runner = new SecurityTestRunner();
-  return await runner.runAllSecurityTests();
+  return runner.runAllSecurityTests();
 };
 
 /**

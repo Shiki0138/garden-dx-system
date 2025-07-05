@@ -724,7 +724,7 @@ export class SecurityAuditor {
  */
 export const runSecurityAudit = async () => {
   const auditor = new SecurityAuditor();
-  return await auditor.performComprehensiveAudit();
+  return auditor.performComprehensiveAudit();
 };
 
 export default SecurityAuditor;

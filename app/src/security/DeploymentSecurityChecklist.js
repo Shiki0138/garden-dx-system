@@ -704,7 +704,7 @@ export class DeploymentSecurityChecker {
  */
 export const runDeploymentSecurityCheck = async () => {
   const checker = new DeploymentSecurityChecker();
-  return await checker.performFinalSecurityCheck();
+  return checker.performFinalSecurityCheck();
 };
 
 export default DeploymentSecurityChecker;

@@ -490,7 +490,7 @@ export class DependencySecurityAuditor {
  */
 export const runDependencySecurityAudit = async () => {
   const auditor = new DependencySecurityAuditor();
-  return await auditor.performDependencyAudit();
+  return auditor.performDependencyAudit();
 };
 
 export default DependencySecurityAuditor;

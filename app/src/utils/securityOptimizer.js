@@ -406,8 +406,8 @@ const securityOptimizer = {
   sanitizeInputFast,
   parseJWTOptimized,
   validateSessionFast,
-  createSecurityCache,
-  securityAudit
+  performSecurityCheck,
+  getAuditReport
 };
 
 export default securityOptimizer;

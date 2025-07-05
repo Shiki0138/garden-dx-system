@@ -333,31 +333,12 @@ export const getRBACStats = () => rbacCache.getStats();
  */
 export const clearRBACCache = () => rbacCache.clear();
 
-/**
- * React Hook: usePermissions（最適化版）
- */
-import React from 'react';
-
-export const usePermissions = (user, permissionsList) => {
-  const [permissions, setPermissions] = React.useState({});
-
-  React.useEffect(() => {
-    if (!user || !permissionsList) return;
-
-    const results = checkMultiplePermissions(user, permissionsList);
-    setPermissions(results);
-  }, [user, permissionsList]);
-
-  return permissions;
-};
-
 const rbacOptimizer = {
   checkPermissionFast,
   checkMultiplePermissions,
-  usePermissions,
-  optimizeEstimatePermissions,
-  optimizeInvoicePermissions,
-  createPermissionCache
+  checkEstimatePermissions,
+  checkInvoicePermissions,
+  getCacheStats
 };
 
 export default rbacOptimizer;
