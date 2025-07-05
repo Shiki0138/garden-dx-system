@@ -131,11 +131,11 @@ const AppContent = () => {
         </nav>
 
         <Routes>
-          {/* パブリックルート */}
-          <Route
-            path="/login"
-            element={process.env.REACT_APP_DEMO_MODE === 'true' ? <Navigate to="/dashboard" replace /> : <LoginPage />}
-          />
+          {/* パブリックルート - デモモード時はログインページを非表示 */}
+          {process.env.REACT_APP_DEMO_MODE !== 'true' && (
+            <Route path="/login" element={<LoginPage />} />
+          )}
+          <Route path="/login-demo" element={<LoginPage />} />
           <Route path="/test" element={<ConnectionTest />} />
           {isDemoMode && (
             <>
@@ -144,69 +144,93 @@ const AppContent = () => {
             </>
           )}
 
-          {/* 保護されたルート */}
+          {/* 保護されたルート - デモモード時は認証不要 */}
           <Route
             path="/wizard"
             element={
-              <ProtectedRoute>
+              process.env.REACT_APP_DEMO_MODE === 'true' ? (
                 <EstimateWizardTest />
-              </ProtectedRoute>
+              ) : (
+                <ProtectedRoute>
+                  <EstimateWizardTest />
+                </ProtectedRoute>
+              )
             }
           />
           <Route
             path="/wizard-pro"
             element={
-              <ProtectedRoute>
+              process.env.REACT_APP_DEMO_MODE === 'true' ? (
                 <EstimateWizardPro />
-              </ProtectedRoute>
+              ) : (
+                <ProtectedRoute>
+                  <EstimateWizardPro />
+                </ProtectedRoute>
+              )
             }
           />
           <Route
             path="/pdf"
             element={
-              <ProtectedRoute>
+              process.env.REACT_APP_DEMO_MODE === 'true' ? (
                 <PDFGenerator />
-              </ProtectedRoute>
+              ) : (
+                <ProtectedRoute>
+                  <PDFGenerator />
+                </ProtectedRoute>
+              )
             }
           />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <EstimateCreator />
-              </ProtectedRoute>
-            }
-          />
+          {/* ルート（/）は常にダッシュボードへリダイレクト */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          
+          {/* ダッシュボード - デモモード時は認証不要 */}
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              process.env.REACT_APP_DEMO_MODE === 'true' ? (
                 <EstimateCreator />
-              </ProtectedRoute>
+              ) : (
+                <ProtectedRoute>
+                  <EstimateCreator />
+                </ProtectedRoute>
+              )
             }
           />
           <Route
             path="/invoices"
             element={
-              <ProtectedRoute>
+              process.env.REACT_APP_DEMO_MODE === 'true' ? (
                 <InvoiceList />
-              </ProtectedRoute>
+              ) : (
+                <ProtectedRoute>
+                  <InvoiceList />
+                </ProtectedRoute>
+              )
             }
           />
           <Route
             path="/invoices/new"
             element={
-              <ProtectedRoute requireRole="manager">
+              process.env.REACT_APP_DEMO_MODE === 'true' ? (
                 <InvoiceForm />
-              </ProtectedRoute>
+              ) : (
+                <ProtectedRoute requireRole="manager">
+                  <InvoiceForm />
+                </ProtectedRoute>
+              )
             }
           />
           <Route
             path="/invoices/:id/edit"
             element={
-              <ProtectedRoute requireRole="manager">
+              process.env.REACT_APP_DEMO_MODE === 'true' ? (
                 <InvoiceForm />
-              </ProtectedRoute>
+              ) : (
+                <ProtectedRoute requireRole="manager">
+                  <InvoiceForm />
+                </ProtectedRoute>
+              )
             }
           />
         </Routes>
