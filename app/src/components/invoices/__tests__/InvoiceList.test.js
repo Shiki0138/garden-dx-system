@@ -5,6 +5,20 @@ import InvoiceList from '../InvoiceList';
 
 import { invoiceApi } from '../../../api/invoiceApi';
 
+// useAuth フックのモック
+jest.mock('../../../hooks/useAuth', () => ({
+  useAuth: () => ({
+    user: {
+      id: 'test-user-id',
+      email: 'test@example.com',
+      role: 'manager',
+      user_metadata: { role: 'manager' }
+    },
+    isAuthenticated: true,
+    loading: false
+  })
+}));
+
 // APIモックの設定
 jest.mock('../../../api/invoiceApi', () => ({
   invoiceApi: {
