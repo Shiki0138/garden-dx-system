@@ -407,7 +407,7 @@ const securityOptimizer = {
   parseJWTOptimized,
   validateSessionFast,
   performSecurityCheck,
-  getAuditReport
+  getSecurityMetrics
 };
 
 export default securityOptimizer;
