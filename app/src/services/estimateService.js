@@ -11,7 +11,9 @@ const generateEstimateNumber = () => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  const random = Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, '0');
   return `EST-${year}${month}${day}-${random}`;
 };
 
@@ -33,7 +35,7 @@ export const saveEstimate = async (wizardData, companyId, userId) => {
       total_amount: wizardData.calculatedAmounts.total_amount,
       notes: wizardData.notes || '',
       terms: wizardData.payment_terms || '工事完了後30日以内',
-      created_by: userId
+      created_by: userId,
     };
 
     // 見積作成
@@ -54,7 +56,7 @@ export const saveEstimate = async (wizardData, companyId, userId) => {
         markup_rate: item.markup_rate,
         unit_price: item.purchase_price * item.markup_rate,
         amount: item.quantity * item.purchase_price * item.markup_rate,
-        sort_order: index
+        sort_order: index,
       }));
 
     if (items.length > 0) {
@@ -71,7 +73,7 @@ export const saveEstimate = async (wizardData, companyId, userId) => {
         address: wizardData.client_address || '',
         phone: wizardData.client_phone || '',
         email: wizardData.client_email || '',
-        contact_person: wizardData.client_contact_person || ''
+        contact_person: wizardData.client_contact_person || '',
       };
 
       const { data: client, error: clientError } = await dbClient.clients.create(clientData);
@@ -89,7 +91,7 @@ export const saveEstimate = async (wizardData, companyId, userId) => {
 };
 
 // 見積データ読み込み
-export const loadEstimate = async (estimateId) => {
+export const loadEstimate = async estimateId => {
   try {
     const { data: estimate, error } = await dbClient.estimates.get(estimateId);
     if (error) throw error;
@@ -116,8 +118,8 @@ export const loadEstimate = async (estimateId) => {
       calculatedAmounts: {
         subtotal: estimate.subtotal,
         total_amount: estimate.total_amount,
-        itemCount: estimate.items?.length || 0
-      }
+        itemCount: estimate.items?.length || 0,
+      },
     };
 
     // 項目データ変換
@@ -131,7 +133,7 @@ export const loadEstimate = async (estimateId) => {
           quantity: item.quantity,
           purchase_price: item.purchase_price,
           markup_rate: item.markup_rate,
-          selected: true
+          selected: true,
         };
       });
     }
@@ -157,7 +159,7 @@ export const getEstimateList = async (companyId, filters = {}) => {
 };
 
 // 見積削除
-export const deleteEstimate = async (estimateId) => {
+export const deleteEstimate = async estimateId => {
   try {
     const { error } = await dbClient.estimates.delete(estimateId);
     if (error) throw error;
@@ -170,7 +172,7 @@ export const deleteEstimate = async (estimateId) => {
 };
 
 // PDF生成用データ取得
-export const getEstimateForPDF = async (estimateId) => {
+export const getEstimateForPDF = async estimateId => {
   try {
     const { data: estimate, error } = await dbClient.estimates.get(estimateId);
     if (error) throw error;
@@ -183,31 +185,32 @@ export const getEstimateForPDF = async (estimateId) => {
       clientInfo: {
         name: estimate.client?.name || '',
         address: estimate.client?.address || '',
-        contactPerson: estimate.client?.contact_person || ''
+        contactPerson: estimate.client?.contact_person || '',
       },
       projectInfo: {
         name: estimate.title,
         siteAddress: estimate.project?.site_address || '',
         period: {
           start: estimate.project?.start_date || '',
-          end: estimate.project?.end_date || ''
-        }
+          end: estimate.project?.end_date || '',
+        },
       },
-      items: estimate.items?.map(item => ({
-        category: item.category,
-        name: item.name,
-        unit: item.unit,
-        quantity: item.quantity,
-        unitPrice: item.unit_price,
-        amount: item.amount
-      })) || [],
+      items:
+        estimate.items?.map(item => ({
+          category: item.category,
+          name: item.name,
+          unit: item.unit,
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
+          amount: item.amount,
+        })) || [],
       summary: {
         subtotal: estimate.subtotal,
         taxAmount: estimate.tax_amount,
-        totalAmount: estimate.total_amount
+        totalAmount: estimate.total_amount,
       },
       notes: estimate.notes,
-      terms: estimate.terms
+      terms: estimate.terms,
     };
 
     return { success: true, data: pdfData };
@@ -222,7 +225,7 @@ export const uploadEstimateFile = async (estimateId, file, fileType = 'pdf', com
   try {
     const fileName = `estimates/${estimateId}/${fileType}_${Date.now()}_${file.name}`;
     const { error } = await storage.upload('garden-dx-files', fileName, file);
-    
+
     if (error) throw error;
 
     // ファイル情報をDBに保存
@@ -233,17 +236,15 @@ export const uploadEstimateFile = async (estimateId, file, fileType = 'pdf', com
       file_name: file.name,
       file_type: file.type,
       file_size: file.size,
-      storage_path: fileName
+      storage_path: fileName,
     };
 
-    const { error: dbError } = await supabase
-      .from('files')
-      .insert(fileRecord);
-    
+    const { error: dbError } = await supabase.from('files').insert(fileRecord);
+
     if (dbError) throw dbError;
 
     const publicUrl = await storage.getPublicUrl('garden-dx-files', fileName);
-    
+
     return { success: true, data: { path: fileName, url: publicUrl } };
   } catch (error) {
     console.error('ファイルアップロードエラー:', error);

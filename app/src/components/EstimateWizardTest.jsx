@@ -8,14 +8,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import EstimateWizard from './EstimateWizard';
 import MockAuthProvider from './MockAuthProvider';
-import { 
-  FiPlay, 
-  FiRefreshCw, 
-  FiCheck, 
-  FiFileText,
-  FiArrowLeft,
-  FiHome 
-} from 'react-icons/fi';
+import { FiPlay, FiRefreshCw, FiCheck, FiFileText, FiArrowLeft, FiHome } from 'react-icons/fi';
 
 const TestContainer = styled.div`
   min-height: 100vh;
@@ -56,7 +49,7 @@ const TestControls = styled.div`
   background: white;
   border-radius: 12px;
   padding: 25px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   display: flex;
   justify-content: center;
   gap: 20px;
@@ -74,7 +67,7 @@ const ControlButton = styled.button`
   align-items: center;
   gap: 10px;
   transition: all 0.3s ease;
-  
+
   ${props => {
     switch (props.variant) {
       case 'primary':
@@ -117,7 +110,7 @@ const ControlButton = styled.button`
         `;
     }
   }}
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -140,12 +133,12 @@ const DemoInfo = styled.div`
 
 const DemoText = styled.div`
   color: #2d5a2d;
-  
+
   h3 {
     margin: 0 0 10px 0;
     font-size: 18px;
   }
-  
+
   p {
     margin: 0;
     font-size: 14px;
@@ -160,8 +153,8 @@ const ResultPanel = styled.div`
   background: white;
   border-radius: 12px;
   padding: 25px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
   h3 {
     color: #2d5a2d;
     margin: 0 0 20px 0;
@@ -187,38 +180,38 @@ const EstimateWizardTest = () => {
   const [showWizard, setShowWizard] = useState(false);
   const [result, setResult] = useState(null);
   const [testMode, setTestMode] = useState('new'); // 'new', 'edit'
-  
+
   const handleStartWizard = (mode = 'new') => {
     setTestMode(mode);
     setShowWizard(true);
     setResult(null);
   };
-  
-  const handleWizardComplete = (estimateData) => {
+
+  const handleWizardComplete = estimateData => {
     setResult({
       success: true,
       mode: testMode,
       data: estimateData,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
     setShowWizard(false);
   };
-  
+
   const handleWizardCancel = () => {
     setResult({
       success: false,
       mode: testMode,
       cancelled: true,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
     setShowWizard(false);
   };
-  
+
   const resetTest = () => {
     setShowWizard(false);
     setResult(null);
   };
-  
+
   if (showWizard) {
     return (
       <MockAuthProvider>
@@ -230,7 +223,7 @@ const EstimateWizardTest = () => {
       </MockAuthProvider>
     );
   }
-  
+
   return (
     <TestContainer>
       <TestHeader>
@@ -238,11 +231,9 @@ const EstimateWizardTest = () => {
           <FiFileText size={32} />
           見積ウィザード テスト環境
         </TestTitle>
-        <TestSubtitle>
-          造園業向け見積書作成ウィザードの動作確認・デモ
-        </TestSubtitle>
+        <TestSubtitle>造園業向け見積書作成ウィザードの動作確認・デモ</TestSubtitle>
       </TestHeader>
-      
+
       <DemoInfo>
         <FiPlay size={24} color="#4a7c4a" />
         <DemoText>
@@ -250,47 +241,36 @@ const EstimateWizardTest = () => {
           <p>
             4ステップウィザード形式で見積書を作成できます：
             <br />
-            ① 基本情報（顧客・現場情報） → ② 要望詳細（プロジェクト内容） → ③ 項目入力（工事内容・単価） → ④ 金額調整（最終確認）
+            ① 基本情報（顧客・現場情報） → ② 要望詳細（プロジェクト内容） → ③
+            項目入力（工事内容・単価） → ④ 金額調整（最終確認）
             <br />
             <strong>リアルタイム金額計算・一時保存・造園事業者向けUI</strong> が体験できます。
           </p>
         </DemoText>
       </DemoInfo>
-      
+
       <TestControls>
-        <ControlButton 
-          variant="primary" 
-          onClick={() => handleStartWizard('new')}
-        >
+        <ControlButton variant="primary" onClick={() => handleStartWizard('new')}>
           <FiPlay />
           新規見積作成テスト
         </ControlButton>
-        
-        <ControlButton 
-          variant="secondary" 
-          onClick={() => handleStartWizard('edit')}
-        >
+
+        <ControlButton variant="secondary" onClick={() => handleStartWizard('edit')}>
           <FiFileText />
           既存見積編集テスト
         </ControlButton>
-        
-        <ControlButton 
-          variant="danger" 
-          onClick={resetTest}
-        >
+
+        <ControlButton variant="danger" onClick={resetTest}>
           <FiRefreshCw />
           テストリセット
         </ControlButton>
-        
-        <ControlButton 
-          variant="secondary" 
-          onClick={() => window.history.back()}
-        >
+
+        <ControlButton variant="secondary" onClick={() => window.history.back()}>
           <FiArrowLeft />
           メニューに戻る
         </ControlButton>
       </TestControls>
-      
+
       {result && (
         <ResultPanel>
           <h3>
@@ -306,9 +286,10 @@ const EstimateWizardTest = () => {
               </>
             )}
           </h3>
-          
+
           <ResultContent>
-            {result.success ? `
+            {result.success
+              ? `
 見積作成成功！
 
 【作成モード】: ${result.mode === 'new' ? '新規作成' : '編集'}
@@ -343,7 +324,8 @@ const EstimateWizardTest = () => {
 【デバッグ情報】
 完全なデータ構造:
 ${JSON.stringify(result.data, null, 2)}
-            ` : `
+            `
+              : `
 見積作成をキャンセルしました
 
 【キャンセル時刻】: ${new Date(result.timestamp).toLocaleString('ja-JP')}

@@ -12,14 +12,14 @@ import authService from '../services/authService';
  * 権限ベースガードコンポーネント
  * 指定された権限がない場合は子要素を非表示にする
  */
-const PermissionGuard = ({ 
-  children, 
-  resource, 
-  action, 
-  feature, 
-  role, 
+const PermissionGuard = ({
+  children,
+  resource,
+  action,
+  feature,
+  role,
   fallback = null,
-  showFallback = false 
+  showFallback = false,
 }) => {
   // 認証チェック
   if (!authService.isAuthenticated()) {
@@ -59,7 +59,7 @@ PermissionGuard.propTypes = {
   feature: PropTypes.string,
   role: PropTypes.oneOf(['owner', 'employee']),
   fallback: PropTypes.node,
-  showFallback: PropTypes.bool
+  showFallback: PropTypes.bool,
 };
 
 /**
@@ -74,7 +74,7 @@ export const OwnerOnly = ({ children, fallback = null, showFallback = false }) =
 OwnerOnly.propTypes = {
   children: PropTypes.node.isRequired,
   fallback: PropTypes.node,
-  showFallback: PropTypes.bool
+  showFallback: PropTypes.bool,
 };
 
 /**
@@ -89,7 +89,7 @@ export const EmployeeAndAbove = ({ children, fallback = null, showFallback = fal
 EmployeeAndAbove.propTypes = {
   children: PropTypes.node.isRequired,
   fallback: PropTypes.node,
-  showFallback: PropTypes.bool
+  showFallback: PropTypes.bool,
 };
 
 /**
@@ -104,7 +104,7 @@ export const CostViewGuard = ({ children, fallback = null, showFallback = false 
 CostViewGuard.propTypes = {
   children: PropTypes.node.isRequired,
   fallback: PropTypes.node,
-  showFallback: PropTypes.bool
+  showFallback: PropTypes.bool,
 };
 
 /**
@@ -119,7 +119,7 @@ export const ProfitViewGuard = ({ children, fallback = null, showFallback = fals
 ProfitViewGuard.propTypes = {
   children: PropTypes.node.isRequired,
   fallback: PropTypes.node,
-  showFallback: PropTypes.bool
+  showFallback: PropTypes.bool,
 };
 
 /**
@@ -134,7 +134,7 @@ export const AdjustTotalGuard = ({ children, fallback = null, showFallback = fal
 AdjustTotalGuard.propTypes = {
   children: PropTypes.node.isRequired,
   fallback: PropTypes.node,
-  showFallback: PropTypes.bool
+  showFallback: PropTypes.bool,
 };
 
 /**
@@ -149,7 +149,7 @@ export const InvoiceIssueGuard = ({ children, fallback = null, showFallback = fa
 InvoiceIssueGuard.propTypes = {
   children: PropTypes.node.isRequired,
   fallback: PropTypes.node,
-  showFallback: PropTypes.bool
+  showFallback: PropTypes.bool,
 };
 
 /**
@@ -164,7 +164,7 @@ export const DashboardGuard = ({ children, fallback = null, showFallback = false
 DashboardGuard.propTypes = {
   children: PropTypes.node.isRequired,
   fallback: PropTypes.node,
-  showFallback: PropTypes.bool
+  showFallback: PropTypes.bool,
 };
 
 /**
@@ -179,7 +179,7 @@ export const UserManagementGuard = ({ children, fallback = null, showFallback = 
 UserManagementGuard.propTypes = {
   children: PropTypes.node.isRequired,
   fallback: PropTypes.node,
-  showFallback: PropTypes.bool
+  showFallback: PropTypes.bool,
 };
 
 export default PermissionGuard;

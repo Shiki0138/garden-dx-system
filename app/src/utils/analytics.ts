@@ -7,7 +7,7 @@
 import React from 'react';
 
 // ユーザーアクション型定義
-export type UserActionType = 
+export type UserActionType =
   | 'estimate_create'
   | 'estimate_edit'
   | 'estimate_delete'
@@ -99,7 +99,7 @@ class AnalyticsService {
 
     // 機密情報を除外
     this.sanitizeAction(action);
-    
+
     this.queue.push(action);
 
     // バッチサイズに達したら即座に送信
@@ -123,12 +123,12 @@ class AnalyticsService {
 
       if (result instanceof Promise) {
         return result
-          .then((value) => {
+          .then(value => {
             const duration = performance.now() - startTime;
             this.track(type, data, true, undefined, duration);
             return value;
           })
-          .catch((error) => {
+          .catch(error => {
             const duration = performance.now() - startTime;
             this.track(type, data, false, error.message, duration);
             throw error;
@@ -149,11 +149,16 @@ class AnalyticsService {
    * エラー追跡
    */
   trackError(error: Error, context?: Record<string, any>): void {
-    this.track('error_occurred', {
-      message: error.message,
-      stack: error.stack?.slice(0, 500), // スタックトレースを制限
-      ...context,
-    }, false, error.message);
+    this.track(
+      'error_occurred',
+      {
+        message: error.message,
+        stack: error.stack?.slice(0, 500), // スタックトレースを制限
+        ...context,
+      },
+      false,
+      error.message
+    );
   }
 
   /**
@@ -177,7 +182,7 @@ class AnalyticsService {
     const batch = [...this.queue];
     this.queue = [];
 
-    this.sendBatch(batch).catch((error) => {
+    this.sendBatch(batch).catch(error => {
       console.warn('Analytics flush failed:', error);
       // 失敗したデータをキューに戻す（最大リトライ回数制限）
       this.queue.unshift(...batch.slice(0, 5));
@@ -216,7 +221,7 @@ class AnalyticsService {
 
   private startFlushTimer(): void {
     if (this.flushTimer) clearInterval(this.flushTimer);
-    
+
     this.flushTimer = setInterval(() => {
       this.flush();
     }, this.config.flushInterval);
@@ -226,10 +231,10 @@ class AnalyticsService {
     if (!data) return data;
 
     const anonymized = { ...data };
-    
+
     // 機密情報をハッシュ化または除去
     const sensitiveFields = ['email', 'phone', 'address', 'customer_name', 'password'];
-    
+
     for (const field of sensitiveFields) {
       if (anonymized[field]) {
         anonymized[field] = this.hashString(anonymized[field]);
@@ -249,10 +254,10 @@ class AnalyticsService {
     if (action.data) {
       const dataStr = JSON.stringify(action.data);
       if (dataStr.length > 1000) {
-        action.data = { 
-          ...action.data, 
+        action.data = {
+          ...action.data,
           _truncated: true,
-          _originalSize: dataStr.length 
+          _originalSize: dataStr.length,
         };
       }
     }
@@ -296,14 +301,14 @@ class AnalyticsService {
       const stored = localStorage.getItem('garden_analytics') || '[]';
       const existing = JSON.parse(stored) as UserAction[];
       const combined = [...existing, ...batch];
-      
+
       // 保持期間を超えたデータを削除
-      const cutoff = Date.now() - (this.config.retentionDays * 24 * 60 * 60 * 1000);
+      const cutoff = Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000;
       const filtered = combined.filter(action => action.timestamp > cutoff);
-      
+
       // ストレージサイズ制限（最大1000件）
       const limited = filtered.slice(-1000);
-      
+
       localStorage.setItem('garden_analytics', JSON.stringify(limited));
     } catch (error) {
       console.warn('Failed to save analytics to localStorage:', error);
@@ -314,7 +319,7 @@ class AnalyticsService {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // 32bit整数に変換
     }
     return `hash_${Math.abs(hash).toString(36)}`;
@@ -359,9 +364,9 @@ export const useAnalytics = (componentName: string) => {
 
     return () => {
       const unmountTime = Date.now();
-      trackUserAction('component_unmount' as UserActionType, { 
+      trackUserAction('component_unmount' as UserActionType, {
         componentName,
-        mountDuration: unmountTime - mountTime 
+        mountDuration: unmountTime - mountTime,
       });
     };
   }, [componentName, mountTime]);
@@ -376,7 +381,7 @@ export const useAnalytics = (componentName: string) => {
 // エラーバウンダリー用
 export const setupGlobalErrorTracking = (): void => {
   // 未処理エラーをキャッチ
-  window.addEventListener('error', (event) => {
+  window.addEventListener('error', event => {
     trackError(new Error(event.message), {
       filename: event.filename,
       lineno: event.lineno,
@@ -385,7 +390,7 @@ export const setupGlobalErrorTracking = (): void => {
   });
 
   // 未処理のPromise拒否をキャッチ
-  window.addEventListener('unhandledrejection', (event) => {
+  window.addEventListener('unhandledrejection', event => {
     trackError(new Error(event.reason), {
       type: 'unhandledrejection',
     });

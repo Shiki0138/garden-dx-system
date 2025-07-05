@@ -22,17 +22,16 @@ const DemoLandingPage = () => {
       <div className="demo-landing-container">
         <header className="demo-header">
           <h1 className="demo-title">
-            🏡 Garden DX System
+            🏡 庭想システム
             <span className="demo-subtitle">造園業向け統合業務管理システム</span>
           </h1>
-          <div className="demo-badge">
-            🎭 デモ体験版
-          </div>
+          <div className="demo-badge">🎭 デモ体験版</div>
         </header>
 
         <div className="demo-intro">
           <p className="demo-description">
-            本システムは造園業界向けに開発された統合業務管理システムです。<br/>
+            本システムは造園業界向けに開発された統合業務管理システムです。
+            <br />
             見積作成から請求書発行まで、業務を効率化するための機能を体験できます。
           </p>
         </div>
@@ -72,7 +71,7 @@ const DemoLandingPage = () => {
                 name="userType"
                 value="manager"
                 checked={selectedUserType === 'manager'}
-                onChange={(e) => setSelectedUserType(e.target.value)}
+                onChange={e => setSelectedUserType(e.target.value)}
               />
               <div className="user-info">
                 <div className="user-avatar">👤</div>
@@ -90,7 +89,7 @@ const DemoLandingPage = () => {
                 name="userType"
                 value="employee"
                 checked={selectedUserType === 'employee'}
-                onChange={(e) => setSelectedUserType(e.target.value)}
+                onChange={e => setSelectedUserType(e.target.value)}
               />
               <div className="user-info">
                 <div className="user-avatar">👩</div>
@@ -109,7 +108,8 @@ const DemoLandingPage = () => {
             🚀 デモを開始する
           </button>
           <p className="demo-note">
-            ※ デモ環境では実際のデータベースには接続されません。<br/>
+            ※ デモ環境では実際のデータベースには接続されません。
+            <br />
             全ての操作はサンプルデータで行われます。
           </p>
         </div>

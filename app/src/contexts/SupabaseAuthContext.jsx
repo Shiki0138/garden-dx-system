@@ -4,11 +4,11 @@
  */
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { 
-  supabaseClient, 
-  isSupabaseConnected, 
+import {
+  supabaseClient,
+  isSupabaseConnected,
   handleSupabaseError,
-  checkSupabaseConnection 
+  checkSupabaseConnection,
 } from '../lib/supabase';
 
 // 認証コンテキスト作成
@@ -38,7 +38,7 @@ export const SupabaseAuthProvider = ({ children }) => {
         // Supabase接続確認
         const connectionStatus = await checkSupabaseConnection();
         setIsConnected(connectionStatus.connected);
-        
+
         if (!isSupabaseConnected()) {
           console.log('開発モード: Supabase未接続');
           setLoading(false);
@@ -46,17 +46,20 @@ export const SupabaseAuthProvider = ({ children }) => {
         }
 
         // セッション取得
-        const { data: { session }, error } = await supabaseClient.auth.getSession();
-        
+        const {
+          data: { session },
+          error,
+        } = await supabaseClient.auth.getSession();
+
         if (error) {
-          console.error('セッション取得エラー:', error);
+          // console.error('セッション取得エラー:', error);
           setError(handleSupabaseError(error));
         } else {
           setSession(session);
           setUser(session?.user ?? null);
         }
       } catch (err) {
-        console.error('認証初期化エラー:', err);
+        // console.error('認証初期化エラー:', err);
         setError('認証システムの初期化に失敗しました');
       } finally {
         setLoading(false);
@@ -70,35 +73,35 @@ export const SupabaseAuthProvider = ({ children }) => {
   useEffect(() => {
     if (!isSupabaseConnected()) return;
 
-    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('認証状態変更:', event, session?.user?.email);
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-        
-        // イベント別処理
-        switch (event) {
-          case 'SIGNED_IN':
-            setError(null);
-            console.log('ログイン成功:', session.user.email);
-            break;
-          case 'SIGNED_OUT':
-            setError(null);
-            console.log('ログアウト完了');
-            break;
-          case 'TOKEN_REFRESHED':
-            console.log('トークン更新完了');
-            break;
-          case 'USER_UPDATED':
-            console.log('ユーザー情報更新');
-            break;
-          default:
-            break;
-        }
+    const {
+      data: { subscription },
+    } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      // console.log('認証状態変更:', event, session?.user?.email);
+
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+
+      // イベント別処理
+      switch (event) {
+        case 'SIGNED_IN':
+          setError(null);
+          // console.log('ログイン成功:', session.user.email);
+          break;
+        case 'SIGNED_OUT':
+          setError(null);
+          // console.log('ログアウト完了');
+          break;
+        case 'TOKEN_REFRESHED':
+          // console.log('トークン更新完了');
+          break;
+        case 'USER_UPDATED':
+          // console.log('ユーザー情報更新');
+          break;
+        default:
+          break;
       }
-    );
+    });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -108,17 +111,17 @@ export const SupabaseAuthProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       if (!isSupabaseConnected()) {
-        // 開発モード用フォールバック
-        setUser({ id: 'dev-user', email, role: 'manager' });
-        setSession({ user: { id: 'dev-user', email, role: 'manager' } });
-        return { success: true, message: '開発モードでログイン' };
+        // Supabase接続が必須
+        const errorMessage = 'Supabaseが設定されていません。環境変数を確認してください。';
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
       }
 
       const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
-        password
+        password,
       });
 
       if (error) {
@@ -154,9 +157,9 @@ export const SupabaseAuthProvider = ({ children }) => {
           data: {
             company_name: userData.companyName,
             full_name: userData.fullName,
-            role: userData.role || 'employee'
-          }
-        }
+            role: userData.role || 'employee',
+          },
+        },
       });
 
       if (error) {
@@ -179,7 +182,7 @@ export const SupabaseAuthProvider = ({ children }) => {
   const signOut = async () => {
     try {
       setLoading(true);
-      
+
       if (!isSupabaseConnected()) {
         setUser(null);
         setSession(null);
@@ -187,7 +190,7 @@ export const SupabaseAuthProvider = ({ children }) => {
       }
 
       const { error } = await supabaseClient.auth.signOut();
-      
+
       if (error) {
         const errorMessage = handleSupabaseError(error);
         setError(errorMessage);
@@ -205,7 +208,7 @@ export const SupabaseAuthProvider = ({ children }) => {
   };
 
   // パスワードリセット
-  const resetPassword = async (email) => {
+  const resetPassword = async email => {
     try {
       setLoading(true);
       setError(null);
@@ -215,7 +218,7 @@ export const SupabaseAuthProvider = ({ children }) => {
       }
 
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) {
@@ -235,7 +238,7 @@ export const SupabaseAuthProvider = ({ children }) => {
   };
 
   // ユーザープロファイル更新
-  const updateProfile = async (updates) => {
+  const updateProfile = async updates => {
     try {
       setLoading(true);
       setError(null);
@@ -245,7 +248,7 @@ export const SupabaseAuthProvider = ({ children }) => {
       }
 
       const { error } = await supabaseClient.auth.updateUser({
-        data: updates
+        data: updates,
       });
 
       if (error) {
@@ -265,18 +268,18 @@ export const SupabaseAuthProvider = ({ children }) => {
   };
 
   // ユーザー権限チェック
-  const hasRole = (requiredRole) => {
+  const hasRole = requiredRole => {
     if (!user) return false;
-    
+
     const userRole = user.user_metadata?.role || 'employee';
-    
+
     // 権限階層: admin > manager > employee
     const roleHierarchy = {
       admin: 3,
       manager: 2,
-      employee: 1
+      employee: 1,
     };
-    
+
     return roleHierarchy[userRole] >= roleHierarchy[requiredRole];
   };
 
@@ -298,28 +301,24 @@ export const SupabaseAuthProvider = ({ children }) => {
     loading,
     error,
     isConnected,
-    
+
     // 認証メソッド
     signInWithPassword,
     signUp,
     signOut,
     resetPassword,
     updateProfile,
-    
+
     // ユーティリティ
     hasRole,
     isAuthenticated,
     isManager,
-    
+
     // エラークリア
-    clearError: () => setError(null)
+    clearError: () => setError(null),
   };
 
-  return (
-    <SupabaseAuthContext.Provider value={value}>
-      {children}
-    </SupabaseAuthContext.Provider>
-  );
+  return <SupabaseAuthContext.Provider value={value}>{children}</SupabaseAuthContext.Provider>;
 };
 
 export default SupabaseAuthProvider;

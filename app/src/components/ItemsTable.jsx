@@ -13,7 +13,7 @@ const TableContainer = styled.div`
   flex: 1;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -49,9 +49,9 @@ const ItemRow = styled.div`
     if (props.level > 0) return '#fafbfc';
     return 'white';
   }};
-  opacity: ${props => props.isDragging ? 0.5 : 1};
-  cursor: ${props => props.isDragging ? 'grabbing' : 'default'};
-  
+  opacity: ${props => (props.isDragging ? 0.5 : 1)};
+  cursor: ${props => (props.isDragging ? 'grabbing' : 'default')};
+
   &:hover {
     background-color: ${props => {
       if (props.itemType === 'header') return '#e8eaed';
@@ -67,7 +67,7 @@ const DragHandle = styled.div`
   cursor: grab;
   color: #6c757d;
   padding: 8px;
-  
+
   &:hover {
     color: #495057;
   }
@@ -79,7 +79,7 @@ const ItemCell = styled.div`
   display: flex;
   align-items: center;
   padding-left: ${props => (props.level || 0) * 20 + 8}px;
-  
+
   &.editable {
     cursor: text;
   }
@@ -90,7 +90,7 @@ const EditableInput = styled.input`
   background: transparent;
   width: 100%;
   font-size: 14px;
-  
+
   &:focus {
     outline: 2px solid #007bff;
     background: white;
@@ -106,7 +106,7 @@ const EditableTextarea = styled.textarea`
   font-size: 14px;
   resize: none;
   min-height: 20px;
-  
+
   &:focus {
     outline: 2px solid #007bff;
     background: white;
@@ -125,7 +125,7 @@ const ActionButton = styled.button`
   padding: 4px;
   cursor: pointer;
   color: #6c757d;
-  
+
   &:hover {
     color: #dc3545;
   }
@@ -147,13 +147,7 @@ const TotalCell = styled.div`
 
 const ITEM_TYPE = 'ESTIMATE_ITEM';
 
-const DraggableItemRow = ({ 
-  item, 
-  index, 
-  moveItem, 
-  onUpdateItem, 
-  onDeleteItem 
-}) => {
+const DraggableItemRow = ({ item, index, moveItem, onUpdateItem, onDeleteItem }) => {
   const [editingField, setEditingField] = useState(null);
   const [localValues, setLocalValues] = useState({});
   const ref = useRef(null);
@@ -199,7 +193,7 @@ const DraggableItemRow = ({
     item: () => {
       return { id: item.item_id, index };
     },
-    collect: (monitor) => ({
+    collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),
   });
@@ -227,7 +221,7 @@ const DraggableItemRow = ({
   };
 
   // 数値フォーマット
-  const formatNumber = (value) => {
+  const formatNumber = value => {
     if (!value && value !== 0) return '';
     return Number(value).toLocaleString();
   };
@@ -258,20 +252,25 @@ const DraggableItemRow = ({
         {editingField === 'item_description' ? (
           <EditableTextarea
             value={localValues.item_description || item.item_description}
-            onChange={(e) => setLocalValues({...localValues, item_description: e.target.value})}
-            onBlur={() => handleFieldUpdate('item_description', localValues.item_description || item.item_description)}
-            onKeyDown={(e) => handleKeyDown(e, 'item_description')}
+            onChange={e => setLocalValues({ ...localValues, item_description: e.target.value })}
+            onBlur={() =>
+              handleFieldUpdate(
+                'item_description',
+                localValues.item_description || item.item_description
+              )
+            }
+            onKeyDown={e => handleKeyDown(e, 'item_description')}
             autoFocus
           />
         ) : (
           <div
             onClick={() => {
               setEditingField('item_description');
-              setLocalValues({...localValues, item_description: item.item_description});
+              setLocalValues({ ...localValues, item_description: item.item_description });
             }}
-            style={{ 
+            style={{
               fontWeight: item.item_type === 'header' ? 'bold' : 'normal',
-              color: item.item_type === 'header' ? '#495057' : 'inherit'
+              color: item.item_type === 'header' ? '#495057' : 'inherit',
             }}
           >
             {item.item_description || ''}
@@ -281,104 +280,119 @@ const DraggableItemRow = ({
 
       {/* 数量 */}
       <ItemCell>
-        {item.item_type === 'item' && (
-          editingField === 'quantity' ? (
+        {item.item_type === 'item' &&
+          (editingField === 'quantity' ? (
             <NumberInput
               type="number"
               step="0.01"
-              value={localValues.quantity !== undefined ? localValues.quantity : (item.quantity || '')}
-              onChange={(e) => setLocalValues({...localValues, quantity: e.target.value})}
+              value={
+                localValues.quantity !== undefined ? localValues.quantity : item.quantity || ''
+              }
+              onChange={e => setLocalValues({ ...localValues, quantity: e.target.value })}
               onBlur={() => handleFieldUpdate('quantity', localValues.quantity || item.quantity)}
-              onKeyDown={(e) => handleKeyDown(e, 'quantity')}
+              onKeyDown={e => handleKeyDown(e, 'quantity')}
               autoFocus
             />
           ) : (
             <div
               onClick={() => {
                 setEditingField('quantity');
-                setLocalValues({...localValues, quantity: item.quantity});
+                setLocalValues({ ...localValues, quantity: item.quantity });
               }}
             >
               {item.quantity || ''}
             </div>
-          )
-        )}
+          ))}
       </ItemCell>
 
       {/* 単位 */}
       <ItemCell>
-        {item.item_type === 'item' && (
-          editingField === 'unit' ? (
+        {item.item_type === 'item' &&
+          (editingField === 'unit' ? (
             <EditableInput
-              value={localValues.unit !== undefined ? localValues.unit : (item.unit || '')}
-              onChange={(e) => setLocalValues({...localValues, unit: e.target.value})}
+              value={localValues.unit !== undefined ? localValues.unit : item.unit || ''}
+              onChange={e => setLocalValues({ ...localValues, unit: e.target.value })}
               onBlur={() => handleFieldUpdate('unit', localValues.unit || item.unit)}
-              onKeyDown={(e) => handleKeyDown(e, 'unit')}
+              onKeyDown={e => handleKeyDown(e, 'unit')}
               autoFocus
             />
           ) : (
             <div
               onClick={() => {
                 setEditingField('unit');
-                setLocalValues({...localValues, unit: item.unit});
+                setLocalValues({ ...localValues, unit: item.unit });
               }}
             >
               {item.unit || ''}
             </div>
-          )
-        )}
+          ))}
       </ItemCell>
 
       {/* 単価 */}
       <ItemCell>
-        {item.item_type === 'item' && (
-          editingField === 'unit_price' ? (
+        {item.item_type === 'item' &&
+          (editingField === 'unit_price' ? (
             <NumberInput
               type="number"
-              value={localValues.unit_price !== undefined ? localValues.unit_price : (item.unit_price || '')}
-              onChange={(e) => setLocalValues({...localValues, unit_price: e.target.value})}
-              onBlur={() => handleFieldUpdate('unit_price', localValues.unit_price || item.unit_price)}
-              onKeyDown={(e) => handleKeyDown(e, 'unit_price')}
+              value={
+                localValues.unit_price !== undefined
+                  ? localValues.unit_price
+                  : item.unit_price || ''
+              }
+              onChange={e => setLocalValues({ ...localValues, unit_price: e.target.value })}
+              onBlur={() =>
+                handleFieldUpdate('unit_price', localValues.unit_price || item.unit_price)
+              }
+              onKeyDown={e => handleKeyDown(e, 'unit_price')}
               autoFocus
             />
           ) : (
             <div
               onClick={() => {
                 setEditingField('unit_price');
-                setLocalValues({...localValues, unit_price: item.unit_price});
+                setLocalValues({ ...localValues, unit_price: item.unit_price });
               }}
               style={{ textAlign: 'right' }}
             >
               {formatNumber(item.unit_price)}
             </div>
-          )
-        )}
+          ))}
       </ItemCell>
 
       {/* 調整額 */}
       <ItemCell>
-        {item.item_type === 'item' && (
-          editingField === 'line_item_adjustment' ? (
+        {item.item_type === 'item' &&
+          (editingField === 'line_item_adjustment' ? (
             <NumberInput
               type="number"
-              value={localValues.line_item_adjustment !== undefined ? localValues.line_item_adjustment : (item.line_item_adjustment || '')}
-              onChange={(e) => setLocalValues({...localValues, line_item_adjustment: e.target.value})}
-              onBlur={() => handleFieldUpdate('line_item_adjustment', localValues.line_item_adjustment || item.line_item_adjustment)}
-              onKeyDown={(e) => handleKeyDown(e, 'line_item_adjustment')}
+              value={
+                localValues.line_item_adjustment !== undefined
+                  ? localValues.line_item_adjustment
+                  : item.line_item_adjustment || ''
+              }
+              onChange={e =>
+                setLocalValues({ ...localValues, line_item_adjustment: e.target.value })
+              }
+              onBlur={() =>
+                handleFieldUpdate(
+                  'line_item_adjustment',
+                  localValues.line_item_adjustment || item.line_item_adjustment
+                )
+              }
+              onKeyDown={e => handleKeyDown(e, 'line_item_adjustment')}
               autoFocus
             />
           ) : (
             <div
               onClick={() => {
                 setEditingField('line_item_adjustment');
-                setLocalValues({...localValues, line_item_adjustment: item.line_item_adjustment});
+                setLocalValues({ ...localValues, line_item_adjustment: item.line_item_adjustment });
               }}
               style={{ textAlign: 'right' }}
             >
               {formatNumber(item.line_item_adjustment)}
             </div>
-          )
-        )}
+          ))}
       </ItemCell>
 
       {/* 金額 */}
@@ -388,10 +402,7 @@ const DraggableItemRow = ({
 
       {/* アクション */}
       <ItemCell>
-        <ActionButton
-          onClick={() => onDeleteItem(item.item_id)}
-          title="削除"
-        >
+        <ActionButton onClick={() => onDeleteItem(item.item_id)} title="削除">
           <FiTrash2 />
         </ActionButton>
       </ItemCell>
@@ -399,13 +410,7 @@ const DraggableItemRow = ({
   );
 };
 
-const ItemsTable = ({ 
-  items = [], 
-  onUpdateItem, 
-  onDeleteItem, 
-  onReorderItems,
-  estimate 
-}) => {
+const ItemsTable = ({ items = [], onUpdateItem, onDeleteItem, onReorderItems, estimate }) => {
   const [localItems, setLocalItems] = useState(items);
 
   useEffect(() => {
@@ -415,10 +420,10 @@ const ItemsTable = ({
   const moveItem = (dragIndex, hoverIndex) => {
     const newItems = [...localItems];
     const draggedItem = newItems[dragIndex];
-    
+
     newItems.splice(dragIndex, 1);
     newItems.splice(hoverIndex, 0, draggedItem);
-    
+
     setLocalItems(newItems);
   };
 
@@ -438,11 +443,11 @@ const ItemsTable = ({
         const adjustment = item.line_item_adjustment || 0;
         return sum + (quantity * unitPrice + adjustment);
       }, 0);
-    
+
     return {
       subtotal,
       adjustment: estimate?.adjustment_amount || 0,
-      total: subtotal + (estimate?.adjustment_amount || 0)
+      total: subtotal + (estimate?.adjustment_amount || 0),
     };
   };
 
@@ -487,7 +492,7 @@ const ItemsTable = ({
         <TotalCell align="right">{totals.subtotal.toLocaleString()}</TotalCell>
         <TotalCell></TotalCell>
       </TotalRow>
-      
+
       {totals.adjustment !== 0 && (
         <TotalRow>
           <TotalCell></TotalCell>
@@ -500,7 +505,7 @@ const ItemsTable = ({
           <TotalCell></TotalCell>
         </TotalRow>
       )}
-      
+
       <TotalRow style={{ backgroundColor: '#e9ecef', fontWeight: 'bold' }}>
         <TotalCell></TotalCell>
         <TotalCell style={{ fontWeight: 'bold' }}>合計</TotalCell>

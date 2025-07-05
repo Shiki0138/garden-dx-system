@@ -6,11 +6,11 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { 
-  FiCheck, 
-  FiArrowRight, 
-  FiArrowLeft, 
-  FiSave, 
+import {
+  FiCheck,
+  FiArrowRight,
+  FiArrowLeft,
+  FiSave,
   FiFileText,
   FiUser,
   FiClipboard,
@@ -26,7 +26,7 @@ import {
   FiEdit3,
   FiPlus,
   FiMinus,
-  FiInfo
+  FiInfo,
 } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
 
@@ -64,7 +64,7 @@ const WizardContainer = styled.div`
   background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 50%, #e8f5e8 100%);
   padding: 20px;
   animation: ${fadeInUp} 0.8s ease-out;
-  
+
   @media (max-width: 768px) {
     padding: 10px;
   }
@@ -80,7 +80,7 @@ const WizardHeader = styled.div`
   box-shadow: 0 10px 30px rgba(45, 90, 45, 0.3);
   position: relative;
   overflow: hidden;
-  
+
   &::before {
     content: '🌿';
     position: absolute;
@@ -89,7 +89,7 @@ const WizardHeader = styled.div`
     font-size: 48px;
     opacity: 0.3;
   }
-  
+
   @media (max-width: 768px) {
     padding: 20px;
     margin-bottom: 20px;
@@ -103,7 +103,7 @@ const WizardTitle = styled.h1`
   display: flex;
   align-items: center;
   gap: 15px;
-  
+
   @media (max-width: 768px) {
     font-size: 24px;
     gap: 10px;
@@ -114,7 +114,7 @@ const WizardSubtitle = styled.p`
   margin: 0;
   font-size: 18px;
   opacity: 0.9;
-  
+
   @media (max-width: 768px) {
     font-size: 16px;
   }
@@ -126,7 +126,7 @@ const ProgressContainer = styled.div`
   background: white;
   border-radius: 12px;
   padding: 25px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 `;
 
 const StepsIndicator = styled.div`
@@ -134,7 +134,7 @@ const StepsIndicator = styled.div`
   justify-content: space-between;
   margin-bottom: 20px;
   position: relative;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 15px;
@@ -148,7 +148,7 @@ const StepItem = styled.div`
   flex: 1;
   position: relative;
   z-index: 2;
-  
+
   @media (max-width: 768px) {
     flex-direction: row;
     justify-content: flex-start;
@@ -165,15 +165,16 @@ const StepNumber = styled.div`
     if (props.active) return 'linear-gradient(135deg, #7cb342, #4a7c4a)';
     return '#e0e0e0';
   }};
-  color: ${props => (props.completed || props.active) ? 'white' : '#666'};
+  color: ${props => (props.completed || props.active ? 'white' : '#666')};
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 16px;
   transition: all 0.3s ease;
-  box-shadow: ${props => (props.completed || props.active) ? '0 4px 15px rgba(74, 124, 74, 0.3)' : 'none'};
-  
+  box-shadow: ${props =>
+    props.completed || props.active ? '0 4px 15px rgba(74, 124, 74, 0.3)' : 'none'};
+
   @media (max-width: 768px) {
     margin-right: 15px;
   }
@@ -183,9 +184,9 @@ const StepLabel = styled.span`
   margin-top: 10px;
   font-size: 14px;
   font-weight: 600;
-  color: ${props => (props.completed || props.active) ? '#2d5a2d' : '#666'};
+  color: ${props => (props.completed || props.active ? '#2d5a2d' : '#666')};
   text-align: center;
-  
+
   @media (max-width: 768px) {
     margin-top: 0;
     text-align: left;
@@ -201,7 +202,7 @@ const ProgressBar = styled.div`
   background: #e0e0e0;
   border-radius: 3px;
   z-index: 1;
-  
+
   @media (max-width: 768px) {
     display: none;
   }
@@ -223,9 +224,9 @@ const WizardContent = styled.div`
   background: white;
   border-radius: 16px;
   padding: 40px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   animation: ${slideInFromRight} 0.6s ease-out;
-  
+
   @media (max-width: 768px) {
     padding: 25px;
     border-radius: 12px;
@@ -234,7 +235,7 @@ const WizardContent = styled.div`
 
 const StepContent = styled.div`
   min-height: 400px;
-  
+
   @media (max-width: 768px) {
     min-height: 300px;
   }
@@ -247,7 +248,7 @@ const SectionTitle = styled.h2`
   display: flex;
   align-items: center;
   gap: 12px;
-  
+
   @media (max-width: 768px) {
     font-size: 20px;
     margin-bottom: 20px;
@@ -259,7 +260,7 @@ const FormGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 25px;
   margin-bottom: 30px;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -288,7 +289,7 @@ const Input = styled.input`
   font-size: 16px;
   background: #fafafa;
   transition: all 0.3s ease;
-  
+
   &:focus {
     outline: none;
     border-color: #4a7c4a;
@@ -296,11 +297,11 @@ const Input = styled.input`
     box-shadow: 0 0 0 3px rgba(74, 124, 74, 0.1);
     transform: translateY(-1px);
   }
-  
+
   &:hover {
     border-color: #7cb342;
   }
-  
+
   &.error {
     border-color: #e74c3c;
     box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
@@ -317,7 +318,7 @@ const TextArea = styled.textarea`
   resize: vertical;
   font-family: inherit;
   transition: all 0.3s ease;
-  
+
   &:focus {
     outline: none;
     border-color: #4a7c4a;
@@ -334,7 +335,7 @@ const Select = styled.select`
   background: #fafafa;
   transition: all 0.3s ease;
   cursor: pointer;
-  
+
   &:focus {
     outline: none;
     border-color: #4a7c4a;
@@ -360,8 +361,8 @@ const ItemRow = styled.div`
   background: white;
   border-radius: 8px;
   margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 10px;
@@ -386,7 +387,7 @@ const AddItemButton = styled.button`
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: linear-gradient(135deg, #689f38, #2d5a2d);
     transform: translateY(-2px);
@@ -405,7 +406,7 @@ const RemoveButton = styled.button`
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: #e55555;
     transform: scale(1.1);
@@ -426,11 +427,11 @@ const CalculationRow = styled.div`
   align-items: center;
   margin-bottom: 15px;
   padding: 12px 0;
-  
+
   &:not(:last-child) {
     border-bottom: 1px solid #e8f5e8;
   }
-  
+
   &:last-child {
     border-top: 2px solid #4a7c4a;
     padding-top: 20px;
@@ -459,7 +460,7 @@ const NavigationButtons = styled.div`
   margin-top: 40px;
   padding-top: 25px;
   border-top: 2px solid #e8f5e8;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 15px;
@@ -477,7 +478,7 @@ const Button = styled.button`
   align-items: center;
   gap: 10px;
   transition: all 0.3s ease;
-  
+
   ${props => {
     switch (props.variant) {
       case 'primary':
@@ -520,14 +521,14 @@ const Button = styled.button`
         `;
     }
   }}
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none !important;
     box-shadow: none !important;
   }
-  
+
   @media (max-width: 768px) {
     width: 100%;
     justify-content: center;
@@ -566,15 +567,15 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
       id: 1,
       username: 'test_user',
       company_id: 1,
-      role: 'owner'
+      role: 'owner',
     };
   }
-  
+
   // ウィザード状態管理
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  
+
   // フォームデータ状態管理
   const [formData, setFormData] = useState({
     // Step 1: 基本情報
@@ -585,7 +586,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
     email: '',
     address: '',
     site_address: '',
-    
+
     // Step 2: 要望詳細
     project_name: '',
     project_type: 'renovation',
@@ -594,10 +595,10 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
     budget_range: '',
     special_requirements: '',
     notes: '',
-    
+
     // Step 3: カテゴリ別項目
     items: [],
-    
+
     // Step 4: 調整
     subtotal: 0,
     adjustment_amount: 0,
@@ -605,53 +606,53 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
     total_amount: 0,
     total_cost: 0,
     gross_profit: 0,
-    gross_margin_rate: 0
+    gross_margin_rate: 0,
   });
-  
+
   // 単価マスタデータ
   const [priceMasterData, setPriceMasterData] = useState([]);
   const [categories, setCategories] = useState({});
-  
+
   // ステップ定義
   const steps = [
-    { 
-      number: 1, 
-      title: '基本情報', 
+    {
+      number: 1,
+      title: '基本情報',
       icon: FiUser,
-      description: 'お客様情報と現場情報を入力'
+      description: 'お客様情報と現場情報を入力',
     },
-    { 
-      number: 2, 
-      title: '要望詳細', 
+    {
+      number: 2,
+      title: '要望詳細',
       icon: FiClipboard,
-      description: 'プロジェクト内容と要望を詳細入力'
+      description: 'プロジェクト内容と要望を詳細入力',
     },
-    { 
-      number: 3, 
-      title: '項目入力', 
+    {
+      number: 3,
+      title: '項目入力',
       icon: FiLayers,
-      description: '工事項目の選択と数量入力'
+      description: '工事項目の選択と数量入力',
     },
-    { 
-      number: 4, 
-      title: '金額調整', 
+    {
+      number: 4,
+      title: '金額調整',
       icon: FiTrendingUp,
-      description: '仕入額・掛け率・調整額の最終確認'
-    }
+      description: '仕入額・掛け率・調整額の最終確認',
+    },
   ];
-  
+
   // 初期データ読み込み
   useEffect(() => {
     loadInitialData();
   }, [estimateId, loadInitialData]);
-  
+
   const loadInitialData = useCallback(async () => {
     try {
       // 単価マスタデータ取得
       const response = await fetch('/api/demo/price-master');
       const priceData = await response.json();
       setPriceMasterData(priceData);
-      
+
       // カテゴリ分類
       const categoryMap = {};
       priceData.forEach(item => {
@@ -661,72 +662,74 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
         categoryMap[item.category].push(item);
       });
       setCategories(categoryMap);
-      
+
       // 編集モードの場合は既存データ読み込み
       if (estimateId) {
         // TODO: 既存見積データの読み込み実装
       }
-      
+
       // 見積有効期限を30日後に設定
       const validUntil = new Date();
       validUntil.setDate(validUntil.getDate() + 30);
       setFormData(prev => ({
         ...prev,
-        valid_until: validUntil.toISOString().split('T')[0]
+        valid_until: validUntil.toISOString().split('T')[0],
       }));
-      
     } catch (error) {
       console.error('初期データの読み込みに失敗:', error);
     }
   }, [estimateId]);
-  
+
   // リアルタイム金額計算
   const calculatedAmounts = useMemo(() => {
     const subtotal = formData.items.reduce((sum, item) => {
       return sum + (item.line_total || 0);
     }, 0);
-    
+
     const total_cost = formData.items.reduce((sum, item) => {
       return sum + (item.line_cost || 0);
     }, 0);
-    
+
     const total_amount = subtotal + (formData.adjustment_amount || 0);
     const gross_profit = total_amount - total_cost;
     const gross_margin_rate = total_amount > 0 ? (gross_profit / total_amount) * 100 : 0;
-    
+
     return {
       subtotal,
       total_cost,
       total_amount,
       gross_profit,
-      gross_margin_rate
+      gross_margin_rate,
     };
   }, [formData.items, formData.adjustment_amount]);
-  
+
   // 金額計算結果をフォームデータに反映
   useEffect(() => {
     setFormData(prev => ({
       ...prev,
-      ...calculatedAmounts
+      ...calculatedAmounts,
     }));
   }, [calculatedAmounts]);
-  
+
   // 入力ハンドラー
-  const handleInputChange = useCallback((field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // エラークリア
-    if (errors[field]) {
-      setErrors(prev => ({
+  const handleInputChange = useCallback(
+    (field, value) => {
+      setFormData(prev => ({
         ...prev,
-        [field]: null
+        [field]: value,
       }));
-    }
-  }, [errors]);
-  
+
+      // エラークリア
+      if (errors[field]) {
+        setErrors(prev => ({
+          ...prev,
+          [field]: null,
+        }));
+      }
+    },
+    [errors]
+  );
+
   // 項目追加
   const addItem = useCallback((category = '') => {
     const newItem = {
@@ -741,15 +744,15 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
       line_total: 0,
       line_cost: 0,
       adjustment: 0,
-      is_custom: true
+      is_custom: true,
     };
-    
+
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, newItem]
+      items: [...prev.items, newItem],
     }));
   }, []);
-  
+
   // 項目更新
   const updateItem = useCallback((itemId, field, value) => {
     setFormData(prev => ({
@@ -757,7 +760,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
       items: prev.items.map(item => {
         if (item.id === itemId) {
           const updatedItem = { ...item, [field]: value };
-          
+
           // 金額の自動計算
           if (field === 'quantity' || field === 'unit_price' || field === 'adjustment') {
             const quantity = parseFloat(updatedItem.quantity) || 0;
@@ -765,33 +768,33 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             const adjustment = parseFloat(updatedItem.adjustment) || 0;
             updatedItem.line_total = Math.round(quantity * unit_price + adjustment);
           }
-          
+
           if (field === 'quantity' || field === 'purchase_price') {
             const quantity = parseFloat(updatedItem.quantity) || 0;
             const purchase_price = parseFloat(updatedItem.purchase_price) || 0;
             updatedItem.line_cost = Math.round(quantity * purchase_price);
           }
-          
+
           if (field === 'purchase_price' || field === 'markup_rate') {
             const purchase_price = parseFloat(updatedItem.purchase_price) || 0;
             const markup_rate = parseFloat(updatedItem.markup_rate) || 1.3;
             updatedItem.unit_price = Math.round(purchase_price * markup_rate);
-            
+
             // 金額も再計算
             const quantity = parseFloat(updatedItem.quantity) || 0;
             const adjustment = parseFloat(updatedItem.adjustment) || 0;
             updatedItem.line_total = Math.round(quantity * updatedItem.unit_price + adjustment);
           }
-          
+
           return updatedItem;
         }
         return item;
-      })
+      }),
     }));
   }, []);
-  
+
   // 単価マスタから項目追加
-  const addItemFromMaster = useCallback((masterItem) => {
+  const addItemFromMaster = useCallback(masterItem => {
     const newItem = {
       id: Date.now(),
       category: masterItem.category,
@@ -806,79 +809,82 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
       line_cost: masterItem.purchase_price,
       adjustment: 0,
       is_custom: false,
-      master_item_id: masterItem.item_id
+      master_item_id: masterItem.item_id,
     };
-    
+
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, newItem]
+      items: [...prev.items, newItem],
     }));
   }, []);
-  
+
   // 項目削除
-  const removeItem = useCallback((itemId) => {
+  const removeItem = useCallback(itemId => {
     setFormData(prev => ({
       ...prev,
-      items: prev.items.filter(item => item.id !== itemId)
+      items: prev.items.filter(item => item.id !== itemId),
     }));
   }, []);
-  
+
   // ステップ検証
-  const validateStep = useCallback((step) => {
-    const newErrors = {};
-    
-    switch (step) {
-      case 1:
-        if (!formData.customer_name.trim()) {
-          newErrors.customer_name = '顧客名は必須です';
-        }
-        if (!formData.phone.trim()) {
-          newErrors.phone = '電話番号は必須です';
-        }
-        if (!formData.address.trim()) {
-          newErrors.address = '住所は必須です';
-        }
-        break;
-        
-      case 2:
-        if (!formData.project_name.trim()) {
-          newErrors.project_name = 'プロジェクト名は必須です';
-        }
-        if (!formData.estimate_date) {
-          newErrors.estimate_date = '見積日は必須です';
-        }
-        if (!formData.valid_until) {
-          newErrors.valid_until = '見積有効期限は必須です';
-        }
-        break;
-        
-      case 3:
-        if (formData.items.length === 0) {
-          newErrors.items = '工事項目を少なくとも1件追加してください';
-        }
-        break;
-        
-      case 4:
-        // 最終ステップでは特に検証なし（金額は自動計算）
-        break;
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData]);
-  
+  const validateStep = useCallback(
+    step => {
+      const newErrors = {};
+
+      switch (step) {
+        case 1:
+          if (!formData.customer_name.trim()) {
+            newErrors.customer_name = '顧客名は必須です';
+          }
+          if (!formData.phone.trim()) {
+            newErrors.phone = '電話番号は必須です';
+          }
+          if (!formData.address.trim()) {
+            newErrors.address = '住所は必須です';
+          }
+          break;
+
+        case 2:
+          if (!formData.project_name.trim()) {
+            newErrors.project_name = 'プロジェクト名は必須です';
+          }
+          if (!formData.estimate_date) {
+            newErrors.estimate_date = '見積日は必須です';
+          }
+          if (!formData.valid_until) {
+            newErrors.valid_until = '見積有効期限は必須です';
+          }
+          break;
+
+        case 3:
+          if (formData.items.length === 0) {
+            newErrors.items = '工事項目を少なくとも1件追加してください';
+          }
+          break;
+
+        case 4:
+          // 最終ステップでは特に検証なし（金額は自動計算）
+          break;
+      }
+
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    },
+    [formData]
+  );
+
   // ステップ進む
   const nextStep = useCallback(() => {
     if (validateStep(currentStep)) {
       setCurrentStep(prev => Math.min(prev + 1, 4));
     }
   }, [currentStep, validateStep]);
-  
+
   // ステップ戻る
   const prevStep = useCallback(() => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   }, []);
-  
+
   // 一時保存
   const saveTemporary = useCallback(async () => {
     setIsLoading(true);
@@ -893,11 +899,11 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
       setIsLoading(false);
     }
   }, [formData]);
-  
+
   // 見積完成
   const completeEstimate = useCallback(async () => {
     if (!validateStep(4)) return;
-    
+
     setIsLoading(true);
     try {
       // TODO: API実装
@@ -911,19 +917,19 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
       setIsLoading(false);
     }
   }, [formData, onComplete, validateStep]);
-  
+
   // 通貨フォーマット
-  const formatCurrency = useCallback((amount) => {
+  const formatCurrency = useCallback(amount => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount || 0);
   }, []);
-  
+
   // プログレス計算
   const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
-  
+
   // ステップ1: 基本情報
   const renderStep1 = () => (
     <StepContent>
@@ -931,14 +937,14 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
         <FiUser />
         基本情報の入力
       </SectionTitle>
-      
+
       <InfoCard>
         <FiInfo size={24} color="#4a7c4a" />
         <InfoText>
           お客様の基本情報と施工現場の情報を入力してください。正確な情報は見積書作成に必要です。
         </InfoText>
       </InfoCard>
-      
+
       <FormGrid>
         <FormGroup>
           <Label htmlFor="customer_name">
@@ -949,7 +955,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             id="customer_name"
             type="text"
             value={formData.customer_name}
-            onChange={(e) => handleInputChange('customer_name', e.target.value)}
+            onChange={e => handleInputChange('customer_name', e.target.value)}
             placeholder="例: 田中造園株式会社"
             className={errors.customer_name ? 'error' : ''}
           />
@@ -959,34 +965,30 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             </span>
           )}
         </FormGroup>
-        
+
         <FormGroup>
-          <Label htmlFor="customer_type">
-            顧客種別
-          </Label>
+          <Label htmlFor="customer_type">顧客種別</Label>
           <Select
             id="customer_type"
             value={formData.customer_type}
-            onChange={(e) => handleInputChange('customer_type', e.target.value)}
+            onChange={e => handleInputChange('customer_type', e.target.value)}
           >
             <option value="individual">個人</option>
             <option value="corporate">法人</option>
           </Select>
         </FormGroup>
-        
+
         <FormGroup>
-          <Label htmlFor="contact_person">
-            担当者名
-          </Label>
+          <Label htmlFor="contact_person">担当者名</Label>
           <Input
             id="contact_person"
             type="text"
             value={formData.contact_person}
-            onChange={(e) => handleInputChange('contact_person', e.target.value)}
+            onChange={e => handleInputChange('contact_person', e.target.value)}
             placeholder="例: 田中太郎"
           />
         </FormGroup>
-        
+
         <FormGroup>
           <Label htmlFor="phone">
             <FiPhone />
@@ -996,7 +998,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             id="phone"
             type="tel"
             value={formData.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
+            onChange={e => handleInputChange('phone', e.target.value)}
             placeholder="例: 03-1234-5678"
             className={errors.phone ? 'error' : ''}
           />
@@ -1006,7 +1008,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             </span>
           )}
         </FormGroup>
-        
+
         <FormGroup>
           <Label htmlFor="email">
             <FiMail />
@@ -1016,11 +1018,11 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             id="email"
             type="email"
             value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
+            onChange={e => handleInputChange('email', e.target.value)}
             placeholder="例: info@example.com"
           />
         </FormGroup>
-        
+
         <FormGroup>
           <Label htmlFor="address">
             <FiHome />
@@ -1030,7 +1032,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             id="address"
             type="text"
             value={formData.address}
-            onChange={(e) => handleInputChange('address', e.target.value)}
+            onChange={e => handleInputChange('address', e.target.value)}
             placeholder="例: 東京都渋谷区..."
             className={errors.address ? 'error' : ''}
           />
@@ -1040,7 +1042,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             </span>
           )}
         </FormGroup>
-        
+
         <FormGroup>
           <Label htmlFor="site_address">
             <FiMapPin />
@@ -1050,14 +1052,14 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             id="site_address"
             type="text"
             value={formData.site_address}
-            onChange={(e) => handleInputChange('site_address', e.target.value)}
+            onChange={e => handleInputChange('site_address', e.target.value)}
             placeholder="住所と異なる場合のみ入力"
           />
         </FormGroup>
       </FormGrid>
     </StepContent>
   );
-  
+
   // ステップ2: 要望詳細
   const renderStep2 = () => (
     <StepContent>
@@ -1065,14 +1067,14 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
         <FiClipboard />
         プロジェクト詳細・要望
       </SectionTitle>
-      
+
       <InfoCard>
         <FiInfo size={24} color="#4a7c4a" />
         <InfoText>
           工事の詳細内容とお客様のご要望を詳しく入力してください。これらの情報は見積の精度向上に役立ちます。
         </InfoText>
       </InfoCard>
-      
+
       <FormGrid>
         <FormGroup>
           <Label htmlFor="project_name">
@@ -1083,7 +1085,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             id="project_name"
             type="text"
             value={formData.project_name}
-            onChange={(e) => handleInputChange('project_name', e.target.value)}
+            onChange={e => handleInputChange('project_name', e.target.value)}
             placeholder="例: 庭園リフォーム工事"
             className={errors.project_name ? 'error' : ''}
           />
@@ -1093,15 +1095,13 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             </span>
           )}
         </FormGroup>
-        
+
         <FormGroup>
-          <Label htmlFor="project_type">
-            工事種別
-          </Label>
+          <Label htmlFor="project_type">工事種別</Label>
           <Select
             id="project_type"
             value={formData.project_type}
-            onChange={(e) => handleInputChange('project_type', e.target.value)}
+            onChange={e => handleInputChange('project_type', e.target.value)}
           >
             <option value="new_construction">新築工事</option>
             <option value="renovation">リフォーム工事</option>
@@ -1109,7 +1109,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             <option value="design_only">設計のみ</option>
           </Select>
         </FormGroup>
-        
+
         <FormGroup>
           <Label htmlFor="estimate_date">
             <FiCalendar />
@@ -1119,7 +1119,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             id="estimate_date"
             type="date"
             value={formData.estimate_date}
-            onChange={(e) => handleInputChange('estimate_date', e.target.value)}
+            onChange={e => handleInputChange('estimate_date', e.target.value)}
             className={errors.estimate_date ? 'error' : ''}
           />
           {errors.estimate_date && (
@@ -1128,16 +1128,14 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             </span>
           )}
         </FormGroup>
-        
+
         <FormGroup>
-          <Label htmlFor="valid_until">
-            見積有効期限 *
-          </Label>
+          <Label htmlFor="valid_until">見積有効期限 *</Label>
           <Input
             id="valid_until"
             type="date"
             value={formData.valid_until}
-            onChange={(e) => handleInputChange('valid_until', e.target.value)}
+            onChange={e => handleInputChange('valid_until', e.target.value)}
             className={errors.valid_until ? 'error' : ''}
           />
           {errors.valid_until && (
@@ -1146,7 +1144,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             </span>
           )}
         </FormGroup>
-        
+
         <FormGroup>
           <Label htmlFor="budget_range">
             <FiDollarSign />
@@ -1155,7 +1153,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
           <Select
             id="budget_range"
             value={formData.budget_range}
-            onChange={(e) => handleInputChange('budget_range', e.target.value)}
+            onChange={e => handleInputChange('budget_range', e.target.value)}
           >
             <option value="">選択してください</option>
             <option value="under_500k">50万円未満</option>
@@ -1166,33 +1164,29 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
           </Select>
         </FormGroup>
       </FormGrid>
-      
+
       <FormGroup>
-        <Label htmlFor="special_requirements">
-          特別な要望・仕様
-        </Label>
+        <Label htmlFor="special_requirements">特別な要望・仕様</Label>
         <TextArea
           id="special_requirements"
           value={formData.special_requirements}
-          onChange={(e) => handleInputChange('special_requirements', e.target.value)}
+          onChange={e => handleInputChange('special_requirements', e.target.value)}
           placeholder="特別な植栽の要望、使用材料の指定、工期の制約など"
         />
       </FormGroup>
-      
+
       <FormGroup>
-        <Label htmlFor="notes">
-          その他備考
-        </Label>
+        <Label htmlFor="notes">その他備考</Label>
         <TextArea
           id="notes"
           value={formData.notes}
-          onChange={(e) => handleInputChange('notes', e.target.value)}
+          onChange={e => handleInputChange('notes', e.target.value)}
           placeholder="その他、見積に関する備考があれば入力してください"
         />
       </FormGroup>
     </StepContent>
   );
-  
+
   // ステップ3: 項目入力
   const renderStep3 = () => (
     <StepContent>
@@ -1200,21 +1194,27 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
         <FiLayers />
         工事項目の入力
       </SectionTitle>
-      
+
       <InfoCard>
         <FiInfo size={24} color="#4a7c4a" />
         <InfoText>
           単価マスタから項目を選択するか、カスタム項目を追加してください。数量を入力すると金額が自動計算されます。
         </InfoText>
       </InfoCard>
-      
+
       {/* 単価マスタから追加 */}
       <div style={{ marginBottom: '25px' }}>
         <h3 style={{ color: '#2d5a2d', marginBottom: '15px' }}>単価マスタから選択</h3>
         {Object.entries(categories).map(([category, items]) => (
           <div key={category} style={{ marginBottom: '20px' }}>
             <h4 style={{ color: '#4a7c4a', marginBottom: '10px' }}>{category}</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '10px' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gap: '10px',
+              }}
+            >
               {items.map(item => (
                 <div
                   key={item.item_id}
@@ -1224,14 +1224,14 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
                     borderRadius: '8px',
                     background: '#fafafa',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
                   }}
                   onClick={() => addItemFromMaster(item)}
-                  onMouseEnter={(e) => {
+                  onMouseEnter={e => {
                     e.target.style.background = '#e8f5e8';
                     e.target.style.borderColor = '#4a7c4a';
                   }}
-                  onMouseLeave={(e) => {
+                  onMouseLeave={e => {
                     e.target.style.background = '#fafafa';
                     e.target.style.borderColor = '#e8f5e8';
                   }}
@@ -1246,17 +1246,24 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
           </div>
         ))}
       </div>
-      
+
       {/* 選択された項目一覧 */}
       <ItemsContainer>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '20px',
+          }}
+        >
           <h3 style={{ color: '#2d5a2d', margin: 0 }}>選択された工事項目</h3>
           <AddItemButton onClick={() => addItem()}>
             <FiPlus />
             カスタム項目追加
           </AddItemButton>
         </div>
-        
+
         {formData.items.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
             項目が追加されていません。上記の単価マスタから選択するか、カスタム項目を追加してください。
@@ -1273,38 +1280,38 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
               <div>販売単価</div>
               <div>操作</div>
             </ItemRow>
-            
+
             {formData.items.map(item => (
               <ItemRow key={item.id}>
                 <ItemInput
                   type="text"
                   value={item.item_name}
-                  onChange={(e) => updateItem(item.id, 'item_name', e.target.value)}
+                  onChange={e => updateItem(item.id, 'item_name', e.target.value)}
                   placeholder="項目名"
                 />
                 <ItemInput
                   type="number"
                   value={item.quantity}
-                  onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
+                  onChange={e => updateItem(item.id, 'quantity', e.target.value)}
                   min="0"
                   step="0.1"
                 />
                 <ItemInput
                   type="text"
                   value={item.unit}
-                  onChange={(e) => updateItem(item.id, 'unit', e.target.value)}
+                  onChange={e => updateItem(item.id, 'unit', e.target.value)}
                   placeholder="単位"
                 />
                 <ItemInput
                   type="number"
                   value={item.purchase_price}
-                  onChange={(e) => updateItem(item.id, 'purchase_price', e.target.value)}
+                  onChange={e => updateItem(item.id, 'purchase_price', e.target.value)}
                   min="0"
                 />
                 <ItemInput
                   type="number"
                   value={item.markup_rate}
-                  onChange={(e) => updateItem(item.id, 'markup_rate', e.target.value)}
+                  onChange={e => updateItem(item.id, 'markup_rate', e.target.value)}
                   min="1"
                   step="0.1"
                 />
@@ -1318,14 +1325,14 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             ))}
           </>
         )}
-        
+
         {errors.items && (
           <div style={{ color: '#e74c3c', fontSize: '14px', marginTop: '10px' }}>
             {errors.items}
           </div>
         )}
       </ItemsContainer>
-      
+
       {/* 小計表示 */}
       {formData.items.length > 0 && (
         <CalculationPanel>
@@ -1344,15 +1351,15 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
           <CalculationRow>
             <CalculationLabel>粗利益</CalculationLabel>
             <CalculationValue>
-              {formatCurrency(calculatedAmounts.gross_profit)} 
-              ({calculatedAmounts.gross_margin_rate.toFixed(1)}%)
+              {formatCurrency(calculatedAmounts.gross_profit)}(
+              {calculatedAmounts.gross_margin_rate.toFixed(1)}%)
             </CalculationValue>
           </CalculationRow>
         </CalculationPanel>
       )}
     </StepContent>
   );
-  
+
   // ステップ4: 金額調整
   const renderStep4 = () => (
     <StepContent>
@@ -1360,14 +1367,14 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
         <FiTrendingUp />
         最終金額調整・確認
       </SectionTitle>
-      
+
       <InfoCard>
         <FiInfo size={24} color="#4a7c4a" />
         <InfoText>
           工事項目の内容を確認し、必要に応じて調整額を適用してください。最終的な見積金額が確定されます。
         </InfoText>
       </InfoCard>
-      
+
       {/* 調整額入力 */}
       <FormGrid>
         <FormGroup>
@@ -1379,34 +1386,34 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             id="adjustment_amount"
             type="number"
             value={formData.adjustment_amount}
-            onChange={(e) => handleInputChange('adjustment_amount', parseInt(e.target.value, 10) || 0)}
+            onChange={e =>
+              handleInputChange('adjustment_amount', parseInt(e.target.value, 10) || 0)
+            }
             placeholder="正数で割増、負数で値引き"
           />
         </FormGroup>
-        
+
         <FormGroup>
-          <Label htmlFor="adjustment_reason">
-            調整理由
-          </Label>
+          <Label htmlFor="adjustment_reason">調整理由</Label>
           <Input
             id="adjustment_reason"
             type="text"
             value={formData.adjustment_reason}
-            onChange={(e) => handleInputChange('adjustment_reason', e.target.value)}
+            onChange={e => handleInputChange('adjustment_reason', e.target.value)}
             placeholder="調整の理由を入力"
           />
         </FormGroup>
       </FormGrid>
-      
+
       {/* 最終金額計算 */}
       <CalculationPanel>
         <h3 style={{ color: '#2d5a2d', marginBottom: '20px' }}>最終見積金額</h3>
-        
+
         <CalculationRow>
           <CalculationLabel>工事項目小計</CalculationLabel>
           <CalculationValue>{formatCurrency(calculatedAmounts.subtotal)}</CalculationValue>
         </CalculationRow>
-        
+
         <CalculationRow>
           <CalculationLabel>調整額</CalculationLabel>
           <CalculationValue>
@@ -1414,36 +1421,41 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
             {formatCurrency(formData.adjustment_amount)}
           </CalculationValue>
         </CalculationRow>
-        
+
         <CalculationRow>
           <CalculationLabel>見積合計金額</CalculationLabel>
           <CalculationValue>{formatCurrency(calculatedAmounts.total_amount)}</CalculationValue>
         </CalculationRow>
-        
-        <CalculationRow style={{ borderTop: '2px solid #4a7c4a', paddingTop: '15px', marginTop: '15px' }}>
+
+        <CalculationRow
+          style={{ borderTop: '2px solid #4a7c4a', paddingTop: '15px', marginTop: '15px' }}
+        >
           <CalculationLabel>仕入原価合計</CalculationLabel>
           <CalculationValue>{formatCurrency(calculatedAmounts.total_cost)}</CalculationValue>
         </CalculationRow>
-        
+
         <CalculationRow>
           <CalculationLabel>粗利益</CalculationLabel>
-          <CalculationValue>
-            {formatCurrency(calculatedAmounts.gross_profit)}
-          </CalculationValue>
+          <CalculationValue>{formatCurrency(calculatedAmounts.gross_profit)}</CalculationValue>
         </CalculationRow>
-        
+
         <CalculationRow>
           <CalculationLabel>粗利率</CalculationLabel>
-          <CalculationValue>
-            {calculatedAmounts.gross_margin_rate.toFixed(1)}%
-          </CalculationValue>
+          <CalculationValue>{calculatedAmounts.gross_margin_rate.toFixed(1)}%</CalculationValue>
         </CalculationRow>
       </CalculationPanel>
-      
+
       {/* 項目確認 */}
       <div style={{ marginTop: '30px' }}>
         <h3 style={{ color: '#2d5a2d', marginBottom: '15px' }}>工事項目一覧（確認）</h3>
-        <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #e8f5e8', borderRadius: '8px' }}>
+        <div
+          style={{
+            maxHeight: '300px',
+            overflowY: 'auto',
+            border: '1px solid #e8f5e8',
+            borderRadius: '8px',
+          }}
+        >
           {formData.items.map((item, index) => (
             <div
               key={item.id}
@@ -1452,7 +1464,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
                 borderBottom: index < formData.items.length - 1 ? '1px solid #e8f5e8' : 'none',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <div>
@@ -1470,7 +1482,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
       </div>
     </StepContent>
   );
-  
+
   // メインレンダー
   return (
     <WizardContainer>
@@ -1479,11 +1491,9 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
           <FiFileText size={32} />
           見積書作成ウィザード
         </WizardTitle>
-        <WizardSubtitle>
-          4ステップで簡単に見積書を作成できます
-        </WizardSubtitle>
+        <WizardSubtitle>4ステップで簡単に見積書を作成できます</WizardSubtitle>
       </WizardHeader>
-      
+
       <ProgressContainer>
         <StepsIndicator>
           <ProgressBar>
@@ -1497,23 +1507,20 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
               >
                 {currentStep > step.number ? <FiCheck /> : step.number}
               </StepNumber>
-              <StepLabel
-                completed={currentStep > step.number}
-                active={currentStep === step.number}
-              >
+              <StepLabel completed={currentStep > step.number} active={currentStep === step.number}>
                 {step.title}
               </StepLabel>
             </StepItem>
           ))}
         </StepsIndicator>
       </ProgressContainer>
-      
+
       <WizardContent>
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}
         {currentStep === 4 && renderStep4()}
-        
+
         <NavigationButtons>
           <div>
             {currentStep > 1 && (
@@ -1523,13 +1530,13 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
               </Button>
             )}
           </div>
-          
+
           <div style={{ display: 'flex', gap: '15px' }}>
             <Button variant="save" onClick={saveTemporary} disabled={isLoading}>
               <FiSave />
               一時保存
             </Button>
-            
+
             {currentStep < 4 ? (
               <Button variant="primary" onClick={nextStep} disabled={isLoading}>
                 次のステップ

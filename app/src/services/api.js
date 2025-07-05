@@ -11,14 +11,14 @@ const apiClient = axios.create({
 
 // 認証トークンの設定
 apiClient.interceptors.request.use(
-  (config) => {
+  config => {
     const token = localStorage.getItem('garden_auth_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   }
 );
@@ -31,7 +31,7 @@ export const estimateApi = {
   },
 
   // 見積の作成
-  createEstimate: async (estimateData) => {
+  createEstimate: async estimateData => {
     const response = await apiClient.post('/api/estimates', estimateData);
     return response.data;
   },
@@ -43,7 +43,7 @@ export const estimateApi = {
   },
 
   // 見積の削除
-  deleteEstimate: async (id) => {
+  deleteEstimate: async id => {
     const response = await apiClient.delete(`/api/estimates/${id}`);
     return response.data;
   },

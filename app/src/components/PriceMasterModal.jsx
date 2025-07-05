@@ -27,9 +27,7 @@ const PriceMasterModal = ({ isOpen, onClose, children }) => {
 
   return (
     <Modal onClick={onClose}>
-      <ModalContent onClick={e => e.stopPropagation()}>
-        {children}
-      </ModalContent>
+      <ModalContent onClick={e => e.stopPropagation()}>{children}</ModalContent>
     </Modal>
   );
 };

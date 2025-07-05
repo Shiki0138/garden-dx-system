@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useTable, useSortBy, useFilters, usePagination } from '@tanstack/react-table';
-import { useAuth, useInvoicePermissions, ManagerOnlyComponent, ProtectedComponent, PERMISSIONS } from '../../hooks/useAuth';
+import {
+  useAuth,
+  useInvoicePermissions,
+  ManagerOnlyComponent,
+  ProtectedComponent,
+  PERMISSIONS,
+} from '../../hooks/useAuth';
 
 const Container = styled.div`
   padding: 20px;
@@ -17,7 +23,7 @@ const Header = styled.div`
   padding: 20px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const Title = styled.h1`
@@ -50,7 +56,7 @@ const FilterContainer = styled.div`
   padding: 15px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const FilterSelect = styled.select`
@@ -72,7 +78,7 @@ const SearchInput = styled.input`
 const TableContainer = styled.div`
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 `;
 
@@ -98,7 +104,7 @@ const TableHeader = styled.th`
 
 const TableRow = styled.tr`
   border-bottom: 1px solid #eee;
-  
+
   &:hover {
     background: #f8f9fa;
   }
@@ -115,9 +121,9 @@ const StatusBadge = styled.span`
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
-  
+
   ${props => {
-    switch(props.status) {
+    switch (props.status) {
       case '未送付':
         return 'background: #f39c12; color: white;';
       case '送付済':
@@ -163,7 +169,7 @@ const InvoiceList = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // 権限チェック
   const { user, isManager } = useAuth();
   const invoicePermissions = useInvoicePermissions();
@@ -184,7 +190,7 @@ const InvoiceList = () => {
             due_date: '2024-07-15',
             total_amount: 1250000,
             status: '送付済',
-            payment_status: '未払い'
+            payment_status: '未払い',
           },
           {
             id: 2,
@@ -195,8 +201,8 @@ const InvoiceList = () => {
             due_date: '2024-07-20',
             total_amount: 850000,
             status: '未送付',
-            payment_status: '未払い'
-          }
+            payment_status: '未払い',
+          },
         ];
         setInvoices(mockData);
       } catch (error) {
@@ -209,15 +215,15 @@ const InvoiceList = () => {
     fetchInvoices();
   }, []);
 
-  const formatCurrency = (amount) => {
+  const formatCurrency = amount => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount);
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     return new Date(dateString).toLocaleDateString('ja-JP');
   };
 
@@ -231,23 +237,23 @@ const InvoiceList = () => {
     console.log('新規請求書作成');
   };
 
-  const handleViewInvoice = (invoiceId) => {
+  const handleViewInvoice = invoiceId => {
     // TODO: 請求書詳細画面への遷移
     console.log('請求書詳細表示:', invoiceId);
   };
 
-  const handleDownloadPDF = (invoiceId) => {
+  const handleDownloadPDF = invoiceId => {
     // TODO: PDF ダウンロード機能
     console.log('PDF ダウンロード:', invoiceId);
   };
 
-  const handleSendInvoice = (invoiceId) => {
+  const handleSendInvoice = invoiceId => {
     // 権限チェック：経営者のみ請求書送付可能
     if (!invoicePermissions.canSend) {
       alert('請求書の送付権限がありません。');
       return;
     }
-    
+
     if (window.confirm('この請求書を送付済みに変更しますか？')) {
       // TODO: 請求書送付API呼び出し
       console.log('請求書送付:', invoiceId);
@@ -257,9 +263,10 @@ const InvoiceList = () => {
 
   const filteredInvoices = invoices.filter(invoice => {
     const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
-    const matchesSearch = invoice.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      invoice.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
@@ -282,29 +289,24 @@ const InvoiceList = () => {
             </div>
           }
         >
-          <CreateButton onClick={handleCreateInvoice}>
-            新規請求書作成
-          </CreateButton>
+          <CreateButton onClick={handleCreateInvoice}>新規請求書作成</CreateButton>
         </ManagerOnlyComponent>
       </Header>
 
       <FilterContainer>
-        <FilterSelect 
-          value={statusFilter} 
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
+        <FilterSelect value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
           <option value="all">すべて</option>
           <option value="未送付">未送付</option>
           <option value="送付済">送付済</option>
           <option value="支払済">支払済</option>
           <option value="滞納">滞納</option>
         </FilterSelect>
-        
+
         <SearchInput
           type="text"
           placeholder="顧客名・案件名・請求書番号で検索"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
         />
       </FilterContainer>
 
@@ -324,7 +326,7 @@ const InvoiceList = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredInvoices.map((invoice) => (
+            {filteredInvoices.map(invoice => (
               <TableRow key={invoice.id}>
                 <TableCell>{invoice.invoice_number}</TableCell>
                 <TableCell>{invoice.customer_name}</TableCell>
@@ -333,9 +335,7 @@ const InvoiceList = () => {
                 <TableCell>{formatDate(invoice.due_date)}</TableCell>
                 <TableCell>{formatCurrency(invoice.total_amount)}</TableCell>
                 <TableCell>
-                  <StatusBadge status={invoice.status}>
-                    {invoice.status}
-                  </StatusBadge>
+                  <StatusBadge status={invoice.status}>{invoice.status}</StatusBadge>
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={invoice.payment_status}>
@@ -343,14 +343,10 @@ const InvoiceList = () => {
                   </StatusBadge>
                 </TableCell>
                 <TableCell>
-                  <ActionButton onClick={() => handleViewInvoice(invoice.id)}>
-                    詳細
-                  </ActionButton>
-                  <ActionButton onClick={() => handleDownloadPDF(invoice.id)}>
-                    PDF
-                  </ActionButton>
+                  <ActionButton onClick={() => handleViewInvoice(invoice.id)}>詳細</ActionButton>
+                  <ActionButton onClick={() => handleDownloadPDF(invoice.id)}>PDF</ActionButton>
                   <ManagerOnlyComponent>
-                    <ActionButton 
+                    <ActionButton
                       onClick={() => handleSendInvoice(invoice.id)}
                       style={{ background: '#27ae60' }}
                     >

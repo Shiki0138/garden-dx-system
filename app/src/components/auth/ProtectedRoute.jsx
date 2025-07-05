@@ -7,6 +7,7 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
+import { useDemoMode } from '../../contexts/DemoModeContext';
 import { Loader, Shield, AlertCircle } from 'lucide-react';
 
 // スタイリング
@@ -17,14 +18,18 @@ const LoadingContainer = styled.div`
   align-items: center;
   justify-content: center;
   gap: 20px;
-  
+
   .spinner {
     animation: spin 1s linear infinite;
   }
-  
+
   @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;
 
@@ -37,16 +42,16 @@ const UnauthorizedContainer = styled.div`
   gap: 20px;
   padding: 40px;
   text-align: center;
-  
+
   .icon {
     color: #dc2626;
   }
-  
+
   h2 {
     color: #1f2937;
     margin: 0;
   }
-  
+
   p {
     color: #6b7280;
     margin: 0;
@@ -63,7 +68,7 @@ const BackButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: #2d5a3d;
     transform: translateY(-2px);
@@ -72,13 +77,29 @@ const BackButton = styled.button`
 
 const ProtectedRoute = ({ children, requireRole = null, requirePermission = null }) => {
   const location = useLocation();
-  const {
-    loading,
-    isAuthenticated,
-    hasRole,
-    user,
-    isConnected
-  } = useSupabaseAuth();
+  const { loading, isAuthenticated, hasRole, user, isConnected } = useSupabaseAuth();
+  const { isDemoMode, demoUser } = useDemoMode();
+
+  // デモモードの場合はローディングをスキップして即座に表示
+  if (isDemoMode) {
+    // デモモードでは権限チェックのみ実施
+    if (requireRole && demoUser && demoUser.role !== requireRole && requireRole !== 'employee') {
+      return (
+        <UnauthorizedContainer>
+          <Shield size={60} className="icon" />
+          <h2>アクセス権限がありません（デモモード）</h2>
+          <p>
+            このページにアクセスするには「{requireRole}」権限が必要です。
+            <br />
+            現在のデモユーザー権限: {demoUser?.role || 'employee'}
+          </p>
+          <BackButton onClick={() => window.history.back()}>前のページに戻る</BackButton>
+        </UnauthorizedContainer>
+      );
+    }
+    // デモモードでは認証チェックをスキップ
+    return children;
+  }
 
   // ローディング中
   if (loading) {
@@ -92,12 +113,7 @@ const ProtectedRoute = ({ children, requireRole = null, requirePermission = null
 
   // 未認証の場合
   if (!isAuthenticated()) {
-    // 開発モード（Supabase未接続）の場合は通す
-    if (!isConnected) {
-      console.log('開発モード: 認証をスキップ');
-      return children;
-    }
-    
+    // 本番環境では必ず認証を要求
     // ログインページにリダイレクト
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
@@ -113,9 +129,7 @@ const ProtectedRoute = ({ children, requireRole = null, requirePermission = null
           <br />
           現在のユーザー権限: {user?.user_metadata?.role || 'employee'}
         </p>
-        <BackButton onClick={() => window.history.back()}>
-          前のページに戻る
-        </BackButton>
+        <BackButton onClick={() => window.history.back()}>前のページに戻る</BackButton>
       </UnauthorizedContainer>
     );
   }
@@ -124,7 +138,7 @@ const ProtectedRoute = ({ children, requireRole = null, requirePermission = null
   if (requirePermission) {
     // TODO: 詳細な権限チェックロジックを実装
     const hasPermission = true; // プレースホルダー
-    
+
     if (!hasPermission) {
       return (
         <UnauthorizedContainer>
@@ -135,9 +149,7 @@ const ProtectedRoute = ({ children, requireRole = null, requirePermission = null
             <br />
             管理者にお問い合わせください。
           </p>
-          <BackButton onClick={() => window.history.back()}>
-            前のページに戻る
-          </BackButton>
+          <BackButton onClick={() => window.history.back()}>前のページに戻る</BackButton>
         </UnauthorizedContainer>
       );
     }

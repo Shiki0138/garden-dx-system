@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { downloadLandscapingInvoicePDF } from '../../utils/landscapingInvoicePDFGenerator';
-import { useAuth, useInvoicePermissions, ManagerOnlyComponent, ProtectedComponent, PERMISSIONS } from '../../hooks/useAuth';
+import {
+  useAuth,
+  useInvoicePermissions,
+  ManagerOnlyComponent,
+  ProtectedComponent,
+  PERMISSIONS,
+} from '../../hooks/useAuth';
 import { log } from '../../utils/logger';
 import { showError, showSuccess, showWarning, showConfirmDialog } from '../../utils/notifications';
 
@@ -39,12 +45,12 @@ const Container = styled.div`
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
   animation: ${fadeInUp} 0.6s ease-out;
-  
+
   /* レスポンシブ対応 */
   @media (max-width: 768px) {
     padding: 10px;
   }
-  
+
   /* アクセシビリティ: 動きを制限したユーザー向け */
   @media (prefers-reduced-motion: reduce) {
     animation: none;
@@ -59,20 +65,24 @@ const Header = styled.div`
   padding: 20px;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
-  border: 1px solid rgba(255,255,255,0.8);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   animation: ${slideIn} 0.5s ease-out;
-  
+
   /* レスポンシブ対応 */
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 15px;
     padding: 15px;
   }
-  
+
   /* ホバー効果 */
   &:hover {
-    box-shadow: 0 8px 15px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
+    box-shadow:
+      0 8px 15px rgba(0, 0, 0, 0.12),
+      0 2px 4px rgba(0, 0, 0, 0.08);
     transition: box-shadow 0.3s ease;
   }
 `;
@@ -109,26 +119,26 @@ const SaveButton = styled.button`
   font-size: 14px;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(39, 174, 96, 0.3);
-  
+
   /* フォーカス状態（アクセシビリティ）*/
   &:focus {
     outline: 3px solid #a7f3d0;
     outline-offset: 2px;
   }
-  
+
   /* ホバー状態 */
   &:hover {
     background: linear-gradient(135deg, #219a52 0%, #27ae60 100%);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(39, 174, 96, 0.4);
   }
-  
+
   /* アクティブ状態 */
   &:active {
     transform: translateY(0);
     animation: ${pulse} 0.2s ease;
   }
-  
+
   /* 無効状態 */
   &:disabled {
     background: #bdc3c7;
@@ -136,7 +146,7 @@ const SaveButton = styled.button`
     transform: none;
     box-shadow: none;
   }
-  
+
   /* レスポンシブ対応 */
   @media (max-width: 768px) {
     width: 100%;
@@ -148,25 +158,29 @@ const SaveButton = styled.button`
 const FormSection = styled.div`
   background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06);
-  border: 1px solid rgba(255,255,255,0.8);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.07),
+    0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   margin-bottom: 20px;
   padding: 24px;
   animation: ${fadeInUp} 0.6s ease-out;
   transition: all 0.3s ease;
-  
+
   /* ホバー効果 */
   &:hover {
-    box-shadow: 0 8px 15px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+    box-shadow:
+      0 8px 15px rgba(0, 0, 0, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.06);
     transform: translateY(-1px);
   }
-  
+
   /* レスポンシブ対応 */
   @media (max-width: 768px) {
     padding: 16px;
     margin-bottom: 16px;
   }
-  
+
   /* 動きを制限したユーザー向け */
   @media (prefers-reduced-motion: reduce) {
     animation: none;
@@ -210,7 +224,7 @@ const Input = styled.input`
   font-size: 14px;
   background: #ffffff;
   transition: all 0.3s ease;
-  
+
   /* フォーカス状態（アクセシビリティ強化）*/
   &:focus {
     outline: none;
@@ -219,36 +233,36 @@ const Input = styled.input`
     background: #fafbfc;
     transform: scale(1.02);
   }
-  
+
   /* ホバー状態 */
   &:hover {
     border-color: #bdc3c7;
   }
-  
+
   /* エラー状態 */
   &.error {
     border-color: #e74c3c;
     box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
   }
-  
+
   /* 無効状態 */
   &:disabled {
     background: #f8f9fa;
     color: #6c757d;
     cursor: not-allowed;
   }
-  
+
   /* 必須フィールド */
   &[required] {
     border-left: 4px solid #f39c12;
   }
-  
+
   /* レスポンシブ対応 */
   @media (max-width: 768px) {
     padding: 14px 16px;
     font-size: 16px; /* iOS Safari のズーム防止 */
   }
-  
+
   /* ダークモード対応 */
   @media (prefers-color-scheme: dark) {
     background: #2c3e50;
@@ -336,7 +350,7 @@ const TotalSection = styled.div`
   border: 2px solid rgba(52, 152, 219, 0.1);
   animation: ${fadeInUp} 0.8s ease-out;
   position: relative;
-  
+
   /* 装飾的なボーダー */
   &::before {
     content: '';
@@ -348,7 +362,7 @@ const TotalSection = styled.div`
     background: linear-gradient(90deg, #3498db, #2ecc71, #f39c12);
     border-radius: 12px 12px 0 0;
   }
-  
+
   /* レスポンシブ対応 */
   @media (max-width: 768px) {
     padding: 20px;
@@ -374,15 +388,15 @@ const TotalValue = styled.span`
   font-size: 18px;
   font-family: 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: -0.5px;
-  
+
   /* アニメーション */
   animation: ${slideIn} 0.5s ease-out;
-  
+
   /* 大きな金額の場合 */
   &.large-amount {
     font-size: 24px;
     color: #27ae60;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -390,24 +404,27 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   // 権限チェック（最適化）
   const { user, isManager } = useAuth();
   const invoicePermissions = useInvoicePermissions();
-  
+
   // パフォーマンス状態管理
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [isDirty, setIsDirty] = useState(false);
-  
+
   // メモ化されたフォーム初期値
-  const initialFormData = useMemo(() => ({
-    invoice_number: '',
-    customer_id: '',
-    project_id: '',
-    estimate_id: estimateId || '',
-    invoice_date: new Date().toISOString().split('T')[0],
-    due_date: '',
-    notes: '',
-    status: '未送付'
-  }), [estimateId]);
-  
+  const initialFormData = useMemo(
+    () => ({
+      invoice_number: '',
+      customer_id: '',
+      project_id: '',
+      estimate_id: estimateId || '',
+      invoice_date: new Date().toISOString().split('T')[0],
+      due_date: '',
+      notes: '',
+      status: '未送付',
+    }),
+    [estimateId]
+  );
+
   const [formData, setFormData] = useState(initialFormData);
 
   const [customers, setCustomers] = useState([]);
@@ -417,20 +434,20 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   const [totals, setTotals] = useState({
     subtotal: 0,
     tax_amount: 0,
-    total_amount: 0
+    total_amount: 0,
   });
-  
+
   // メモ化された計算値
   const calculatedTotals = useMemo(() => {
     const subtotal = items.reduce((sum, item) => sum + (item.amount || 0), 0);
     const tax_rate = 0.1; // 10%
     const tax_amount = Math.floor(subtotal * tax_rate);
     const total_amount = subtotal + tax_amount;
-    
+
     return {
       subtotal,
       tax_amount,
-      total_amount
+      total_amount,
     };
   }, [items]);
 
@@ -449,17 +466,17 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
       // 仮データ
       setCustomers([
         { id: 1, name: '田中造園株式会社', contact_person: '田中太郎' },
-        { id: 2, name: '山田工務店', contact_person: '山田花子' }
+        { id: 2, name: '山田工務店', contact_person: '山田花子' },
       ]);
 
       setProjects([
         { id: 1, name: '新宿オフィスビル庭園工事', customer_id: 1 },
-        { id: 2, name: '住宅庭園設計・施工', customer_id: 2 }
+        { id: 2, name: '住宅庭園設計・施工', customer_id: 2 },
       ]);
 
       setEstimates([
         { id: 1, project_id: 1, estimate_number: 'EST-2024-001', total_amount: 1250000 },
-        { id: 2, project_id: 2, estimate_number: 'EST-2024-002', total_amount: 850000 }
+        { id: 2, project_id: 2, estimate_number: 'EST-2024-002', total_amount: 850000 },
       ]);
 
       // 見積IDが指定されている場合は自動生成
@@ -483,25 +500,25 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const number = `INV-${year}${month}${day}-001`; // TODO: 連番管理
-    
+
     setFormData(prev => ({
       ...prev,
-      invoice_number: number
+      invoice_number: number,
     }));
   };
 
-  const generateFromEstimate = async (estimateId) => {
+  const generateFromEstimate = async estimateId => {
     try {
       // TODO: 実際のAPI呼び出し
       const estimate = estimates.find(e => e.id === parseInt(estimateId, 10));
       if (estimate) {
         const project = projects.find(p => p.id === estimate.project_id);
-        
+
         setFormData(prev => ({
           ...prev,
           estimate_id: estimateId,
           project_id: estimate.project_id,
-          customer_id: project?.customer_id || ''
+          customer_id: project?.customer_id || '',
         }));
 
         // 見積明細から請求書明細を生成
@@ -512,7 +529,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
             quantity: 10,
             unit: '本',
             unit_price: 45000,
-            amount: 450000
+            amount: 450000,
           },
           {
             category: '外構工事',
@@ -520,8 +537,8 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
             quantity: 15,
             unit: 'm2',
             unit_price: 35000,
-            amount: 525000
-          }
+            amount: 525000,
+          },
         ];
         setItems(mockItems);
       }
@@ -534,46 +551,49 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   // フォーム検証関数
   const validateForm = useCallback(() => {
     const errors = {};
-    
+
     if (!formData.invoice_number.trim()) {
       errors.invoice_number = '請求書番号は必須です';
     }
-    
+
     if (!formData.customer_id) {
       errors.customer_id = '顧客の選択は必須です';
     }
-    
+
     if (!formData.invoice_date) {
       errors.invoice_date = '請求日は必須です';
     }
-    
+
     if (!formData.due_date) {
       errors.due_date = '支払期限は必須です';
     }
-    
+
     if (items.length === 0) {
       errors.items = '請求明細を少なくとも1件入力してください';
     }
-    
+
     return errors;
   }, [formData, items]);
-  
+
   // アクセシビリティ: キーボードナビゲーション
-  const handleKeyDown = useCallback((e) => {
-    if (e.ctrlKey || e.metaKey) {
-      switch (e.key) {
-        case 's':
-          e.preventDefault();
-          handleSave();
-          break;
-        case 'p':
-          e.preventDefault();
-          handlePreviewPDF();
-          break;
+  const handleKeyDown = useCallback(
+    e => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 's':
+            e.preventDefault();
+            handleSave();
+            break;
+          case 'p':
+            e.preventDefault();
+            handlePreviewPDF();
+            break;
+        }
       }
-    }
-  }, [handleSave, handlePreviewPDF]);
-  
+    },
+    [handleSave, handlePreviewPDF]
+  );
+
   // キーボードイベントの設定
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -583,29 +603,32 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   }, [handleKeyDown]);
 
   // メモ化されたイベントハンドラー
-  const handleInputChange = useCallback((e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    setIsDirty(true);
-    
-    // エラークリア
-    if (errors[name]) {
-      setErrors(prev => ({
+  const handleInputChange = useCallback(
+    e => {
+      const { name, value } = e.target;
+      setFormData(prev => ({
         ...prev,
-        [name]: null
+        [name]: value,
       }));
-    }
-  }, [errors]);
+      setIsDirty(true);
+
+      // エラークリア
+      if (errors[name]) {
+        setErrors(prev => ({
+          ...prev,
+          [name]: null,
+        }));
+      }
+    },
+    [errors]
+  );
 
   const handleItemChange = useCallback((index, field, value) => {
     setItems(prevItems => {
       const newItems = [...prevItems];
       newItems[index] = {
         ...newItems[index],
-        [field]: value
+        [field]: value,
       };
 
       // 金額の自動計算（最適化）
@@ -621,18 +644,21 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   }, []);
 
   const addItem = useCallback(() => {
-    setItems(prevItems => [...prevItems, {
-      category: '',
-      item_name: '',
-      quantity: 0,
-      unit: '',
-      unit_price: 0,
-      amount: 0
-    }]);
+    setItems(prevItems => [
+      ...prevItems,
+      {
+        category: '',
+        item_name: '',
+        quantity: 0,
+        unit: '',
+        unit_price: 0,
+        amount: 0,
+      },
+    ]);
     setIsDirty(true);
   }, []);
 
-  const removeItem = useCallback((index) => {
+  const removeItem = useCallback(index => {
     setItems(prevItems => prevItems.filter((_, i) => i !== index));
     setIsDirty(true);
   }, []);
@@ -643,10 +669,10 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
       showError('請求書の保存権限がありません。経営者にお問い合わせください。');
       return;
     }
-    
+
     setIsLoading(true);
     setErrors({});
-    
+
     try {
       // フォーム検証
       const validationErrors = validateForm();
@@ -654,7 +680,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
         setErrors(validationErrors);
         return;
       }
-      
+
       const invoiceData = {
         ...formData,
         items,
@@ -662,16 +688,15 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
         tax_amount: totals.tax_amount,
         total_amount: totals.total_amount,
         created_by: user?.id,
-        updated_by: user?.id
+        updated_by: user?.id,
       };
 
       // TODO: API呼び出し
       log.info('請求書保存:', invoiceData);
-      
+
       // 成功時の処理
       showSuccess('請求書を保存しました');
       setIsDirty(false);
-      
     } catch (error) {
       log.error('請求書の保存に失敗:', error);
       showError('保存に失敗しました。再度お試しください。');
@@ -683,7 +708,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
 
   const handlePreviewPDF = useCallback(async () => {
     setIsLoading(true);
-    
+
     try {
       const invoiceData = {
         ...formData,
@@ -692,7 +717,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
         tax_amount: totals.tax_amount,
         total_amount: totals.total_amount,
         customer_name: customers.find(c => c.id === parseInt(formData.customer_id, 10))?.name || '',
-        project_name: projects.find(p => p.id === parseInt(formData.project_id, 10))?.name || ''
+        project_name: projects.find(p => p.id === parseInt(formData.project_id, 10))?.name || '',
       };
 
       // 会社情報（実際の設定から取得）
@@ -704,7 +729,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
         bank_name: '○○銀行 ○○支店',
         account_type: '普通預金',
         account_number: '1234567',
-        account_holder: '造園業株式会社'
+        account_holder: '造園業株式会社',
       };
 
       // 見積書データ（連携情報）
@@ -713,9 +738,8 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
       // 造園業界標準PDFを生成・ダウンロード（最適化版）
       await downloadLandscapingInvoicePDF(invoiceData, companyInfo, null, {
         notifyDownload: true,
-        notifySuccess: true
+        notifySuccess: true,
       });
-      
     } catch (error) {
       log.error('PDF生成に失敗:', error);
       showError('PDF生成に失敗しました。再度お試しください。');
@@ -725,24 +749,24 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   }, [formData, items, totals, customers, projects, estimates]);
 
   // メモ化された通貨フォーマット関数
-  const formatCurrency = useCallback((amount) => {
+  const formatCurrency = useCallback(amount => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount);
   }, []);
-  
+
   // ページ離脱警告（未保存の変更がある場合）
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
+    const handleBeforeUnload = e => {
       if (isDirty) {
         e.preventDefault();
         e.returnValue = '未保存の変更があります。ページを離れますか？';
         log.warn('ページ離脱警告: 未保存の変更があります');
       }
     };
-    
+
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -753,24 +777,20 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
     <Container>
       <Header>
         <div>
-          <BackButton onClick={() => window.history.back()}>
-            戻る
-          </BackButton>
-          <Title>
-            {invoiceId ? '請求書編集' : '請求書作成'}
-          </Title>
+          <BackButton onClick={() => window.history.back()}>戻る</BackButton>
+          <Title>{invoiceId ? '請求書編集' : '請求書作成'}</Title>
         </div>
         <ManagerOnlyComponent
           fallback={
-            <div 
-              style={{ 
-                color: '#e74c3c', 
-                fontSize: '14px', 
+            <div
+              style={{
+                color: '#e74c3c',
+                fontSize: '14px',
                 fontWeight: 'bold',
                 padding: '8px 12px',
                 backgroundColor: '#fdf2f2',
                 border: '1px solid #fecaca',
-                borderRadius: '6px'
+                borderRadius: '6px',
               }}
               role="alert"
               aria-live="polite"
@@ -779,7 +799,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
             </div>
           }
         >
-          <SaveButton 
+          <SaveButton
             onClick={handleSave}
             disabled={isLoading}
             aria-label="請求書を保存 (Ctrl+S)"
@@ -788,13 +808,13 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
             {isLoading ? '保存中...' : '保存'}
           </SaveButton>
         </ManagerOnlyComponent>
-        <SaveButton 
-          onClick={handlePreviewPDF} 
+        <SaveButton
+          onClick={handlePreviewPDF}
           disabled={isLoading}
-          style={{ 
-            background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)', 
+          style={{
+            background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
             marginLeft: '10px',
-            boxShadow: '0 2px 4px rgba(52, 152, 219, 0.3)'
+            boxShadow: '0 2px 4px rgba(52, 152, 219, 0.3)',
           }}
           aria-label="PDFを出力 (Ctrl+P)"
           title="PDFを出力 (Ctrl+P)"
@@ -820,12 +840,16 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
               className={errors.invoice_number ? 'error' : ''}
             />
             {errors.invoice_number && (
-              <div id="invoice_number_error" role="alert" style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}>
+              <div
+                id="invoice_number_error"
+                role="alert"
+                style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}
+              >
                 {errors.invoice_number}
               </div>
             )}
           </FormGroup>
-          
+
           <FormGroup>
             <Label htmlFor="customer_id">顧客 *</Label>
             <Select
@@ -845,7 +869,11 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
               ))}
             </Select>
             {errors.customer_id && (
-              <div id="customer_id_error" role="alert" style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}>
+              <div
+                id="customer_id_error"
+                role="alert"
+                style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}
+              >
                 {errors.customer_id}
               </div>
             )}
@@ -853,33 +881,29 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
 
           <FormGroup>
             <Label>プロジェクト</Label>
-            <Select
-              name="project_id"
-              value={formData.project_id}
-              onChange={handleInputChange}
-            >
+            <Select name="project_id" value={formData.project_id} onChange={handleInputChange}>
               <option value="">プロジェクトを選択</option>
-              {projects.filter(p => p.customer_id === parseInt(formData.customer_id, 10)).map(project => (
-                <option key={project.id} value={project.id}>
-                  {project.name}
-                </option>
-              ))}
+              {projects
+                .filter(p => p.customer_id === parseInt(formData.customer_id, 10))
+                .map(project => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
             </Select>
           </FormGroup>
 
           <FormGroup>
             <Label>見積書</Label>
-            <Select
-              name="estimate_id"
-              value={formData.estimate_id}
-              onChange={handleInputChange}
-            >
+            <Select name="estimate_id" value={formData.estimate_id} onChange={handleInputChange}>
               <option value="">見積書を選択</option>
-              {estimates.filter(e => e.project_id === parseInt(formData.project_id, 10)).map(estimate => (
-                <option key={estimate.id} value={estimate.id}>
-                  {estimate.estimate_number}
-                </option>
-              ))}
+              {estimates
+                .filter(e => e.project_id === parseInt(formData.project_id, 10))
+                .map(estimate => (
+                  <option key={estimate.id} value={estimate.id}>
+                    {estimate.estimate_number}
+                  </option>
+                ))}
             </Select>
           </FormGroup>
 
@@ -896,7 +920,11 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
               className={errors.invoice_date ? 'error' : ''}
             />
             {errors.invoice_date && (
-              <div id="invoice_date_error" role="alert" style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}>
+              <div
+                id="invoice_date_error"
+                role="alert"
+                style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}
+              >
                 {errors.invoice_date}
               </div>
             )}
@@ -915,7 +943,11 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
               className={errors.due_date ? 'error' : ''}
             />
             {errors.due_date && (
-              <div id="due_date_error" role="alert" style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}>
+              <div
+                id="due_date_error"
+                role="alert"
+                style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}
+              >
                 {errors.due_date}
               </div>
             )}
@@ -960,35 +992,35 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
                   <ItemInput
                     type="text"
                     value={item.category}
-                    onChange={(e) => handleItemChange(index, 'category', e.target.value)}
+                    onChange={e => handleItemChange(index, 'category', e.target.value)}
                   />
                 </TableCell>
                 <TableCell>
                   <ItemInput
                     type="text"
                     value={item.item_name}
-                    onChange={(e) => handleItemChange(index, 'item_name', e.target.value)}
+                    onChange={e => handleItemChange(index, 'item_name', e.target.value)}
                   />
                 </TableCell>
                 <TableCell>
                   <ItemInput
                     type="number"
                     value={item.quantity}
-                    onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                    onChange={e => handleItemChange(index, 'quantity', e.target.value)}
                   />
                 </TableCell>
                 <TableCell>
                   <ItemInput
                     type="text"
                     value={item.unit}
-                    onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
+                    onChange={e => handleItemChange(index, 'unit', e.target.value)}
                   />
                 </TableCell>
                 <TableCell>
                   <ItemInput
                     type="number"
                     value={item.unit_price}
-                    onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)}
+                    onChange={e => handleItemChange(index, 'unit_price', e.target.value)}
                   />
                 </TableCell>
                 <TableCell>{formatCurrency(item.amount)}</TableCell>
@@ -999,10 +1031,8 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
             ))}
           </tbody>
         </ItemsTable>
-        
-        <AddItemButton onClick={addItem}>
-          明細追加
-        </AddItemButton>
+
+        <AddItemButton onClick={addItem}>明細追加</AddItemButton>
 
         <TotalSection>
           <TotalRow>
@@ -1019,7 +1049,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
           </TotalRow>
           <TotalRow style={{ borderTop: '2px solid #34495e', paddingTop: '10px' }}>
             <TotalLabel>請求合計:</TotalLabel>
-            <TotalValue 
+            <TotalValue
               className={totals.total_amount > 1000000 ? 'large-amount' : ''}
               style={{ fontSize: '24px', color: '#e74c3c' }}
               aria-label={`請求合計 ${formatCurrency(totals.total_amount)}`}

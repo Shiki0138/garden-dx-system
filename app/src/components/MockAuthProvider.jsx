@@ -28,7 +28,7 @@ export const MockAuthProvider = ({ children }) => {
     company_id: 1,
     role: 'owner',
     full_name: 'テストユーザー',
-    is_active: true
+    is_active: true,
   };
 
   // テスト用の認証状態
@@ -36,12 +36,12 @@ export const MockAuthProvider = ({ children }) => {
     user: mockUser,
     isAuthenticated: true,
     isLoading: false,
-    error: null
+    error: null,
   };
 
   // テスト用の認証メソッド
   const mockAuthMethods = {
-    login: async (credentials) => {
+    login: async credentials => {
       console.log('Mock login:', credentials);
       return { success: true, user: mockUser };
     },
@@ -49,7 +49,7 @@ export const MockAuthProvider = ({ children }) => {
       console.log('Mock logout');
       return { success: true };
     },
-    register: async (userData) => {
+    register: async userData => {
       console.log('Mock register:', userData);
       return { success: true, user: mockUser };
     },
@@ -57,23 +57,19 @@ export const MockAuthProvider = ({ children }) => {
       console.log('Mock refresh token');
       return { success: true };
     },
-    updateUser: async (updates) => {
+    updateUser: async updates => {
       console.log('Mock update user:', updates);
       return { success: true, user: { ...mockUser, ...updates } };
-    }
+    },
   };
 
   // 完全なAuthコンテキスト値
   const authContextValue = {
     ...mockAuthState,
-    ...mockAuthMethods
+    ...mockAuthMethods,
   };
 
-  return (
-    <MockAuthContext.Provider value={authContextValue}>
-      {children}
-    </MockAuthContext.Provider>
-  );
+  return <MockAuthContext.Provider value={authContextValue}>{children}</MockAuthContext.Provider>;
 };
 
 export default MockAuthProvider;

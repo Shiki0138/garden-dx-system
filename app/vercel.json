@@ -8,7 +8,7 @@
     "REACT_APP_SUPABASE_URL": "https://ppplfluvazaufassdkra.supabase.co",
     "REACT_APP_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwcGxmbHV2YXphdWZhc3Nka3JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTk5NjczOTYsImV4cCI6MjAzNTU0MzM5Nn0.IWHrTSjfE-fKKgJOVXHECtWo8DGOLGe0Nx0z-vbpyWQ",
     "REACT_APP_API_BASE_URL": "https://ppplfluvazaufassdkra.supabase.co",
-    "REACT_APP_DEMO_MODE": "true",
+    "REACT_APP_DEMO_MODE": "false",
     "REACT_APP_ENVIRONMENT": "production",
     "CI": "false",
     "GENERATE_SOURCEMAP": "false"

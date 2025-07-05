@@ -23,7 +23,7 @@ const TestHeader = styled.div`
   background: white;
   padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 `;
 
@@ -43,7 +43,7 @@ const TestSection = styled.div`
   background: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 `;
 
@@ -94,7 +94,7 @@ const TestResult = styled.div`
 `;
 
 const ActionButton = styled.button`
-  background: ${props => props.variant === 'primary' ? '#007bff' : '#6c757d'};
+  background: ${props => (props.variant === 'primary' ? '#007bff' : '#6c757d')};
   color: white;
   border: none;
   padding: 8px 16px;
@@ -105,11 +105,11 @@ const ActionButton = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  
+
   &:hover {
     opacity: 0.9;
   }
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -139,7 +139,7 @@ const IntegrationTestPanel = () => {
   const runIndividualTest = async (testName, testFunction) => {
     setTestResults(prev => ({
       ...prev,
-      [testName]: { status: 'running', message: 'テスト実行中...' }
+      [testName]: { status: 'running', message: 'テスト実行中...' },
     }));
 
     try {
@@ -150,8 +150,8 @@ const IntegrationTestPanel = () => {
           status: result.success ? 'success' : 'error',
           message: result.message || 'テスト完了',
           data: result.data || result.error,
-          details: result
-        }
+          details: result,
+        },
       }));
     } catch (error) {
       setTestResults(prev => ({
@@ -159,8 +159,8 @@ const IntegrationTestPanel = () => {
         [testName]: {
           status: 'error',
           message: error.message,
-          data: error.toString()
-        }
+          data: error.toString(),
+        },
       }));
     }
   };
@@ -247,15 +247,11 @@ const IntegrationTestPanel = () => {
           <input
             type="number"
             value={testEstimateId}
-            onChange={(e) => setTestEstimateId(parseInt(e.target.value, 10))}
+            onChange={e => setTestEstimateId(parseInt(e.target.value, 10))}
             style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
           />
         </div>
-        <ActionButton 
-          variant="primary" 
-          onClick={runAllTests}
-          disabled={isRunning}
-        >
+        <ActionButton variant="primary" onClick={runAllTests} disabled={isRunning}>
           {isRunning ? <FiClock /> : <FiCheckCircle />}
           全テスト実行
         </ActionButton>
@@ -275,9 +271,7 @@ const IntegrationTestPanel = () => {
               <FiDownload /> テスト実行
             </ActionButton>
             {testResults.estimate_pdf && (
-              <TestResult>
-                {JSON.stringify(testResults.estimate_pdf, null, 2)}
-              </TestResult>
+              <TestResult>{JSON.stringify(testResults.estimate_pdf, null, 2)}</TestResult>
             )}
           </TestCard>
 
@@ -287,13 +281,13 @@ const IntegrationTestPanel = () => {
               <StatusIcon status={testResults.invoice_generation?.status} />
               請求書データ生成テスト
             </TestCardTitle>
-            <ActionButton onClick={() => runIndividualTest('invoice_generation', testInvoiceGeneration)}>
+            <ActionButton
+              onClick={() => runIndividualTest('invoice_generation', testInvoiceGeneration)}
+            >
               <FiEye /> テスト実行
             </ActionButton>
             {testResults.invoice_generation && (
-              <TestResult>
-                {JSON.stringify(testResults.invoice_generation, null, 2)}
-              </TestResult>
+              <TestResult>{JSON.stringify(testResults.invoice_generation, null, 2)}</TestResult>
             )}
           </TestCard>
 
@@ -303,12 +297,15 @@ const IntegrationTestPanel = () => {
               <StatusIcon status={testResults.integration_data?.status} />
               統合データ取得テスト
             </TestCardTitle>
-            <ActionButton onClick={() => runIndividualTest('integration_data', testIntegrationData)}>
+            <ActionButton
+              onClick={() => runIndividualTest('integration_data', testIntegrationData)}
+            >
               <FiEye /> テスト実行
             </ActionButton>
             {testResults.integration_data && (
               <TestResult>
-                統合ステータス: {JSON.stringify(testResults.integration_data.details?.integration_status, null, 2)}
+                統合ステータス:{' '}
+                {JSON.stringify(testResults.integration_data.details?.integration_status, null, 2)}
               </TestResult>
             )}
           </TestCard>
@@ -342,23 +339,32 @@ const IntegrationTestPanel = () => {
           <TestGrid>
             <TestCard status={formatValidation.scores.estimate >= 4 ? 'success' : 'error'}>
               <TestCardTitle>見積書検証</TestCardTitle>
-              <div>スコア: {formatValidation.scores.estimate}/{Object.keys(formatValidation.validations.estimate).length}</div>
+              <div>
+                スコア: {formatValidation.scores.estimate}/
+                {Object.keys(formatValidation.validations.estimate).length}
+              </div>
               <TestResult>
                 {JSON.stringify(formatValidation.validations.estimate, null, 2)}
               </TestResult>
             </TestCard>
-            
+
             <TestCard status={formatValidation.scores.invoice >= 4 ? 'success' : 'error'}>
               <TestCardTitle>請求書検証</TestCardTitle>
-              <div>スコア: {formatValidation.scores.invoice}/{Object.keys(formatValidation.validations.invoice).length}</div>
+              <div>
+                スコア: {formatValidation.scores.invoice}/
+                {Object.keys(formatValidation.validations.invoice).length}
+              </div>
               <TestResult>
                 {JSON.stringify(formatValidation.validations.invoice, null, 2)}
               </TestResult>
             </TestCard>
-            
+
             <TestCard status={formatValidation.scores.integration >= 2 ? 'success' : 'error'}>
               <TestCardTitle>統合検証</TestCardTitle>
-              <div>スコア: {formatValidation.scores.integration}/{Object.keys(formatValidation.validations.integration).length}</div>
+              <div>
+                スコア: {formatValidation.scores.integration}/
+                {Object.keys(formatValidation.validations.integration).length}
+              </div>
               <TestResult>
                 {JSON.stringify(formatValidation.validations.integration, null, 2)}
               </TestResult>
@@ -371,8 +377,18 @@ const IntegrationTestPanel = () => {
       <TestSection>
         <SectionTitle>連携機能使用ガイド</SectionTitle>
         {invoiceIntegrationService.getIntegrationGuide().map((step, index) => (
-          <div key={index} style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
-            <strong>ステップ {step.step}: {step.title}</strong>
+          <div
+            key={index}
+            style={{
+              marginBottom: '15px',
+              padding: '10px',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '4px',
+            }}
+          >
+            <strong>
+              ステップ {step.step}: {step.title}
+            </strong>
             <p>{step.description}</p>
             <div>
               <strong>実行項目:</strong> {step.actions.join(', ')}

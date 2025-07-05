@@ -12,7 +12,7 @@
   background: white;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 /* ヘッダー */
@@ -44,7 +44,7 @@
   position: absolute;
   top: 20px;
   right: 20px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 0.9rem;
@@ -93,7 +93,7 @@
 
 .feature-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .feature-icon {
@@ -140,7 +140,7 @@
   cursor: pointer;
 }
 
-.user-option input[type="radio"] {
+.user-option input[type='radio'] {
   display: none;
 }
 
@@ -208,12 +208,12 @@
   border-radius: 30px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .demo-start-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 .demo-note {
@@ -264,38 +264,38 @@
   .demo-landing {
     padding: 20px 10px;
   }
-  
+
   .demo-header {
     padding: 30px 20px;
   }
-  
+
   .demo-title {
     font-size: 2rem;
   }
-  
+
   .demo-subtitle {
     font-size: 1rem;
   }
-  
+
   .demo-badge {
     position: static;
     margin-top: 20px;
     display: inline-block;
   }
-  
+
   .features-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .user-options {
     flex-direction: column;
   }
-  
+
   .demo-info {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .user-info {
     flex-direction: column;
     text-align: center;

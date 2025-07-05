@@ -31,14 +31,14 @@ const LoginCard = styled.div`
 const Logo = styled.div`
   text-align: center;
   margin-bottom: 30px;
-  
+
   h1 {
     color: #1a472a;
     font-size: 1.8rem;
     font-weight: 700;
     margin: 10px 0 5px;
   }
-  
+
   p {
     color: #6b7280;
     margin: 0;
@@ -53,7 +53,7 @@ const Form = styled.form`
 
 const InputGroup = styled.div`
   position: relative;
-  
+
   label {
     display: block;
     font-weight: 600;
@@ -75,14 +75,16 @@ const Input = styled.input`
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.3s ease;
-  
+
   &:focus {
     outline: none;
     border-color: #1a472a;
     box-shadow: 0 0 0 3px rgba(26, 71, 42, 0.1);
   }
-  
-  ${props => props.error && `
+
+  ${props =>
+    props.error &&
+    `
     border-color: #dc2626;
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
   `}
@@ -102,7 +104,7 @@ const IconRight = styled.button`
   border: none;
   color: #9ca3af;
   cursor: pointer;
-  
+
   &:hover {
     color: #1a472a;
   }
@@ -111,19 +113,19 @@ const IconRight = styled.button`
 const Button = styled.button`
   width: 100%;
   padding: 14px;
-  background: ${props => props.disabled ? '#9ca3af' : '#1a472a'};
+  background: ${props => (props.disabled ? '#9ca3af' : '#1a472a')};
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
-  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  
+
   &:hover:not(:disabled) {
     background: #2d5a3d;
     transform: translateY(-2px);
@@ -138,20 +140,26 @@ const Message = styled.div`
   align-items: center;
   gap: 8px;
   font-weight: 500;
-  
-  ${props => props.type === 'success' && `
+
+  ${props =>
+    props.type === 'success' &&
+    `
     background: rgba(16, 185, 129, 0.1);
     color: #065f46;
     border: 1px solid rgba(16, 185, 129, 0.3);
   `}
-  
-  ${props => props.type === 'error' && `
+
+  ${props =>
+    props.type === 'error' &&
+    `
     background: rgba(239, 68, 68, 0.1);
     color: #991b1b;
     border: 1px solid rgba(239, 68, 68, 0.3);
   `}
   
-  ${props => props.type === 'info' && `
+  ${props =>
+    props.type === 'info' &&
+    `
     background: rgba(59, 130, 246, 0.1);
     color: #1e40af;
     border: 1px solid rgba(59, 130, 246, 0.3);
@@ -161,12 +169,12 @@ const Message = styled.div`
 const Links = styled.div`
   text-align: center;
   margin-top: 20px;
-  
+
   a {
     color: #1a472a;
     text-decoration: none;
     font-weight: 500;
-    
+
     &:hover {
       text-decoration: underline;
     }
@@ -182,11 +190,11 @@ const LinkButton = styled.button`
   cursor: pointer;
   font-size: inherit;
   font-family: inherit;
-  
+
   &:hover {
     text-decoration: underline;
   }
-  
+
   &:focus {
     outline: 2px solid #1a472a;
     outline-offset: 2px;
@@ -200,7 +208,7 @@ const DevMode = styled.div`
   padding: 12px;
   margin-bottom: 20px;
   text-align: center;
-  
+
   p {
     margin: 0;
     color: #92400e;
@@ -214,38 +222,35 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [mode, setMode] = useState('login'); // 'login' or 'signup'
   const [message, setMessage] = useState(null);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const {
-    signInWithPassword,
-    signUp,
-    loading,
-    error,
-    isConnected,
-    isAuthenticated,
-    clearError
-  } = useSupabaseAuth();
+
+  const { signInWithPassword, signUp, loading, error, isConnected, isAuthenticated, clearError } =
+    useSupabaseAuth();
 
   // ログイン済みの場合はリダイレクト
   useEffect(() => {
-    if (isAuthenticated()) {
-      const from = location.state?.from?.pathname || '/';
+    if (typeof isAuthenticated === 'function' && isAuthenticated()) {
+      const from = location.state?.from?.pathname || '/dashboard';
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);
 
   // エラークリア
   useEffect(() => {
-    clearError();
+    if (typeof clearError === 'function') {
+      clearError();
+    }
     setMessage(null);
   }, [mode, clearError]);
 
   // フォーム送信
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    clearError();
+    if (typeof clearError === 'function') {
+      clearError();
+    }
     setMessage(null);
 
     if (!email || !password) {
@@ -257,7 +262,7 @@ const LoginPage = () => {
       if (mode === 'login') {
         const result = await signInWithPassword(email, password);
         if (result.success) {
-          const from = location.state?.from?.pathname || '/';
+          const from = location.state?.from?.pathname || '/dashboard';
           navigate(from, { replace: true });
         } else {
           setMessage({ type: 'error', text: result.error });
@@ -266,13 +271,13 @@ const LoginPage = () => {
         const result = await signUp(email, password, {
           fullName: email.split('@')[0],
           companyName: '造園業株式会社',
-          role: 'employee'
+          role: 'employee',
         });
-        
+
         if (result.success) {
-          setMessage({ 
-            type: 'success', 
-            text: result.message || 'アカウントを作成しました。メールを確認してください。' 
+          setMessage({
+            type: 'success',
+            text: result.message || 'アカウントを作成しました。メールを確認してください。',
           });
           setMode('login');
         } else {
@@ -298,7 +303,7 @@ const LoginPage = () => {
       <LoginCard>
         <Logo>
           <div style={{ fontSize: '3rem' }}>🏡</div>
-          <h1>Garden DX System</h1>
+          <h1>庭想システム</h1>
           <p>造園業向け統合業務管理システム</p>
         </Logo>
 
@@ -307,8 +312,8 @@ const LoginPage = () => {
             <p>
               🔧 開発モード（Supabase未接続）
               <br />
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={handleDevLogin}
                 style={{
                   background: '#f59e0b',
@@ -318,7 +323,7 @@ const LoginPage = () => {
                   borderRadius: '4px',
                   cursor: 'pointer',
                   marginTop: '8px',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
                 }}
               >
                 デモ用ログイン
@@ -338,7 +343,7 @@ const LoginPage = () => {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 placeholder="your@email.com"
                 required
                 autoComplete="email"
@@ -356,15 +361,12 @@ const LoginPage = () => {
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 placeholder="パスワード"
                 required
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               />
-              <IconRight
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-              >
+              <IconRight type="button" onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </IconRight>
             </InputWrapper>
@@ -389,7 +391,7 @@ const LoginPage = () => {
             <>
               <p>
                 アカウントをお持ちでない方は{' '}
-                <LinkButton 
+                <LinkButton
                   type="button"
                   onClick={() => setMode('signup')}
                   aria-label="アカウント作成ページに切り替え"
@@ -401,7 +403,7 @@ const LoginPage = () => {
           ) : (
             <p>
               既にアカウントをお持ちの方は{' '}
-              <LinkButton 
+              <LinkButton
                 type="button"
                 onClick={() => setMode('login')}
                 aria-label="ログインページに切り替え"

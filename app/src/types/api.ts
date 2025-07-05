@@ -52,11 +52,12 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface AuthResponse extends ApiResponse<{
-  access_token: string;
-  token_type: string;
-  user: User;
-}> {}
+export interface AuthResponse
+  extends ApiResponse<{
+    access_token: string;
+    token_type: string;
+    user: User;
+  }> {}
 
 export interface UserFeatures {
   can_view_costs: boolean;
@@ -276,8 +277,25 @@ export interface ValidationError extends ApiError {
 }
 
 // 権限関連
-export type ResourceType = 'estimates' | 'customers' | 'price_master' | 'invoices' | 'projects' | 'dashboard' | 'system';
-export type ActionType = 'view' | 'create' | 'edit' | 'delete' | 'view_cost' | 'view_profit' | 'adjust_total' | 'approve' | 'pdf_generate' | 'issue';
+export type ResourceType =
+  | 'estimates'
+  | 'customers'
+  | 'price_master'
+  | 'invoices'
+  | 'projects'
+  | 'dashboard'
+  | 'system';
+export type ActionType =
+  | 'view'
+  | 'create'
+  | 'edit'
+  | 'delete'
+  | 'view_cost'
+  | 'view_profit'
+  | 'adjust_total'
+  | 'approve'
+  | 'pdf_generate'
+  | 'issue';
 
 export interface PermissionCheck {
   resource: ResourceType;
@@ -367,7 +385,12 @@ export interface DashboardMetrics {
 
 export interface ActivityItem {
   id: number;
-  type: 'estimate_created' | 'estimate_approved' | 'invoice_sent' | 'payment_received' | 'project_completed';
+  type:
+    | 'estimate_created'
+    | 'estimate_approved'
+    | 'invoice_sent'
+    | 'payment_received'
+    | 'project_completed';
   title: string;
   description: string;
   timestamp: string;
@@ -389,23 +412,38 @@ export type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, 
 
 // Type guards for runtime type checking
 export function isApiError(response: unknown): response is ApiError {
-  return typeof response === 'object' && 
-         response !== null && 
-         'code' in response && 
-         'message' in response;
+  return (
+    typeof response === 'object' && response !== null && 'code' in response && 'message' in response
+  );
 }
 
-export function isSuccessResponse<T>(response: ApiResponse<T>): response is ApiResponse<T> & { success: true; data: T } {
+export function isSuccessResponse<T>(
+  response: ApiResponse<T>
+): response is ApiResponse<T> & { success: true; data: T } {
   return response.success === true && response.data !== undefined;
 }
 
-export function isErrorResponse(response: ApiResponse<unknown>): response is ApiResponse<never> & { success: false; error: string } {
+export function isErrorResponse(
+  response: ApiResponse<unknown>
+): response is ApiResponse<never> & { success: false; error: string } {
   return response.success === false && typeof response.error === 'string';
 }
 
 // Constants for better type safety
-export const ESTIMATE_STATUSES = ['draft', 'submitted', 'approved', 'rejected', 'completed'] as const;
-export const PROJECT_STATUSES = ['planning', 'active', 'on_hold', 'completed', 'cancelled'] as const;
+export const ESTIMATE_STATUSES = [
+  'draft',
+  'submitted',
+  'approved',
+  'rejected',
+  'completed',
+] as const;
+export const PROJECT_STATUSES = [
+  'planning',
+  'active',
+  'on_hold',
+  'completed',
+  'cancelled',
+] as const;
 export const INVOICE_STATUSES = ['draft', 'sent', 'paid', 'overdue', 'cancelled'] as const;
 export const ITEM_TYPES = ['item', 'header', 'separator', 'note'] as const;
 export const USER_ROLES = ['owner', 'employee'] as const;
