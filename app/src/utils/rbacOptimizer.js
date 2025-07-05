@@ -3,6 +3,8 @@
  * 権限判定処理の高速化・セキュリティオーバーヘッド削減
  */
 
+import React from 'react';
+
 // 権限キャッシュシステム
 class RBACCache {
   constructor() {
@@ -344,8 +346,6 @@ const rbacOptimizer = {
 export default rbacOptimizer;
 
 // React Hook: usePermissions（最適化版）
-import React from 'react';
-
 export const usePermissions = (user, permissionsList) => {
   const [permissions, setPermissions] = React.useState({});
 
@@ -363,11 +363,10 @@ export const usePermissions = (user, permissionsList) => {
 export const legacyDefault = {
   checkPermissionFast,
   checkMultiplePermissions,
-  usePermissions
+  usePermissions,
   hasRoleLevel,
   checkResourceAccess,
   checkConditionalPermission,
   getRBACStats,
-  clearRBACCache,
-  usePermissions,
+  clearRBACCache
 };
