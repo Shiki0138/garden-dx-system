@@ -17,26 +17,137 @@ from reportlab.lib import colors
 from datetime import datetime, date
 from decimal import Decimal
 import os
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 from io import BytesIO
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+import threading
+import gc
+import logging
+from functools import lru_cache
+import time
 
-# 日本語フォント設定
-try:
-    pdfmetrics.registerFont(TTFont('NotoSansJP', '/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc'))
-    FONT_NAME = 'NotoSansJP'
-except:
-    FONT_NAME = 'HeiseiKakuGo-W5'  # フォールバック
+# ロギング設定
+logger = logging.getLogger(__name__)
+
+# 日本語フォント設定（キャッシュ対応）
+@lru_cache(maxsize=1)
+def get_japanese_font():
+    """日本語フォントの取得（キャッシュ対応）"""
+    try:
+        pdfmetrics.registerFont(TTFont('NotoSansJP', '/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc'))
+        return 'NotoSansJP'
+    except:
+        return 'HeiseiKakuGo-W5'  # フォールバック
+
+FONT_NAME = get_japanese_font()
+
+# パフォーマンス監視デコレータ
+def measure_performance(func):
+    """関数の実行時間とメモリ使用量を測定"""
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        start_memory = gc.get_stats()[0].get('collected', 0)
+        
+        result = func(*args, **kwargs)
+        
+        end_time = time.time()
+        end_memory = gc.get_stats()[0].get('collected', 0)
+        
+        duration = end_time - start_time
+        memory_delta = end_memory - start_memory
+        
+        logger.info(f"{func.__name__} - 実行時間: {duration:.2f}秒, メモリ変化: {memory_delta}バイト")
+        
+        return result
+    return wrapper
+
+
+class PDFCache:
+    """PDF生成結果のキャッシュ管理"""
+    def __init__(self, max_size: int = 50 * 1024 * 1024):  # 50MB
+        self.cache = {}
+        self.max_size = max_size
+        self.current_size = 0
+        self.lock = threading.Lock()
+        self.hit_count = 0
+        self.miss_count = 0
+    
+    def get_key(self, data: Dict[str, Any]) -> str:
+        """データからキャッシュキーを生成"""
+        # シンプルなハッシュ生成
+        data_str = str(sorted(data.items()))
+        return str(hash(data_str))
+    
+    def get(self, key: str) -> Optional[bytes]:
+        """キャッシュから取得"""
+        with self.lock:
+            if key in self.cache:
+                self.hit_count += 1
+                entry = self.cache[key]
+                entry['last_accessed'] = time.time()
+                return entry['data']
+            self.miss_count += 1
+            return None
+    
+    def set(self, key: str, data: bytes) -> None:
+        """キャッシュに保存"""
+        with self.lock:
+            size = len(data)
+            
+            # サイズ制限チェック
+            while self.current_size + size > self.max_size and self.cache:
+                # LRU: 最も古いエントリを削除
+                oldest_key = min(self.cache.keys(), 
+                               key=lambda k: self.cache[k]['last_accessed'])
+                oldest_size = len(self.cache[oldest_key]['data'])
+                del self.cache[oldest_key]
+                self.current_size -= oldest_size
+            
+            self.cache[key] = {
+                'data': data,
+                'created': time.time(),
+                'last_accessed': time.time(),
+                'size': size
+            }
+            self.current_size += size
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """統計情報を取得"""
+        hit_rate = self.hit_count / (self.hit_count + self.miss_count) if (self.hit_count + self.miss_count) > 0 else 0
+        return {
+            'size': len(self.cache),
+            'current_size_mb': self.current_size / 1024 / 1024,
+            'max_size_mb': self.max_size / 1024 / 1024,
+            'hit_count': self.hit_count,
+            'miss_count': self.miss_count,
+            'hit_rate': hit_rate
+        }
+
 
 class GardenEstimatePDFGenerator:
-    """造園業界標準準拠見積書PDF生成クラス"""
+    """造園業界標準準拠見積書PDF生成クラス（最適化版）"""
+    
+    # クラス変数でキャッシュを共有
+    _cache = PDFCache()
+    _style_cache = {}
+    _executor = ThreadPoolExecutor(max_workers=3)
     
     def __init__(self):
         self.page_width, self.page_height = A4
         self.margin = 20 * mm
         self.styles = self._create_custom_styles()
+        self.enable_cache = True
+        self.enable_parallel = True
         
+    @lru_cache(maxsize=1)
     def _create_custom_styles(self):
-        """造園業界標準スタイル定義"""
+        """造園業界標準スタイル定義（キャッシュ対応）"""
+        # スタイルキャッシュチェック
+        cache_key = 'garden_styles_v1'
+        if cache_key in self._style_cache:
+            return self._style_cache[cache_key]
+        
         styles = getSampleStyleSheet()
         
         # 表紙タイトル（造園業界標準）
@@ -106,11 +217,14 @@ class GardenEstimatePDFGenerator:
             fontWeight='bold'
         ))
         
+        # キャッシュに保存
+        self._style_cache[cache_key] = styles
         return styles
     
+    @measure_performance
     def generate_estimate_pdf(self, estimate_data: Dict[str, Any]) -> BytesIO:
         """
-        造園業界標準準拠見積書PDF生成
+        造園業界標準準拠見積書PDF生成（最適化版）
         
         Args:
             estimate_data: 見積データ
@@ -118,6 +232,14 @@ class GardenEstimatePDFGenerator:
         Returns:
             BytesIO: PDF バイナリデータ
         """
+        # キャッシュチェック
+        if self.enable_cache:
+            cache_key = self._cache.get_key(estimate_data)
+            cached_pdf = self._cache.get(cache_key)
+            if cached_pdf:
+                logger.info("PDFキャッシュヒット")
+                return BytesIO(cached_pdf)
+        
         buffer = BytesIO()
         doc = SimpleDocTemplate(
             buffer,
@@ -132,24 +254,46 @@ class GardenEstimatePDFGenerator:
         # PDF構成要素
         story = []
         
-        # 1. 表紙ページ
-        story.extend(self._create_cover_page(estimate_data))
-        story.append(PageBreak())
-        
-        # 2. 内訳書ページ
-        story.extend(self._create_summary_page(estimate_data))
-        story.append(PageBreak())
-        
-        # 3. 明細書ページ
-        story.extend(self._create_detail_page(estimate_data))
-        story.append(PageBreak())
-        
-        # 4. 特記事項・約款ページ
-        story.extend(self._create_terms_page(estimate_data))
+        if self.enable_parallel:
+            # 並列処理でページ生成
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                futures = [
+                    executor.submit(self._create_cover_page, estimate_data),
+                    executor.submit(self._create_summary_page, estimate_data),
+                    executor.submit(self._create_detail_page, estimate_data),
+                    executor.submit(self._create_terms_page, estimate_data)
+                ]
+                
+                pages = [future.result() for future in futures]
+                
+                # ページ結合
+                for i, page_elements in enumerate(pages):
+                    story.extend(page_elements)
+                    if i < len(pages) - 1:
+                        story.append(PageBreak())
+        else:
+            # 通常の逐次処理
+            story.extend(self._create_cover_page(estimate_data))
+            story.append(PageBreak())
+            story.extend(self._create_summary_page(estimate_data))
+            story.append(PageBreak())
+            story.extend(self._create_detail_page(estimate_data))
+            story.append(PageBreak())
+            story.extend(self._create_terms_page(estimate_data))
         
         # PDF生成
         doc.build(story)
         buffer.seek(0)
+        
+        # キャッシュに保存
+        if self.enable_cache:
+            pdf_data = buffer.getvalue()
+            self._cache.set(cache_key, pdf_data)
+            buffer.seek(0)
+        
+        # メモリ最適化
+        gc.collect()
+        
         return buffer
     
     def _create_cover_page(self, estimate_data: Dict[str, Any]) -> List:
@@ -455,8 +599,9 @@ class GardenEstimatePDFGenerator:
         
         return elements
     
+    @measure_performance
     def _create_detail_page(self, estimate_data: Dict[str, Any]) -> List:
-        """明細書ページ（業界標準項目順序）"""
+        """明細書ページ（業界標準項目順序・最適化版）"""
         elements = []
         
         # ページタイトル
@@ -473,27 +618,32 @@ class GardenEstimatePDFGenerator:
         items = estimate_data.get('items', [])
         sorted_items = self._sort_items_by_industry_standard(items)
         
-        for item in sorted_items:
-            if item.get('item_type') == 'header':
-                # 見出し行
-                detail_data.append([
-                    f"【{item.get('item_description', '')}】",
-                    '', '', '', '', ''
-                ])
-            elif item.get('item_type') == 'item':
-                # 明細行
-                quantity = item.get('quantity', 0)
-                unit_price = item.get('unit_price', 0)
-                line_total = quantity * unit_price + item.get('line_item_adjustment', 0)
-                
-                detail_data.append([
-                    f"  {item.get('item_description', '')}",
-                    item.get('specification', ''),
-                    f"{quantity:g}" if quantity else '',
-                    item.get('unit', ''),
-                    f"{unit_price:,}" if unit_price else '',
-                    f"{line_total:,}"
-                ])
+        # バッチ処理でパフォーマンス向上
+        batch_size = 50
+        for i in range(0, len(sorted_items), batch_size):
+            batch = sorted_items[i:i + batch_size]
+            
+            for item in batch:
+                if item.get('item_type') == 'header':
+                    # 見出し行
+                    detail_data.append([
+                        f"【{item.get('item_description', '')}】",
+                        '', '', '', '', ''
+                    ])
+                elif item.get('item_type') == 'item':
+                    # 明細行
+                    quantity = item.get('quantity', 0)
+                    unit_price = item.get('unit_price', 0)
+                    line_total = quantity * unit_price + item.get('line_item_adjustment', 0)
+                    
+                    detail_data.append([
+                        f"  {item.get('item_description', '')}",
+                        item.get('specification', ''),
+                        f"{quantity:g}" if quantity else '',
+                        item.get('unit', ''),
+                        f"{unit_price:,}" if unit_price else '',
+                        f"{line_total:,}"
+                    ])
         
         # テーブル作成
         table = Table(detail_data, colWidths=[40*mm, 35*mm, 20*mm, 15*mm, 25*mm, 25*mm])
@@ -659,3 +809,47 @@ class GardenEstimatePDFGenerator:
         
         # 西暦表示
         return f"{date_obj.year}年{date_obj.month}月{date_obj.day}日"
+    
+    async def generate_batch_pdfs(self, estimates_data: List[Dict[str, Any]], 
+                                 max_concurrent: int = 3) -> List[BytesIO]:
+        """
+        複数の見積書PDFを並列生成（非同期対応）
+        
+        Args:
+            estimates_data: 見積データのリスト
+            max_concurrent: 最大同時実行数
+            
+        Returns:
+            List[BytesIO]: 生成されたPDFのリスト
+        """
+        semaphore = asyncio.Semaphore(max_concurrent)
+        
+        async def generate_with_limit(data):
+            async with semaphore:
+                loop = asyncio.get_event_loop()
+                return await loop.run_in_executor(
+                    self._executor, 
+                    self.generate_estimate_pdf, 
+                    data
+                )
+        
+        tasks = [generate_with_limit(data) for data in estimates_data]
+        return await asyncio.gather(*tasks)
+    
+    def get_performance_stats(self) -> Dict[str, Any]:
+        """パフォーマンス統計情報を取得"""
+        return {
+            'cache_stats': self._cache.get_stats(),
+            'style_cache_size': len(self._style_cache),
+            'thread_pool_active': self._executor._threads,
+        }
+    
+    def clear_cache(self):
+        """キャッシュをクリア"""
+        self._cache.cache.clear()
+        self._cache.current_size = 0
+        self._cache.hit_count = 0
+        self._cache.miss_count = 0
+        self._style_cache.clear()
+        gc.collect()
+        logger.info("PDFキャッシュをクリアしました")

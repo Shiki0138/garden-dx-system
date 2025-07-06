@@ -23,6 +23,7 @@ import EstimateHeader from './EstimateHeader';
 import ItemsTable from './ItemsTable';
 import ProfitabilityPanel from './ProfitabilityPanel';
 import { CostViewGuard, ProfitViewGuard, AdjustTotalGuard, OwnerOnly } from './PermissionGuard';
+import LoadingButton from './ui/LoadingButton';
 import { estimateApi } from '../services/api';
 import authService from '../services/authService';
 import { debounce } from '../utils/performance';
@@ -92,38 +93,82 @@ const ActionButton = styled.button`
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  touch-action: manipulation;
 
   &.primary {
     background-color: #007bff;
     color: white;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: #0056b3;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
     }
   }
 
   &.secondary {
     background-color: #6c757d;
     color: white;
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: #5a6268;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
     }
   }
 
   &.success {
     background-color: #28a745;
     color: white;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: #1e7e34;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
     }
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  }
+
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+    font-size: 16px;
+    min-height: 48px;
   }
 `;
 
@@ -397,11 +442,15 @@ const EstimateCreator = ({ estimateId }) => {
         {/* ツールバー */}
         <ToolbarContainer>
           <ButtonGroup>
-            <ActionButton className="primary" onClick={() => setShowPriceMaster(true)}>
+            <LoadingButton
+              variant="primary"
+              onClick={() => setShowPriceMaster(true)}
+              disabled={loading}
+            >
               + 明細追加
-            </ActionButton>
-            <ActionButton
-              className="secondary"
+            </LoadingButton>
+            <LoadingButton
+              variant="secondary"
               onClick={() =>
                 handleAddItem({
                   item_description: '新規項目',
@@ -411,18 +460,30 @@ const EstimateCreator = ({ estimateId }) => {
                   is_visible_to_customer: true,
                 })
               }
+              loading={loading}
             >
               + 見出し追加
-            </ActionButton>
+            </LoadingButton>
           </ButtonGroup>
 
           <ButtonGroup>
-            <ActionButton className="success" onClick={handleSave} disabled={!isDirty}>
+            <LoadingButton
+              variant="success"
+              onClick={handleSave}
+              disabled={!isDirty}
+              loading={loading}
+              loadingText="保存中..."
+            >
               保存
-            </ActionButton>
-            <ActionButton className="primary" onClick={handleGeneratePDF}>
+            </LoadingButton>
+            <LoadingButton
+              variant="primary"
+              onClick={handleGeneratePDF}
+              loading={loading}
+              loadingText="PDF生成中..."
+            >
               PDF出力
-            </ActionButton>
+            </LoadingButton>
           </ButtonGroup>
         </ToolbarContainer>
 

@@ -17,11 +17,19 @@ DATABASE_URL = os.getenv(
     "postgresql://garden_user:garden_password@localhost:5432/garden_db"
 )
 
-# SQLAlchemyエンジン作成
+# SQLAlchemyエンジン作成 - パフォーマンス最適化
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
     pool_recycle=300,
+    pool_size=20,              # 接続プールサイズ増加
+    max_overflow=30,           # 最大オーバーフロー接続数
+    pool_timeout=30,           # 接続タイムアウト
+    connect_args={
+        "options": "-c timezone=Asia/Tokyo",
+        "application_name": "garden_dx_backend",
+        "connect_timeout": 10,
+    },
     echo=os.getenv("SQL_DEBUG", "false").lower() == "true"
 )
 

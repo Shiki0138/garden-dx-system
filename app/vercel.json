@@ -2,18 +2,28 @@
   "buildCommand": "CI=false npm run build",
   "outputDirectory": "build",
   "framework": null,
-  "installCommand": "npm install",
+  "installCommand": "npm install --production=false",
   "devCommand": "npm start",
+  "functions": {
+    "app/**": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "env": {
     "REACT_APP_SUPABASE_URL": "https://ppplfluvazaufassdkra.supabase.co",
     "REACT_APP_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwcGxmbHV2YXphdWZhc3Nka3JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTk5NjczOTYsImV4cCI6MjAzNTU0MzM5Nn0.IWHrTSjfE-fKKgJOVXHECtWo8DGOLGe0Nx0z-vbpyWQ",
     "REACT_APP_API_BASE_URL": "https://ppplfluvazaufassdkra.supabase.co",
-    "REACT_APP_DEMO_MODE": "true",
+    "REACT_APP_DEMO_MODE": "false",
     "REACT_APP_ENVIRONMENT": "production",
     "CI": "false",
     "GENERATE_SOURCEMAP": "false",
     "ESLINT_NO_DEV_ERRORS": "true",
-    "DISABLE_ESLINT_PLUGIN": "true"
+    "DISABLE_ESLINT_PLUGIN": "true",
+    "REACT_APP_ANALYTICS_ENABLED": "true",
+    "REACT_APP_PWA_ENABLED": "true",
+    "REACT_APP_ENABLE_REALTIME": "true",
+    "REACT_APP_ENABLE_PDF_GENERATION": "true",
+    "REACT_APP_ENABLE_NOTIFICATIONS": "true"
   },
   "rewrites": [
     {
@@ -48,6 +58,23 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        }
+      ]
+    },
+    {
+      "source": "/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
         }
       ]
     }

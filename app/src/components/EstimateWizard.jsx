@@ -386,12 +386,36 @@ const AddItemButton = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 44px;
+  touch-action: manipulation;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: linear-gradient(135deg, #689f38, #2d5a2d);
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(74, 124, 74, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(74, 124, 74, 0.3);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.25);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 14px 18px;
+    min-height: 48px;
   }
 `;
 
@@ -405,11 +429,38 @@ const RemoveButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 32px;
+  min-height: 32px;
+  touch-action: manipulation;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: #e55555;
     transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 1px 4px rgba(255, 107, 107, 0.3);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.25);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  @media (max-width: 768px) {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 10px;
   }
 `;
 

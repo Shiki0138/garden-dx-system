@@ -41,29 +41,40 @@ app = FastAPI(
     redoc_url="/api/redoc"
 )
 
-# CORS設定
+# CORS設定 - パフォーマンス最適化
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://localhost:5173",
+        "https://garden-dx.vercel.app",  # 本番環境
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # 具体的に指定
+    allow_headers=[
+        "Authorization",
+        "Content-Type",
+        "Accept",
+        "X-Requested-With",
+    ],
+    max_age=86400,  # preflightキャッシュ時間1日
 )
 
-# データベース設定
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/garden_dx")
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+# データベース設定 - 最適化済み
+from database import engine, SessionLocal, Base
 
 # セキュリティ
 security = HTTPBearer()
 
-# データベース依存関数
+# データベース依存関数 - パフォーマンス最適化
 def get_db():
+    """DBセッション管理 - コネクションプール最適化"""
     db = SessionLocal()
     try:
         yield db
+    except Exception as e:
+        db.rollback()
+        raise e
     finally:
         db.close()
 
@@ -192,45 +203,66 @@ async def root():
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now()}
 
-# 単価マスタ関連API
+# 単価マスタ関連API - パフォーマンス最適化
 @app.get("/api/price-master", response_model=List[PriceMaster])
 async def get_price_master(
     category: Optional[str] = None,
     sub_category: Optional[str] = None,
     search: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 100,
     db: Session = Depends(get_db)
 ):
-    """単価マスタ取得（階層検索・キーワード検索対応）"""
-    query = db.query(PriceMaster).filter(PriceMaster.is_active == True)
+    """単価マスタ取得（階層検索・キーワード検索対応・ページネーション）"""
+    from services.cache_service import cached, performance_monitor
     
-    if category:
-        query = query.filter(PriceMaster.category == category)
-    if sub_category:
-        query = query.filter(PriceMaster.sub_category == sub_category)
-    if search:
-        query = query.filter(
-            PriceMaster.item_name.contains(search) | 
-            PriceMaster.item_code.contains(search)
-        )
+    @cached(ttl=600, key_prefix="price_master")
+    @performance_monitor
+    def _get_price_master_cached():
+        query = db.query(PriceMaster).filter(PriceMaster.is_active == True)
+        
+        if category:
+            query = query.filter(PriceMaster.category == category)
+        if sub_category:
+            query = query.filter(PriceMaster.sub_category == sub_category)
+        if search:
+            search_term = f"%{search}%"
+            query = query.filter(
+                PriceMaster.item_name.ilike(search_term) | 
+                PriceMaster.category.ilike(search_term)
+            )
+        
+        return query.order_by(
+            PriceMaster.category, 
+            PriceMaster.sub_category, 
+            PriceMaster.item_name
+        ).offset(skip).limit(limit).all()
     
-    return query.order_by(PriceMaster.category, PriceMaster.sub_category, PriceMaster.item_name).all()
+    return _get_price_master_cached()
 
 @app.get("/api/price-master/categories")
 async def get_categories(db: Session = Depends(get_db)):
-    """カテゴリ階層取得"""
-    result = db.query(
-        PriceMaster.category,
-        PriceMaster.sub_category
-    ).filter(PriceMaster.is_active == True).distinct().all()
+    """カテゴリ階層取得 - 高速キャッシュ対応"""
+    from services.cache_service import cached, performance_monitor
     
-    categories = {}
-    for category, sub_category in result:
-        if category not in categories:
-            categories[category] = []
-        if sub_category and sub_category not in categories[category]:
-            categories[category].append(sub_category)
+    @cached(ttl=1800, key_prefix="categories")  # 30分キャッシュ
+    @performance_monitor
+    def _get_categories_cached():
+        result = db.query(
+            PriceMaster.category,
+            PriceMaster.sub_category
+        ).filter(PriceMaster.is_active == True).distinct().all()
+        
+        categories = {}
+        for category, sub_category in result:
+            if category not in categories:
+                categories[category] = []
+            if sub_category and sub_category not in categories[category]:
+                categories[category].append(sub_category)
+        
+        return categories
     
-    return categories
+    return _get_categories_cached()
 
 @app.post("/api/price-master", response_model=PriceMaster)
 async def create_price_master(
@@ -244,33 +276,50 @@ async def create_price_master(
     db.refresh(db_item)
     return db_item
 
-# 見積関連API
+# 見積関連API - パフォーマンス最適化
 @app.get("/api/estimates", response_model=List[Estimate])
 async def get_estimates(
     status: Optional[str] = None,
     customer_id: Optional[int] = None,
+    skip: int = 0,
+    limit: int = 50,
     current_user: User = Depends(require_permission("estimates", "view")),
     db: Session = Depends(get_db)
 ):
-    """見積一覧取得（権限チェック付き）"""
-    query = db.query(Estimate).filter(Estimate.company_id == current_user.company_id)
+    """見積一覧取得（権限チェック付き・最適化済み）"""
+    from services.cache_service import cached, performance_monitor
+    from sqlalchemy.orm import joinedload
     
-    if status:
-        query = query.filter(Estimate.status == status)
-    if customer_id:
-        query = query.filter(Estimate.customer_id == customer_id)
+    @performance_monitor
+    def _get_estimates_optimized():
+        # eager loading でN+1問題を回避
+        query = db.query(Estimate).options(
+            joinedload(Estimate.customer),
+            joinedload(Estimate.company)
+        ).filter(Estimate.company_id == current_user.company_id)
+        
+        if status:
+            query = query.filter(Estimate.status == status)
+        if customer_id:
+            query = query.filter(Estimate.customer_id == customer_id)
+        
+        estimates = query.order_by(Estimate.created_at.desc())\
+                        .offset(skip).limit(limit).all()
+        
+        # 権限に基づく表示制御（最適化）
+        if current_user.role == "owner":
+            # 経営者は全データそのまま
+            return estimates
+        else:
+            # 従業員は権限フィルタリング
+            filtered_estimates = []
+            for estimate in estimates:
+                estimate_dict = estimate.__dict__.copy()
+                filtered_data = apply_estimate_permissions(current_user, estimate_dict)
+                filtered_estimates.append(filtered_data)
+            return filtered_estimates
     
-    estimates = query.order_by(Estimate.created_at.desc()).all()
-    
-    # 権限に基づく表示制御
-    filtered_estimates = []
-    for estimate in estimates:
-        estimate_dict = estimate.__dict__.copy()
-        # 権限フィルタリング適用
-        filtered_data = apply_estimate_permissions(current_user, estimate_dict)
-        filtered_estimates.append(filtered_data)
-    
-    return filtered_estimates
+    return _get_estimates_optimized()
 
 @app.get("/api/estimates/{estimate_id}")
 async def get_estimate(
@@ -404,24 +453,31 @@ async def get_profitability_analysis(
     current_user: User = Depends(require_owner_role()),
     db: Session = Depends(get_db)
 ):
-    """収益性分析（経営者のみ）"""
-    estimate = db.query(Estimate).filter(
-        Estimate.estimate_id == estimate_id,
-        Estimate.company_id == current_user.company_id
-    ).first()
+    """収益性分析（経営者のみ）- キャッシュ最適化"""
+    from services.cache_service import cached, performance_monitor
     
-    if not estimate:
-        raise HTTPException(status_code=404, detail="見積が見つかりません")
+    @cached(ttl=180, key_prefix="profitability")
+    @performance_monitor
+    def _get_profitability_cached():
+        estimate = db.query(Estimate).filter(
+            Estimate.estimate_id == estimate_id,
+            Estimate.company_id == current_user.company_id
+        ).first()
+        
+        if not estimate:
+            raise HTTPException(status_code=404, detail="見積が見つかりません")
+        
+        return ProfitabilityAnalysis(
+            total_cost=estimate.total_cost,
+            total_revenue=estimate.subtotal,
+            gross_profit=estimate.gross_profit,
+            gross_margin_rate=estimate.gross_margin_rate or 0.0,
+            adjusted_total=estimate.total_amount,
+            final_profit=estimate.total_amount - estimate.total_cost,
+            final_margin_rate=(estimate.total_amount - estimate.total_cost) / estimate.total_amount if estimate.total_amount > 0 else 0.0
+        )
     
-    return ProfitabilityAnalysis(
-        total_cost=estimate.total_cost,
-        total_revenue=estimate.subtotal,
-        gross_profit=estimate.gross_profit,
-        gross_margin_rate=estimate.gross_margin_rate or 0.0,
-        adjusted_total=estimate.total_amount,
-        final_profit=estimate.total_amount - estimate.total_cost,
-        final_margin_rate=(estimate.total_amount - estimate.total_cost) / estimate.total_amount if estimate.total_amount > 0 else 0.0
-    )
+    return _get_profitability_cached()
 
 # PDF出力関連API
 @app.get("/api/estimates/{estimate_id}/pdf")

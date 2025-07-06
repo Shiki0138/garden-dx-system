@@ -3,7 +3,7 @@
  * 見積書・請求書の統合PDF出力機能（本番リリース対応）
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import {
   FileText,
@@ -17,6 +17,8 @@ import {
   Loader,
   Image,
   Stamp,
+  BarChart,
+  Zap,
 } from 'lucide-react';
 
 import {
@@ -24,6 +26,8 @@ import {
   downloadLandscapingInvoicePDF,
   LANDSCAPING_STANDARDS,
 } from '../utils/landscapingInvoicePDFGenerator';
+import { getPDFOptimizer } from '../utils/pdfOptimizer';
+import { generateInvoicePDF } from '../utils/pdfGenerator';
 
 // 造園業界標準カラーパレット
 const colors = {
@@ -338,18 +342,60 @@ const StatusMessage = styled.div`
   `}
 `;
 
+// プログレスバーコンポーネント
+const ProgressBar = styled.div`
+  width: 100%;
+  height: 6px;
+  background: ${colors.border};
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 10px 0;
+`;
+
+const ProgressFill = styled.div`
+  height: 100%;
+  background: linear-gradient(90deg, ${colors.primary}, ${colors.accent});
+  transition: width 0.3s ease;
+  width: ${props => props.progress}%;
+`;
+
+// パフォーマンス統計表示
+const StatsCard = styled.div`
+  background: ${colors.background};
+  border-radius: 8px;
+  padding: 15px;
+  margin: 15px 0;
+  border: 1px solid ${colors.border};
+`;
+
+const StatItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 5px 0;
+  font-size: 0.9rem;
+  
+  strong {
+    color: ${colors.primary};
+  }
+`;
+
 /**
- * PDF生成メインコンポーネント
+ * PDF生成メインコンポーネント（最適化版）
  */
 const PDFGenerator = ({
   documentData = null,
   documentType = 'invoice', // 'invoice' or 'estimate'
   onGenerated = () => {},
   onError = () => {},
+  enableOptimization = true, // 最適化機能の有効/無効
+  showStats = true, // 統計情報の表示
 }) => {
   // ステート管理
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
+  const [progress, setProgress] = useState(0);
+  const [optimizationStats, setOptimizationStats] = useState(null);
   const [companyInfo, setCompanyInfo] = useState({
     name: '造園業株式会社',
     postal_code: '123-0000',
@@ -368,6 +414,25 @@ const PDFGenerator = ({
 
   const logoInputRef = useRef(null);
   const sealInputRef = useRef(null);
+  const pdfOptimizerRef = useRef(null);
+
+  // PDF最適化インスタンスの初期化
+  useEffect(() => {
+    if (enableOptimization) {
+      pdfOptimizerRef.current = getPDFOptimizer({
+        cacheSize: 20 * 1024 * 1024, // 20MB
+        enableCache: true,
+        enableCompression: true,
+      });
+    }
+
+    return () => {
+      // クリーンアップ
+      if (pdfOptimizerRef.current) {
+        pdfOptimizerRef.current.cleanup();
+      }
+    };
+  }, [enableOptimization]);
 
   // サンプルデータ
   const sampleData = {
@@ -460,15 +525,71 @@ const PDFGenerator = ({
   const generatePDF = useCallback(async () => {
     setLoading(true);
     setStatus(null);
+    setProgress(0);
 
     try {
       const dataToUse = documentData || sampleData;
 
-      const pdf = await generateLandscapingInvoicePDF(dataToUse, companyInfo, null, {
-        quality: 'high',
-        includeMetadata: true,
-        optimizeForPrint: true,
-      });
+      let pdf;
+      
+      if (enableOptimization && pdfOptimizerRef.current) {
+        // 最適化されたPDF生成
+        const optimizer = pdfOptimizerRef.current;
+        
+        // プログレス更新関数
+        const updateProgress = (value) => {
+          setProgress(Math.min(value, 100));
+        };
+
+        // 最適化オプション
+        const optimizationOptions = {
+          quality: 'high',
+          includeMetadata: true,
+          optimizeForPrint: true,
+          onProgress: updateProgress,
+        };
+
+        // データ前処理の進捗
+        updateProgress(10);
+        
+        // 統一されたPDF生成関数を使用
+        const generator = documentType === 'invoice' 
+          ? generateLandscapingInvoicePDF 
+          : generateInvoicePDF;
+
+        updateProgress(20);
+        
+        // 最適化されたPDF生成
+        pdf = await optimizer.generateOptimizedPDF(
+          { ...dataToUse, companyInfo },
+          async (data, options) => {
+            updateProgress(50);
+            const result = await generator(data, data.companyInfo, null, options);
+            updateProgress(90);
+            return result;
+          },
+          optimizationOptions
+        );
+        
+        updateProgress(100);
+
+        // 統計情報の取得
+        if (showStats) {
+          const stats = optimizer.getOptimizationStats();
+          setOptimizationStats(stats);
+        }
+      } else {
+        // 通常のPDF生成
+        const generator = documentType === 'invoice' 
+          ? generateLandscapingInvoicePDF 
+          : generateInvoicePDF;
+          
+        pdf = await generator(dataToUse, companyInfo, null, {
+          quality: 'high',
+          includeMetadata: true,
+          optimizeForPrint: true,
+        });
+      }
 
       setStatus({
         type: 'success',
@@ -486,8 +607,9 @@ const PDFGenerator = ({
       onError(error);
     } finally {
       setLoading(false);
+      setProgress(0);
     }
-  }, [documentData, sampleData, companyInfo, onGenerated, onError]);
+  }, [documentData, sampleData, companyInfo, documentType, enableOptimization, showStats, onGenerated, onError]);
 
   const downloadPDF = useCallback(async () => {
     setLoading(true);
@@ -700,6 +822,13 @@ const PDFGenerator = ({
         </PreviewCard>
       </PreviewSection>
 
+      {/* プログレスバー */}
+      {loading && progress > 0 && (
+        <ProgressBar>
+          <ProgressFill progress={progress} />
+        </ProgressBar>
+      )}
+
       {/* ステータス表示 */}
       {status && (
         <StatusMessage type={status.type}>
@@ -710,8 +839,60 @@ const PDFGenerator = ({
         </StatusMessage>
       )}
 
+      {/* 最適化統計情報 */}
+      {showStats && optimizationStats && (
+        <StatsCard>
+          <SectionTitle>
+            <BarChart size={20} />
+            パフォーマンス統計
+          </SectionTitle>
+          
+          {optimizationStats.cache && (
+            <>
+              <StatItem>
+                <span>キャッシュヒット率:</span>
+                <strong>{(optimizationStats.cache.hitRate * 100).toFixed(0)}%</strong>
+              </StatItem>
+              <StatItem>
+                <span>キャッシュサイズ:</span>
+                <strong>{(optimizationStats.cache.currentSize / 1024 / 1024).toFixed(1)} MB</strong>
+              </StatItem>
+            </>
+          )}
+          
+          {optimizationStats.memory?.supported && (
+            <>
+              <StatItem>
+                <span>メモリ使用量:</span>
+                <strong>{optimizationStats.memory.usedJSHeapSize}</strong>
+              </StatItem>
+            </>
+          )}
+        </StatsCard>
+      )}
+
       {/* アクションボタン */}
       <ActionsSection>
+        {enableOptimization && (
+          <ActionButton 
+            variant="secondary" 
+            onClick={() => {
+              if (pdfOptimizerRef.current) {
+                pdfOptimizerRef.current.cleanup();
+                setOptimizationStats(null);
+                setStatus({
+                  type: 'info',
+                  message: 'キャッシュをクリアしました',
+                });
+              }
+            }}
+            disabled={loading}
+            title="PDFキャッシュをクリア"
+          >
+            <Zap size={18} />
+            キャッシュクリア
+          </ActionButton>
+        )}
         <ActionButton variant="primary" onClick={previewPDF} disabled={loading}>
           {loading ? <Loader size={18} className="animate-spin" /> : <Eye size={18} />}
           プレビュー
