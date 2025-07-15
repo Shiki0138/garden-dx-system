@@ -499,7 +499,7 @@ const MobileMenu = ({ onClose }) => {
         </MenuHeader>
         <MenuList>
           {menuItems.map((item, index) => (
-            <MenuItem key={index} onClick={() => window.location.href = item.path}>
+            <MenuItem key={index} onClick={() => { window.location.href = item.path; }}>
               <item.icon size={20} />
               <span>{item.label}</span>
               <ChevronRight size={16} />

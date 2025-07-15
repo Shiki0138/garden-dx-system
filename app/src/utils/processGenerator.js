@@ -179,7 +179,7 @@ export const calculateProcessDuration = (item, projectScale, season) => {
   const category = categorizeEstimateItem(item);
   
   // 基本工期
-  let baseDuration = category.duration;
+  const baseDuration = category.duration;
   
   // 金額に基づく工期調整
   const itemAmount = item.amount || 0;
@@ -554,10 +554,11 @@ const generateRecommendations = (processes, metadata) => {
 // 工程表データをエクスポート
 export const exportProcessData = (processData, format = 'json') => {
   switch (format) {
-    case 'json':
+    case 'json': {
       return JSON.stringify(processData, null, 2);
+    }
     
-    case 'csv':
+    case 'csv': {
       const headers = ['工程名', '開始日', '終了日', '期間', 'カテゴリ', '金額', '進捗'];
       const rows = processData.processes.map(p => [
         p.name,
@@ -570,6 +571,7 @@ export const exportProcessData = (processData, format = 'json') => {
       ]);
       
       return [headers, ...rows].map(row => row.join(',')).join('\n');
+    }
     
     default:
       return processData;
