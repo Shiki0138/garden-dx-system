@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext';
 import { DemoModeProvider, useDemoMode } from './contexts/DemoModeContext';
@@ -8,11 +8,15 @@ import { LandscapingErrorBoundary } from './components/ui/ErrorBoundary';
 import DemoBanner from './components/DemoBanner';
 import DemoGuide from './components/DemoGuide';
 import LoginPage from './components/auth/LoginPage';
+import EstimateCreator from './components/EstimateCreator';
+import EstimateWizardPro from './components/EstimateWizardPro';
+import PDFGenerator from './components/PDFGenerator';
 import GardenDXMain from './components/GardenDXMain';
 import { checkEnvironmentVariables } from './utils/apiErrorHandler';
 import { log } from './utils/logger';
 import { initNotificationSystem } from './utils/notifications';
 import { initMonitoring } from './utils/monitoring';
+import DebugInfo from './components/DebugInfo';
 
 // アプリケーションコンテンツ
 const AppContent = () => {
@@ -28,21 +32,22 @@ const AppContent = () => {
     } else {
       document.body.classList.remove('demo-mode');
     }
+
+    return () => {
+      document.body.classList.remove('demo-mode');
+    };
   }, [isDemoMode]);
 
-  // アプリケーション初期化
+  // システム初期化（通知、監視、環境変数チェック）
   useEffect(() => {
     // 通知システムの初期化
     initNotificationSystem();
-    
-    // 監視システムの初期化
-    initMonitoring();
-    
-    // セキュリティヘッダー設定
-    document.querySelector('meta[name="viewport"]')?.setAttribute('content', 
-      'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
-    );
-    
+
+    // 本番環境監視システムの初期化
+    if (process.env.REACT_APP_PERFORMANCE_MONITORING === 'true') {
+      initMonitoring();
+    }
+
     // 環境変数チェック（開発環境のみ）
     if (process.env.REACT_APP_ENVIRONMENT === 'development') {
       const envCheck = checkEnvironmentVariables();
@@ -108,28 +113,29 @@ const AppContent = () => {
   return (
     <Router>
       <div className="App">
+        {/* <DebugInfo /> */}
         {isDemoMode && <DemoBanner />}
         <GardenDXMain />
         {showGuide && <DemoGuide onClose={handleCloseGuide} />}
       </div>
     </Router>
   );
-};
+}
 
-// メインアプリケーション
+// OldNavigationコンポーネントは新しいUIでは使用されていないため削除
+
+// メインアプリコンポーネント
 function App() {
   return (
-    <DemoModeProvider>
-      <AuthProvider>
+    <ErrorBoundary>
+      <DemoModeProvider>
         <SupabaseAuthProvider>
-          <ErrorBoundary>
-            <LandscapingErrorBoundary>
-              <AppContent />
-            </LandscapingErrorBoundary>
-          </ErrorBoundary>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
         </SupabaseAuthProvider>
-      </AuthProvider>
-    </DemoModeProvider>
+      </DemoModeProvider>
+    </ErrorBoundary>
   );
 }
 
