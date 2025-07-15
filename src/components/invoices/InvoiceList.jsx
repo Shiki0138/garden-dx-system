@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useTable, useSortBy, useFilters, usePagination } from '@tanstack/react-table';
-import { useAuth, useInvoicePermissions, ManagerOnlyComponent, ProtectedComponent, PERMISSIONS } from '../../hooks/useAuth';
+import {
+  useAuth,
+  useInvoicePermissions,
+  ManagerOnlyComponent,
+  ProtectedComponent,
+  PERMISSIONS,
+} from '../../hooks/useAuth';
 
 const Container = styled.div`
   padding: 20px;
   background-color: #f8f9fa;
   min-height: 100vh;
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 `;
 
 const Header = styled.div`
@@ -17,7 +27,15 @@ const Header = styled.div`
   padding: 20px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    text-align: center;
+  }
 `;
 
 const Title = styled.h1`
@@ -37,9 +55,17 @@ const CreateButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
+  min-height: 44px; /* タッチ操作のための最小サイズ */
 
   &:hover {
     background: #219a52;
+  }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 16px;
   }
 `;
 
@@ -50,7 +76,14 @@ const FilterContainer = styled.div`
   padding: 15px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
 `;
 
 const FilterSelect = styled.select`
@@ -59,6 +92,13 @@ const FilterSelect = styled.select`
   border-radius: 4px;
   font-size: 14px;
   min-width: 120px;
+  min-height: 44px; /* タッチ操作のための最小サイズ */
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    width: 100%;
+    font-size: 16px; /* iOS Safari のズーム防止 */
+  }
 `;
 
 const SearchInput = styled.input`
@@ -67,18 +107,36 @@ const SearchInput = styled.input`
   border-radius: 4px;
   font-size: 14px;
   min-width: 200px;
+  min-height: 44px; /* タッチ操作のための最小サイズ */
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    width: 100%;
+    font-size: 16px; /* iOS Safari のズーム防止 */
+  }
 `;
 
 const TableContainer = styled.div`
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    min-width: 800px; /* 最小幅を設定して横スクロールを可能にする */
+  }
 `;
 
 const TableHeader = styled.th`
@@ -98,7 +156,7 @@ const TableHeader = styled.th`
 
 const TableRow = styled.tr`
   border-bottom: 1px solid #eee;
-  
+
   &:hover {
     background: #f8f9fa;
   }
@@ -115,9 +173,9 @@ const StatusBadge = styled.span`
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
-  
+
   ${props => {
-    switch(props.status) {
+    switch (props.status) {
       case '未送付':
         return 'background: #f39c12; color: white;';
       case '送付済':
@@ -142,20 +200,36 @@ const ActionButton = styled.button`
   cursor: pointer;
   margin-right: 5px;
   transition: all 0.2s;
+  min-height: 36px; /* タッチ操作のための最小サイズ */
 
   &:hover {
     background: #3498db;
     color: white;
   }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+    font-size: 14px;
+    margin-right: 3px;
+    min-height: 40px;
+  }
 `;
 
 const PaginationContainer = styled.div`
   display: flex;
-  justify-content: between;
+  justify-content: space-between;
   align-items: center;
   padding: 15px;
   background: #f8f9fa;
   border-top: 1px solid #eee;
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
 `;
 
 const InvoiceList = () => {
@@ -163,7 +237,7 @@ const InvoiceList = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // 権限チェック
   const { user, isManager } = useAuth();
   const invoicePermissions = useInvoicePermissions();
@@ -184,7 +258,7 @@ const InvoiceList = () => {
             due_date: '2024-07-15',
             total_amount: 1250000,
             status: '送付済',
-            payment_status: '未払い'
+            payment_status: '未払い',
           },
           {
             id: 2,
@@ -195,8 +269,8 @@ const InvoiceList = () => {
             due_date: '2024-07-20',
             total_amount: 850000,
             status: '未送付',
-            payment_status: '未払い'
-          }
+            payment_status: '未払い',
+          },
         ];
         setInvoices(mockData);
       } catch (error) {
@@ -209,15 +283,15 @@ const InvoiceList = () => {
     fetchInvoices();
   }, []);
 
-  const formatCurrency = (amount) => {
+  const formatCurrency = amount => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount);
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     return new Date(dateString).toLocaleDateString('ja-JP');
   };
 
@@ -231,23 +305,23 @@ const InvoiceList = () => {
     console.log('新規請求書作成');
   };
 
-  const handleViewInvoice = (invoiceId) => {
+  const handleViewInvoice = invoiceId => {
     // TODO: 請求書詳細画面への遷移
     console.log('請求書詳細表示:', invoiceId);
   };
 
-  const handleDownloadPDF = (invoiceId) => {
+  const handleDownloadPDF = invoiceId => {
     // TODO: PDF ダウンロード機能
     console.log('PDF ダウンロード:', invoiceId);
   };
 
-  const handleSendInvoice = (invoiceId) => {
+  const handleSendInvoice = invoiceId => {
     // 権限チェック：経営者のみ請求書送付可能
     if (!invoicePermissions.canSend) {
       alert('請求書の送付権限がありません。');
       return;
     }
-    
+
     if (window.confirm('この請求書を送付済みに変更しますか？')) {
       // TODO: 請求書送付API呼び出し
       console.log('請求書送付:', invoiceId);
@@ -257,9 +331,10 @@ const InvoiceList = () => {
 
   const filteredInvoices = invoices.filter(invoice => {
     const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
-    const matchesSearch = invoice.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      invoice.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
@@ -282,29 +357,24 @@ const InvoiceList = () => {
             </div>
           }
         >
-          <CreateButton onClick={handleCreateInvoice}>
-            新規請求書作成
-          </CreateButton>
+          <CreateButton onClick={handleCreateInvoice}>新規請求書作成</CreateButton>
         </ManagerOnlyComponent>
       </Header>
 
       <FilterContainer>
-        <FilterSelect 
-          value={statusFilter} 
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
+        <FilterSelect value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
           <option value="all">すべて</option>
           <option value="未送付">未送付</option>
           <option value="送付済">送付済</option>
           <option value="支払済">支払済</option>
           <option value="滞納">滞納</option>
         </FilterSelect>
-        
+
         <SearchInput
           type="text"
           placeholder="顧客名・案件名・請求書番号で検索"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
         />
       </FilterContainer>
 
@@ -324,7 +394,7 @@ const InvoiceList = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredInvoices.map((invoice) => (
+            {filteredInvoices.map(invoice => (
               <TableRow key={invoice.id}>
                 <TableCell>{invoice.invoice_number}</TableCell>
                 <TableCell>{invoice.customer_name}</TableCell>
@@ -333,9 +403,7 @@ const InvoiceList = () => {
                 <TableCell>{formatDate(invoice.due_date)}</TableCell>
                 <TableCell>{formatCurrency(invoice.total_amount)}</TableCell>
                 <TableCell>
-                  <StatusBadge status={invoice.status}>
-                    {invoice.status}
-                  </StatusBadge>
+                  <StatusBadge status={invoice.status}>{invoice.status}</StatusBadge>
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={invoice.payment_status}>
@@ -343,16 +411,12 @@ const InvoiceList = () => {
                   </StatusBadge>
                 </TableCell>
                 <TableCell>
-                  <ActionButton onClick={() => handleViewInvoice(invoice.id)}>
-                    詳細
-                  </ActionButton>
-                  <ActionButton onClick={() => handleDownloadPDF(invoice.id)}>
-                    PDF
-                  </ActionButton>
+                  <ActionButton onClick={() => handleViewInvoice(invoice.id)}>詳細</ActionButton>
+                  <ActionButton onClick={() => handleDownloadPDF(invoice.id)}>PDF</ActionButton>
                   <ManagerOnlyComponent>
-                    <ActionButton 
+                    <ActionButton
                       onClick={() => handleSendInvoice(invoice.id)}
-                      style={{ background: '#27ae60' }}
+                      style={{ background: '#27ae60', color: 'white' }}
                     >
                       送付
                     </ActionButton>

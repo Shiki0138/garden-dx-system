@@ -13,22 +13,22 @@ const apiClient = axios.create({
 
 // 認証トークンを自動付与するインターセプター
 apiClient.interceptors.request.use(
-  (config) => {
+  config => {
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   }
 );
 
 // レスポンスエラーハンドリング
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     if (error.response?.status === 401) {
       // 認証エラーの場合はログイン画面へリダイレクト
       localStorage.removeItem('authToken');
@@ -62,7 +62,7 @@ export const invoiceApi = {
    * @param {number} invoiceId - 請求書ID
    * @returns {Promise<Object>} - 請求書詳細
    */
-  getInvoice: async (invoiceId) => {
+  getInvoice: async invoiceId => {
     try {
       const response = await apiClient.get(`/invoices/${invoiceId}`);
       return response.data;
@@ -77,7 +77,7 @@ export const invoiceApi = {
    * @param {Object} invoiceData - 請求書データ
    * @returns {Promise<Object>} - 作成された請求書
    */
-  createInvoice: async (invoiceData) => {
+  createInvoice: async invoiceData => {
     try {
       const response = await apiClient.post('/invoices', invoiceData);
       return response.data;
@@ -108,7 +108,7 @@ export const invoiceApi = {
    * @param {number} invoiceId - 請求書ID
    * @returns {Promise<void>}
    */
-  deleteInvoice: async (invoiceId) => {
+  deleteInvoice: async invoiceId => {
     try {
       await apiClient.delete(`/invoices/${invoiceId}`);
     } catch (error) {
@@ -122,7 +122,7 @@ export const invoiceApi = {
    * @param {number} estimateId - 見積ID
    * @returns {Promise<Object>} - 生成された請求書
    */
-  createInvoiceFromEstimate: async (estimateId) => {
+  createInvoiceFromEstimate: async estimateId => {
     try {
       const response = await apiClient.post(`/invoices/from-estimate/${estimateId}`);
       return response.data;
@@ -137,10 +137,10 @@ export const invoiceApi = {
    * @param {number} invoiceId - 請求書ID
    * @returns {Promise<Blob>} - PDFファイル
    */
-  downloadInvoicePDF: async (invoiceId) => {
+  downloadInvoicePDF: async invoiceId => {
     try {
       const response = await apiClient.get(`/invoices/${invoiceId}/pdf`, {
-        responseType: 'blob'
+        responseType: 'blob',
       });
       return response.data;
     } catch (error) {
@@ -176,14 +176,14 @@ export const invoiceApi = {
     try {
       const response = await apiClient.patch(`/invoices/${invoiceId}/payment-status`, {
         payment_status: paymentStatus,
-        paid_date: paidDate
+        paid_date: paidDate,
       });
       return response.data;
     } catch (error) {
       console.error('支払状況更新エラー:', error);
       throw error;
     }
-  }
+  },
 };
 
 /**
@@ -202,7 +202,7 @@ export const customerApi = {
       console.error('顧客一覧取得エラー:', error);
       throw error;
     }
-  }
+  },
 };
 
 /**
@@ -223,7 +223,7 @@ export const projectApi = {
       console.error('プロジェクト一覧取得エラー:', error);
       throw error;
     }
-  }
+  },
 };
 
 /**
@@ -251,7 +251,7 @@ export const estimateApi = {
    * @param {number} estimateId - 見積ID
    * @returns {Promise<Object>} - 見積詳細
    */
-  getEstimate: async (estimateId) => {
+  getEstimate: async estimateId => {
     try {
       const response = await apiClient.get(`/estimates/${estimateId}`);
       return response.data;
@@ -259,7 +259,7 @@ export const estimateApi = {
       console.error('見積詳細取得エラー:', error);
       throw error;
     }
-  }
+  },
 };
 
 /**
@@ -271,7 +271,7 @@ export const utils = {
    * @param {Error} error - エラーオブジェクト
    * @returns {string} - エラーメッセージ
    */
-  getErrorMessage: (error) => {
+  getErrorMessage: error => {
     if (error.response?.data?.message) {
       return error.response.data.message;
     }
@@ -305,7 +305,7 @@ export const utils = {
    * @param {string} dateString - 日付文字列
    * @returns {string} - フォーマットされた日付
    */
-  formatDate: (dateString) => {
+  formatDate: dateString => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('ja-JP');
   },
@@ -315,14 +315,14 @@ export const utils = {
    * @param {number} amount - 金額
    * @returns {string} - フォーマットされた金額
    */
-  formatCurrency: (amount) => {
+  formatCurrency: amount => {
     if (!amount) return '¥0';
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount);
-  }
+  },
 };
 
 export default apiClient;

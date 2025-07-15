@@ -3,6 +3,8 @@
  * 権限判定処理の高速化・セキュリティオーバーヘッド削減
  */
 
+import React from 'react';
+
 // 権限キャッシュシステム
 class RBACCache {
   constructor() {
@@ -20,17 +22,17 @@ class RBACCache {
   // 権限結果をキャッシュ
   set(userId, resource, action, result) {
     const key = this.generateKey(userId, resource, action);
-    
+
     // キャッシュサイズ制限
     if (this.cache.size >= this.maxCacheSize) {
       const firstKey = this.cache.keys().next().value;
       this.cache.delete(firstKey);
     }
-    
+
     this.cache.set(key, {
       result,
       timestamp: Date.now(),
-      accessCount: 1
+      accessCount: 1,
     });
   }
 
@@ -38,15 +40,15 @@ class RBACCache {
   get(userId, resource, action) {
     const key = this.generateKey(userId, resource, action);
     const item = this.cache.get(key);
-    
+
     if (!item) return null;
-    
+
     // TTL チェック
     if (Date.now() - item.timestamp > this.ttl) {
       this.cache.delete(key);
       return null;
     }
-    
+
     // アクセス回数更新
     item.accessCount++;
     return item.result;
@@ -56,7 +58,7 @@ class RBACCache {
   setUserRole(userId, role) {
     this.roleCache.set(userId, {
       role,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
@@ -64,12 +66,12 @@ class RBACCache {
   getUserRole(userId) {
     const item = this.roleCache.get(userId);
     if (!item) return null;
-    
+
     if (Date.now() - item.timestamp > this.ttl) {
       this.roleCache.delete(userId);
       return null;
     }
-    
+
     return item.role;
   }
 
@@ -84,20 +86,20 @@ class RBACCache {
     return {
       cacheSize: this.cache.size,
       roleCacheSize: this.roleCache.size,
-      hitRate: this.calculateHitRate()
+      hitRate: this.calculateHitRate(),
     };
   }
 
   calculateHitRate() {
     let totalAccess = 0;
     let hits = 0;
-    
+
     for (const item of this.cache.values()) {
       totalAccess += item.accessCount;
       if (item.accessCount > 1) hits += item.accessCount - 1;
     }
-    
-    return totalAccess > 0 ? (hits / totalAccess * 100).toFixed(2) : 0;
+
+    return totalAccess > 0 ? ((hits / totalAccess) * 100).toFixed(2) : 0;
   }
 }
 
@@ -113,7 +115,7 @@ const PERMISSION_MATRIX = {
     projects: ['read', 'create', 'update', 'delete'],
     users: ['read', 'create', 'update', 'delete'],
     reports: ['read', 'export'],
-    settings: ['read', 'update']
+    settings: ['read', 'update'],
   },
   admin: {
     estimates: ['read', 'create', 'update', 'delete', 'approve'],
@@ -122,7 +124,7 @@ const PERMISSION_MATRIX = {
     projects: ['read', 'create', 'update', 'delete'],
     users: ['read', 'create', 'update'],
     reports: ['read', 'export'],
-    settings: ['read']
+    settings: ['read'],
   },
   manager: {
     estimates: ['read', 'create', 'update', 'approve'],
@@ -131,7 +133,7 @@ const PERMISSION_MATRIX = {
     projects: ['read', 'create', 'update'],
     users: ['read'],
     reports: ['read'],
-    settings: ['read']
+    settings: ['read'],
   },
   employee: {
     estimates: ['read', 'create', 'update'],
@@ -139,7 +141,7 @@ const PERMISSION_MATRIX = {
     customers: ['read', 'create', 'update'],
     projects: ['read', 'update'],
     users: ['read'],
-    reports: ['read']
+    reports: ['read'],
   },
   viewer: {
     estimates: ['read'],
@@ -147,8 +149,8 @@ const PERMISSION_MATRIX = {
     customers: ['read'],
     projects: ['read'],
     users: ['read'],
-    reports: ['read']
-  }
+    reports: ['read'],
+  },
 };
 
 // 役割階層（数値で高速比較）
@@ -157,7 +159,7 @@ const ROLE_HIERARCHY = {
   admin: 4,
   manager: 3,
   employee: 2,
-  viewer: 1
+  viewer: 1,
 };
 
 /**
@@ -165,21 +167,21 @@ const ROLE_HIERARCHY = {
  */
 export const checkPermissionFast = (user, resource, action) => {
   if (!user || !resource || !action) return false;
-  
+
   const userId = user.id || user.user_id;
   const userRole = user.user_metadata?.role || user.role || 'viewer';
-  
+
   // キャッシュから確認
   const cached = rbacCache.get(userId, resource, action);
   if (cached !== null) return cached;
-  
+
   // 権限判定実行
   const result = executePermissionCheck(userRole, resource, action);
-  
+
   // 結果をキャッシュ
   rbacCache.set(userId, resource, action, result);
   rbacCache.setUserRole(userId, userRole);
-  
+
   return result;
 };
 
@@ -191,12 +193,12 @@ const executePermissionCheck = (userRole, resource, action) => {
   if (!ROLE_HIERARCHY[userRole] || !PERMISSION_MATRIX[userRole]) {
     return false;
   }
-  
+
   const rolePermissions = PERMISSION_MATRIX[userRole];
   const resourcePermissions = rolePermissions[resource];
-  
+
   if (!resourcePermissions) return false;
-  
+
   // 配列検索の最適化（includes より indexOf を使用）
   return resourcePermissions.indexOf(action) !== -1;
 };
@@ -206,14 +208,14 @@ const executePermissionCheck = (userRole, resource, action) => {
  */
 export const checkMultiplePermissions = (user, permissions) => {
   if (!user || !Array.isArray(permissions)) return {};
-  
+
   const results = {};
-  
+
   permissions.forEach(({ resource, action, key }) => {
     const permKey = key || `${resource}_${action}`;
     results[permKey] = checkPermissionFast(user, resource, action);
   });
-  
+
   return results;
 };
 
@@ -223,7 +225,7 @@ export const checkMultiplePermissions = (user, permissions) => {
 export const hasRoleLevel = (userRole, requiredRole) => {
   const userLevel = ROLE_HIERARCHY[userRole] || 0;
   const requiredLevel = ROLE_HIERARCHY[requiredRole] || 0;
-  
+
   return userLevel >= requiredLevel;
 };
 
@@ -232,13 +234,13 @@ export const hasRoleLevel = (userRole, requiredRole) => {
  */
 export const checkResourceAccess = (user, resource, resourceData) => {
   if (!user || !resource || !resourceData) return false;
-  
+
   const userCompanyId = user.company_id || user.user_metadata?.company_id;
   const resourceCompanyId = resourceData.company_id;
-  
+
   // 会社レベルのアクセス制御
   if (userCompanyId !== resourceCompanyId) return false;
-  
+
   return true;
 };
 
@@ -248,7 +250,7 @@ export const checkResourceAccess = (user, resource, resourceData) => {
 export const checkConditionalPermission = (user, resource, action, context = {}) => {
   // 基本権限チェック
   if (!checkPermissionFast(user, resource, action)) return false;
-  
+
   // 条件別追加チェック
   switch (resource) {
     case 'estimates':
@@ -267,7 +269,7 @@ export const checkConditionalPermission = (user, resource, action, context = {})
  */
 const checkEstimatePermission = (user, action, context) => {
   const { estimate, status } = context;
-  
+
   switch (action) {
     case 'approve':
       // 承認権限: マネージャー以上 & ドラフト状態
@@ -285,7 +287,7 @@ const checkEstimatePermission = (user, action, context) => {
  */
 const checkInvoicePermission = (user, action, context) => {
   const { invoice, paymentStatus } = context;
-  
+
   switch (action) {
     case 'send':
       // 送信権限: マネージャー以上 & 未送信状態
@@ -303,7 +305,7 @@ const checkInvoicePermission = (user, action, context) => {
  */
 const checkProjectPermission = (user, action, context) => {
   const { project, userId } = context;
-  
+
   switch (action) {
     case 'update':
       // 更新権限: 担当者 または マネージャー以上
@@ -333,29 +335,38 @@ export const getRBACStats = () => rbacCache.getStats();
  */
 export const clearRBACCache = () => rbacCache.clear();
 
-/**
- * React Hook: usePermissions（最適化版）
- */
+const rbacOptimizer = {
+  checkPermissionFast,
+  checkMultiplePermissions,
+  checkEstimatePermission,
+  checkInvoicePermission,
+  getRBACStats,
+};
+
+export default rbacOptimizer;
+
+// React Hook: usePermissions（最適化版）
 export const usePermissions = (user, permissionsList) => {
-  const [permissions, setPermissions] = useState({});
-  
-  useEffect(() => {
+  const [permissions, setPermissions] = React.useState({});
+
+  React.useEffect(() => {
     if (!user || !permissionsList) return;
-    
+
     const results = checkMultiplePermissions(user, permissionsList);
     setPermissions(results);
   }, [user, permissionsList]);
-  
+
   return permissions;
 };
 
-export default {
+// Legacy default export for compatibility
+export const legacyDefault = {
   checkPermissionFast,
   checkMultiplePermissions,
+  usePermissions,
   hasRoleLevel,
   checkResourceAccess,
   checkConditionalPermission,
   getRBACStats,
   clearRBACCache,
-  usePermissions
 };

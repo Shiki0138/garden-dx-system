@@ -12,38 +12,38 @@ export class DependencySecurityAuditor {
       vulnerabilities: [],
       outdatedDependencies: [],
       securityRecommendations: [],
-      complianceStatus: 'unknown'
+      complianceStatus: 'unknown',
     };
-    
+
     // セキュリティ関連ライブラリのリスト
     this.securityDependencies = {
       '@supabase/supabase-js': {
         current: '^2.50.2',
         category: 'authentication',
-        securityImportance: 'critical'
+        securityImportance: 'critical',
       },
-      'axios': {
+      axios: {
         current: '^1.4.0',
         category: 'http-client',
-        securityImportance: 'high'
+        securityImportance: 'high',
       },
-      'dompurify': {
+      dompurify: {
         current: '^3.2.6',
         category: 'xss-protection',
-        securityImportance: 'critical'
+        securityImportance: 'critical',
       },
-      'react': {
+      react: {
         current: '^18.2.0',
         category: 'framework',
-        securityImportance: 'high'
+        securityImportance: 'high',
       },
       'react-dom': {
         current: '^18.2.0',
         category: 'framework',
-        securityImportance: 'high'
-      }
+        securityImportance: 'high',
+      },
     };
-    
+
     // 既知の脆弱性データベース（簡易版）
     this.knownVulnerabilities = {
       'nth-check': {
@@ -51,14 +51,14 @@ export class DependencySecurityAuditor {
         severity: 'high',
         description: 'Inefficient Regular Expression Complexity',
         cve: 'GHSA-rp65-9cf3-cjxr',
-        fixAvailable: true
+        fixAvailable: true,
       },
-      'svgo': {
+      svgo: {
         versions: '1.0.0 - 1.3.2',
         severity: 'medium',
         description: 'Vulnerable dependency chain',
-        fixAvailable: true
-      }
+        fixAvailable: true,
+      },
     };
   }
 
@@ -67,37 +67,36 @@ export class DependencySecurityAuditor {
    */
   async performDependencyAudit() {
     console.log('🔍 依存関係セキュリティ監査開始...');
-    
+
     try {
       // 1. セキュリティ関連ライブラリ更新確認
       await this.auditSecurityLibraries();
-      
+
       // 2. JWT・認証ライブラリ更新チェック
       await this.auditAuthenticationLibraries();
-      
+
       // 3. 暗号化・ハッシュライブラリ更新確認
       await this.auditCryptographyLibraries();
-      
+
       // 4. セキュリティ監査ツール依存関係最新化
       await this.auditSecurityTools();
-      
+
       // 5. 既知の脆弱性チェック
       await this.checkKnownVulnerabilities();
-      
+
       // 6. ライセンス確認
       await this.auditLicenseCompliance();
-      
+
       // 総合評価
       this.calculateComplianceStatus();
-      
+
       console.log('✅ 依存関係セキュリティ監査完了');
       return this.generateDependencyReport();
-      
     } catch (error) {
       console.error('❌ 依存関係監査エラー:', error);
-      return { 
+      return {
         error: '依存関係監査中にエラーが発生しました',
-        details: error.message 
+        details: error.message,
       };
     }
   }
@@ -107,7 +106,7 @@ export class DependencySecurityAuditor {
    */
   async auditSecurityLibraries() {
     console.log('🔐 セキュリティライブラリ監査中...');
-    
+
     const securityLibraryChecks = [
       {
         name: '@supabase/supabase-js',
@@ -115,7 +114,7 @@ export class DependencySecurityAuditor {
         latest: '2.50.2', // 最新版（仮想）
         updateRecommended: false,
         securityImpact: 'critical',
-        notes: 'Supabase認証・データベースクライアント'
+        notes: 'Supabase認証・データベースクライアント',
       },
       {
         name: 'dompurify',
@@ -123,7 +122,7 @@ export class DependencySecurityAuditor {
         latest: '3.2.6',
         updateRecommended: false,
         securityImpact: 'critical',
-        notes: 'XSS攻撃防止ライブラリ'
+        notes: 'XSS攻撃防止ライブラリ',
       },
       {
         name: 'axios',
@@ -131,8 +130,8 @@ export class DependencySecurityAuditor {
         latest: '1.6.2', // より新しいバージョンが利用可能
         updateRecommended: true,
         securityImpact: 'high',
-        notes: 'HTTPクライアントライブラリ - セキュリティ修正含む'
-      }
+        notes: 'HTTPクライアントライブラリ - セキュリティ修正含む',
+      },
     ];
 
     securityLibraryChecks.forEach(lib => {
@@ -143,9 +142,9 @@ export class DependencySecurityAuditor {
           latest: lib.latest,
           impact: lib.securityImpact,
           reason: 'セキュリティ修正を含む更新が利用可能',
-          notes: lib.notes
+          notes: lib.notes,
         });
-        
+
         this.auditResults.securityRecommendations.push(
           `${lib.name} を ${lib.current} から ${lib.latest} に更新してください`
         );
@@ -158,7 +157,7 @@ export class DependencySecurityAuditor {
    */
   async auditAuthenticationLibraries() {
     console.log('🔑 認証ライブラリ監査中...');
-    
+
     const authLibraryChecks = [
       {
         name: '@supabase/supabase-js',
@@ -168,28 +167,19 @@ export class DependencySecurityAuditor {
           'JWT トークン検証',
           'セッション管理',
           'RLS（Row Level Security）',
-          'リアルタイム認証'
+          'リアルタイム認証',
         ],
         vulnerabilities: [],
-        recommendations: [
-          'RLS ポリシーの適切な設定を確認',
-          'セッション有効期限の適切な設定'
-        ]
+        recommendations: ['RLS ポリシーの適切な設定を確認', 'セッション有効期限の適切な設定'],
       },
       {
         name: 'React',
         purpose: 'コンポーネントレベル認証',
         currentVersion: '18.2.0',
-        securityFeatures: [
-          'XSS攻撃防止',
-          'CSRF対策支援'
-        ],
+        securityFeatures: ['XSS攻撃防止', 'CSRF対策支援'],
         vulnerabilities: [],
-        recommendations: [
-          'dangerouslySetInnerHTML の使用を避ける',
-          '認証状態の適切な管理'
-        ]
-      }
+        recommendations: ['dangerouslySetInnerHTML の使用を避ける', '認証状態の適切な管理'],
+      },
     ];
 
     authLibraryChecks.forEach(lib => {
@@ -211,7 +201,7 @@ export class DependencySecurityAuditor {
    */
   async auditCryptographyLibraries() {
     console.log('🔒 暗号化ライブラリ監査中...');
-    
+
     const cryptoLibraryChecks = [
       {
         name: 'Web Crypto API',
@@ -219,7 +209,7 @@ export class DependencySecurityAuditor {
         algorithms: ['AES-GCM', 'SHA-256', 'HMAC'],
         status: 'ブラウザネイティブ実装',
         securityLevel: 'excellent',
-        notes: '最新のブラウザで利用可能な標準暗号化API'
+        notes: '最新のブラウザで利用可能な標準暗号化API',
       },
       {
         name: 'Supabase Encryption',
@@ -227,8 +217,8 @@ export class DependencySecurityAuditor {
         algorithms: ['AES-256', 'bcrypt', 'JWT'],
         status: 'サービス提供',
         securityLevel: 'excellent',
-        notes: 'Supabase によるエンドツーエンド暗号化'
-      }
+        notes: 'Supabase によるエンドツーエンド暗号化',
+      },
     ];
 
     // 暗号化推奨事項
@@ -247,7 +237,7 @@ export class DependencySecurityAuditor {
         type: 'missing_crypto_support',
         severity: 'high',
         description: 'Web Crypto API が利用できません',
-        recommendation: 'ポリフィルまたは代替ライブラリの検討'
+        recommendation: 'ポリフィルまたは代替ライブラリの検討',
       });
     }
   }
@@ -257,7 +247,7 @@ export class DependencySecurityAuditor {
    */
   async auditSecurityTools() {
     console.log('🛠️ セキュリティツール監査中...');
-    
+
     const securityToolChecks = [
       {
         name: 'ESLint',
@@ -267,16 +257,16 @@ export class DependencySecurityAuditor {
           'no-eval',
           'no-implied-eval',
           'no-new-func',
-          'security/detect-object-injection'
+          'security/detect-object-injection',
         ],
-        updateRecommended: false
+        updateRecommended: false,
       },
       {
         name: 'Prettier',
         current: '3.0.0',
         purpose: 'コード整形・一貫性',
         securityImpact: 'low',
-        updateRecommended: false
+        updateRecommended: false,
       },
       {
         name: 'TypeScript',
@@ -285,8 +275,8 @@ export class DependencySecurityAuditor {
         purpose: '型安全性・コンパイル時チェック',
         securityImpact: 'medium',
         updateRecommended: true,
-        notes: '型安全性の向上によるセキュリティリスク軽減'
-      }
+        notes: '型安全性の向上によるセキュリティリスク軽減',
+      },
     ];
 
     securityToolChecks.forEach(tool => {
@@ -297,7 +287,7 @@ export class DependencySecurityAuditor {
           latest: tool.latest,
           impact: tool.securityImpact,
           reason: 'セキュリティ向上のため更新推奨',
-          notes: tool.notes
+          notes: tool.notes,
         });
       }
     });
@@ -316,7 +306,7 @@ export class DependencySecurityAuditor {
    */
   async checkKnownVulnerabilities() {
     console.log('🚨 既知の脆弱性チェック中...');
-    
+
     // npm audit の結果を解析（シミュレート）
     const detectedVulnerabilities = [
       {
@@ -326,8 +316,8 @@ export class DependencySecurityAuditor {
         affectedVersions: '<2.0.1',
         fixAvailable: true,
         path: 'svgo > css-select > nth-check',
-        recommendation: 'npm audit fix --force の実行'
-      }
+        recommendation: 'npm audit fix --force の実行',
+      },
     ];
 
     detectedVulnerabilities.forEach(vuln => {
@@ -338,7 +328,7 @@ export class DependencySecurityAuditor {
         affectedVersions: vuln.affectedVersions,
         dependencyPath: vuln.path,
         fixAvailable: vuln.fixAvailable,
-        recommendation: vuln.recommendation
+        recommendation: vuln.recommendation,
       });
     });
 
@@ -357,36 +347,32 @@ export class DependencySecurityAuditor {
    */
   async auditLicenseCompliance() {
     console.log('📜 ライセンス確認中...');
-    
+
     const licenseChecks = [
       {
         name: '@supabase/supabase-js',
         license: 'MIT',
         compliance: 'compliant',
-        commercialUse: true
+        commercialUse: true,
       },
       {
         name: 'react',
         license: 'MIT',
         compliance: 'compliant',
-        commercialUse: true
+        commercialUse: true,
       },
       {
         name: 'dompurify',
         license: 'Apache-2.0 OR MPL-2.0',
         compliance: 'compliant',
-        commercialUse: true
-      }
+        commercialUse: true,
+      },
     ];
 
-    const nonCompliantLicenses = licenseChecks.filter(
-      lib => lib.compliance !== 'compliant'
-    );
+    const nonCompliantLicenses = licenseChecks.filter(lib => lib.compliance !== 'compliant');
 
     if (nonCompliantLicenses.length > 0) {
-      this.auditResults.securityRecommendations.push(
-        'ライセンス非準拠パッケージの確認と代替検討'
-      );
+      this.auditResults.securityRecommendations.push('ライセンス非準拠パッケージの確認と代替検討');
     }
   }
 
@@ -397,10 +383,8 @@ export class DependencySecurityAuditor {
     const criticalVulns = this.auditResults.vulnerabilities.filter(
       v => v.severity === 'critical'
     ).length;
-    
-    const highVulns = this.auditResults.vulnerabilities.filter(
-      v => v.severity === 'high'
-    ).length;
+
+    const highVulns = this.auditResults.vulnerabilities.filter(v => v.severity === 'high').length;
 
     if (criticalVulns > 0) {
       this.auditResults.complianceStatus = 'critical';
@@ -418,30 +402,29 @@ export class DependencySecurityAuditor {
    */
   generateDependencyReport() {
     const timestamp = new Date().toISOString();
-    
+
     return {
       metadata: {
         timestamp,
-        auditor: 'Garden DX Dependency Security Auditor v1.0',
-        scope: 'Security Libraries, Authentication, Cryptography, Tools'
+        auditor: 'Teisou System Dependency Security Auditor v1.0',
+        scope: 'Security Libraries, Authentication, Cryptography, Tools',
       },
       summary: {
         totalVulnerabilities: this.auditResults.vulnerabilities.length,
         criticalVulnerabilities: this.auditResults.vulnerabilities.filter(
           v => v.severity === 'critical'
         ).length,
-        highVulnerabilities: this.auditResults.vulnerabilities.filter(
-          v => v.severity === 'high'
-        ).length,
+        highVulnerabilities: this.auditResults.vulnerabilities.filter(v => v.severity === 'high')
+          .length,
         outdatedDependencies: this.auditResults.outdatedDependencies.length,
         complianceStatus: this.auditResults.complianceStatus,
-        recommendationsCount: this.auditResults.securityRecommendations.length
+        recommendationsCount: this.auditResults.securityRecommendations.length,
       },
       vulnerabilities: this.auditResults.vulnerabilities,
       outdatedDependencies: this.auditResults.outdatedDependencies,
       recommendations: this.auditResults.securityRecommendations,
       actionItems: this.generateActionItems(),
-      updatePlan: this.generateUpdatePlan()
+      updatePlan: this.generateUpdatePlan(),
     };
   }
 
@@ -450,28 +433,32 @@ export class DependencySecurityAuditor {
    */
   generateActionItems() {
     const actionItems = [];
-    
+
     // 脆弱性対応
     this.auditResults.vulnerabilities.forEach(vuln => {
       actionItems.push({
-        priority: vuln.severity === 'critical' ? 'immediate' : 
-                 vuln.severity === 'high' ? 'urgent' : 'medium',
+        priority:
+          vuln.severity === 'critical'
+            ? 'immediate'
+            : vuln.severity === 'high'
+              ? 'urgent'
+              : 'medium',
         action: `修正: ${vuln.package} の脆弱性`,
         description: vuln.description,
-        recommendation: vuln.recommendation
+        recommendation: vuln.recommendation,
       });
     });
-    
+
     // 依存関係更新
     this.auditResults.outdatedDependencies.forEach(dep => {
       actionItems.push({
         priority: dep.impact === 'critical' ? 'urgent' : 'medium',
         action: `更新: ${dep.name}`,
         description: `${dep.current} → ${dep.latest}`,
-        recommendation: dep.reason
+        recommendation: dep.reason,
       });
     });
-    
+
     return actionItems.sort((a, b) => {
       const priorityOrder = { immediate: 0, urgent: 1, medium: 2, low: 3 };
       return priorityOrder[a.priority] - priorityOrder[b.priority];
@@ -483,20 +470,17 @@ export class DependencySecurityAuditor {
    */
   generateUpdatePlan() {
     return {
-      immediate: [
-        '脆弱性のあるパッケージの緊急更新',
-        'npm audit fix の実行'
-      ],
+      immediate: ['脆弱性のあるパッケージの緊急更新', 'npm audit fix の実行'],
       shortTerm: [
         'セキュリティ関連ライブラリの更新',
         'TypeScript の最新版への更新',
-        'ESLint セキュリティルールの強化'
+        'ESLint セキュリティルールの強化',
       ],
       longTerm: [
         '依存関係の定期更新スケジュール設定',
         '自動化された脆弱性監視の導入',
-        'セキュリティ監査の定期実行'
-      ]
+        'セキュリティ監査の定期実行',
+      ],
     };
   }
 }
@@ -506,7 +490,7 @@ export class DependencySecurityAuditor {
  */
 export const runDependencySecurityAudit = async () => {
   const auditor = new DependencySecurityAuditor();
-  return await auditor.performDependencyAudit();
+  return auditor.performDependencyAudit();
 };
 
 export default DependencySecurityAuditor;

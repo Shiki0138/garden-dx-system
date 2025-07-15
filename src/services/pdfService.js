@@ -15,18 +15,15 @@ class PDFService {
    */
   async downloadEstimatePDF(estimateId) {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/estimates/${estimateId}/pdf`,
-        {
-          responseType: 'blob',
-          timeout: 30000, // 30秒タイムアウト
-        }
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/estimates/${estimateId}/pdf`, {
+        responseType: 'blob',
+        timeout: 30000, // 30秒タイムアウト
+      });
 
       // ファイル名をレスポンスヘッダーから取得
       const contentDisposition = response.headers['content-disposition'];
       let filename = `見積書_${estimateId}.pdf`;
-      
+
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename\*?=([^;]+)/);
         if (filenameMatch) {
@@ -37,29 +34,29 @@ class PDFService {
       // Blobを作成してダウンロード
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // メモリクリーンアップ
       window.URL.revokeObjectURL(url);
-      
+
       return { success: true, filename };
-      
     } catch (error) {
       console.error('PDF生成エラー:', error);
-      
+
       let errorMessage = 'PDF生成中にエラーが発生しました。';
-      
+
       if (error.response) {
         if (error.response.status === 404) {
           errorMessage = '指定された見積が見つかりません。';
         } else if (error.response.status === 500) {
-          errorMessage = 'サーバー内部でエラーが発生しました。システム管理者にお問い合わせください。';
+          errorMessage =
+            'サーバー内部でエラーが発生しました。システム管理者にお問い合わせください。';
         } else if (error.response.data && error.response.data.detail) {
           errorMessage = error.response.data.detail;
         }
@@ -68,7 +65,7 @@ class PDFService {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       throw new Error(errorMessage);
     }
   }
@@ -80,12 +77,9 @@ class PDFService {
    */
   async getEstimatePDFPreview(estimateId) {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/estimates/${estimateId}/preview`
-      );
-      
+      const response = await axios.get(`${API_BASE_URL}/api/estimates/${estimateId}/preview`);
+
       return response.data;
-      
     } catch (error) {
       console.error('プレビューデータ取得エラー:', error);
       throw new Error('プレビューデータの取得に失敗しました。');
@@ -100,46 +94,41 @@ class PDFService {
   async checkPDFGenerationPossibility(estimateId) {
     try {
       // 見積データの基本的な妥当性をチェック
-      const response = await axios.get(
-        `${API_BASE_URL}/api/estimates/${estimateId}`
-      );
-      
+      const response = await axios.get(`${API_BASE_URL}/api/estimates/${estimateId}`);
+
       const estimate = response.data;
       const issues = [];
-      
+
       // 基本情報チェック
       if (!estimate.estimate_number) {
         issues.push('見積番号が設定されていません');
       }
-      
+
       if (!estimate.customer_id) {
         issues.push('顧客情報が設定されていません');
       }
-      
+
       // 明細チェック
-      const itemsResponse = await axios.get(
-        `${API_BASE_URL}/api/estimates/${estimateId}/items`
-      );
-      
+      const itemsResponse = await axios.get(`${API_BASE_URL}/api/estimates/${estimateId}/items`);
+
       const items = itemsResponse.data || [];
       const actualItems = items.filter(item => item.item_type === 'item');
-      
+
       if (actualItems.length === 0) {
         issues.push('見積明細が登録されていません');
       }
-      
+
       // 金額チェック
       if (estimate.total_amount <= 0) {
         issues.push('見積金額が0円以下です');
       }
-      
+
       return {
         canGenerate: issues.length === 0,
         issues,
         itemCount: actualItems.length,
         totalAmount: estimate.total_amount,
       };
-      
     } catch (error) {
       console.error('PDF生成可能性チェックエラー:', error);
       return {
@@ -159,20 +148,20 @@ class PDFService {
   async downloadMultipleEstimatesPDF(estimateIds) {
     // 現在は単一ずつ処理
     const results = [];
-    
+
     for (const estimateId of estimateIds) {
       try {
         const result = await this.downloadEstimatePDF(estimateId);
         results.push({ estimateId, success: true, ...result });
       } catch (error) {
-        results.push({ 
-          estimateId, 
-          success: false, 
-          error: error.message 
+        results.push({
+          estimateId,
+          success: false,
+          error: error.message,
         });
       }
     }
-    
+
     return results;
   }
 
@@ -185,22 +174,21 @@ class PDFService {
   async downloadEstimatePDFWithProgress(estimateId, onProgress) {
     try {
       onProgress && onProgress({ stage: 'checking', message: '見積データを確認中...' });
-      
+
       // 生成可能性チェック
       const checkResult = await this.checkPDFGenerationPossibility(estimateId);
       if (!checkResult.canGenerate) {
         throw new Error(`PDF生成できません: ${checkResult.issues.join(', ')}`);
       }
-      
+
       onProgress && onProgress({ stage: 'generating', message: 'PDF生成中...' });
-      
+
       // PDF生成・ダウンロード
       const result = await this.downloadEstimatePDF(estimateId);
-      
+
       onProgress && onProgress({ stage: 'completed', message: 'PDF生成完了' });
-      
+
       return result;
-      
     } catch (error) {
       onProgress && onProgress({ stage: 'error', message: error.message });
       throw error;

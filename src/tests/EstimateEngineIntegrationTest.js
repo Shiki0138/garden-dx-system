@@ -6,17 +6,17 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { 
-  FiCheckCircle, 
-  FiXCircle, 
-  FiClock, 
-  FiPlay, 
+import {
+  FiCheckCircle,
+  FiXCircle,
+  FiClock,
+  FiPlay,
   FiRefreshCw,
   FiDatabase,
   FiSettings,
   FiFileText,
   FiShield,
-  FiTarget
+  FiTarget,
 } from 'react-icons/fi';
 
 import authService from '../services/authService';
@@ -58,7 +58,7 @@ const TestProgress = styled.div`
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 `;
 
 const ProgressBar = styled.div`
@@ -82,15 +82,20 @@ const TestSection = styled.div`
   border-radius: 12px;
   padding: 25px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  border-left: 5px solid ${props => {
-    switch (props.status) {
-      case 'success': return '#27ae60';
-      case 'error': return '#e74c3c';
-      case 'running': return '#f39c12';
-      default: return '#95a5a6';
-    }
-  }};
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-left: 5px solid
+    ${props => {
+      switch (props.status) {
+        case 'success':
+          return '#27ae60';
+        case 'error':
+          return '#e74c3c';
+        case 'running':
+          return '#f39c12';
+        default:
+          return '#95a5a6';
+      }
+    }};
 `;
 
 const SectionTitle = styled.h3`
@@ -110,22 +115,27 @@ const TestGrid = styled.div`
 `;
 
 const TestCard = styled.div`
-  border: 2px solid ${props => {
-    switch (props.status) {
-      case 'success': return '#27ae60';
-      case 'error': return '#e74c3c';
-      case 'running': return '#f39c12';
-      default: return '#bdc3c7';
-    }
-  }};
+  border: 2px solid
+    ${props => {
+      switch (props.status) {
+        case 'success':
+          return '#27ae60';
+        case 'error':
+          return '#e74c3c';
+        case 'running':
+          return '#f39c12';
+        default:
+          return '#bdc3c7';
+      }
+    }};
   border-radius: 8px;
   padding: 20px;
   background: white;
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -152,7 +162,7 @@ const TestResult = styled.div`
 
 const StatusIcon = ({ status, size = 20 }) => {
   const iconStyle = { width: size, height: size };
-  
+
   switch (status) {
     case 'success':
       return <FiCheckCircle style={{ ...iconStyle, color: '#27ae60' }} />;
@@ -179,12 +189,12 @@ const ActionButton = styled.button`
   margin-right: 10px;
   margin-bottom: 10px;
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: linear-gradient(135deg, #2980b9 0%, #21618c 100%);
     transform: translateY(-1px);
   }
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -206,7 +216,7 @@ const EstimateEngineIntegrationTest = () => {
     const passed = results.filter(r => r.status === 'success').length;
     const failed = results.filter(r => r.status === 'error').length;
     const running = results.filter(r => r.status === 'running').length;
-    
+
     return { total, passed, failed, running };
   }, [testResults]);
 
@@ -218,18 +228,18 @@ const EstimateEngineIntegrationTest = () => {
   // 1. DBマイグレーション後のAPI動作確認
   const testDatabaseConnection = async () => {
     logTest('データベース接続テスト開始', 'info');
-    
+
     try {
       // ヘルスチェック
       const healthResponse = await fetch('http://localhost:8000/health');
       const healthData = await healthResponse.json();
-      
+
       if (healthResponse.ok && healthData.status === 'healthy') {
         logTest('✅ データベース接続成功', 'success');
         return {
           success: true,
           message: 'データベース接続正常',
-          data: healthData
+          data: healthData,
         };
       } else {
         throw new Error('ヘルスチェック失敗');
@@ -238,7 +248,7 @@ const EstimateEngineIntegrationTest = () => {
       logTest(`❌ データベース接続エラー: ${error.message}`, 'error');
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   };
@@ -246,19 +256,19 @@ const EstimateEngineIntegrationTest = () => {
   // 2. 見積API基本動作テスト
   const testEstimateAPIs = async () => {
     logTest('見積API動作テスト開始', 'info');
-    
+
     try {
       const testData = {
         customer_id: 1,
         estimate_number: `TEST_${Date.now()}`,
         estimate_date: new Date().toISOString().split('T')[0],
-        notes: '統合テスト用見積書'
+        notes: '統合テスト用見積書',
       };
 
       // 見積作成テスト
       logTest('見積作成API テスト', 'info');
       const createResponse = await estimateApi.createEstimate(testData);
-      
+
       if (!createResponse.estimate_id) {
         throw new Error('見積作成レスポンスが不正');
       }
@@ -266,7 +276,7 @@ const EstimateEngineIntegrationTest = () => {
       // 見積取得テスト
       logTest('見積取得API テスト', 'info');
       const getResponse = await estimateApi.getEstimate(createResponse.estimate_id);
-      
+
       if (getResponse.estimate_number !== testData.estimate_number) {
         throw new Error('見積データ不整合');
       }
@@ -274,7 +284,7 @@ const EstimateEngineIntegrationTest = () => {
       // 見積一覧テスト
       logTest('見積一覧API テスト', 'info');
       const listResponse = await estimateApi.getEstimates();
-      
+
       if (!Array.isArray(listResponse)) {
         throw new Error('見積一覧形式エラー');
       }
@@ -286,14 +296,14 @@ const EstimateEngineIntegrationTest = () => {
         data: {
           created: createResponse,
           retrieved: getResponse,
-          listCount: listResponse.length
-        }
+          listCount: listResponse.length,
+        },
       };
     } catch (error) {
       logTest(`❌ 見積APIエラー: ${error.message}`, 'error');
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   };
@@ -301,13 +311,13 @@ const EstimateEngineIntegrationTest = () => {
   // 3. 単価マスタ機能テスト
   const testPriceMaster = async () => {
     logTest('単価マスタ機能テスト開始', 'info');
-    
+
     try {
       // カテゴリ取得テスト
       logTest('カテゴリ階層取得テスト', 'info');
       const categoriesResponse = await fetch('http://localhost:8000/api/price-master/categories');
       const categories = await categoriesResponse.json();
-      
+
       if (!categoriesResponse.ok) {
         throw new Error('カテゴリ取得失敗');
       }
@@ -316,7 +326,7 @@ const EstimateEngineIntegrationTest = () => {
       logTest('単価マスタ一覧取得テスト', 'info');
       const mastersResponse = await fetch('http://localhost:8000/api/price-master');
       const masters = await mastersResponse.json();
-      
+
       if (!Array.isArray(masters)) {
         throw new Error('単価マスタ一覧形式エラー');
       }
@@ -325,7 +335,7 @@ const EstimateEngineIntegrationTest = () => {
       logTest('単価マスタ検索テスト', 'info');
       const searchResponse = await fetch('http://localhost:8000/api/price-master?search=植栽');
       const searchResults = await searchResponse.json();
-      
+
       logTest('✅ 単価マスタ機能確認完了', 'success');
       return {
         success: true,
@@ -333,14 +343,14 @@ const EstimateEngineIntegrationTest = () => {
         data: {
           categoriesCount: Object.keys(categories).length,
           mastersCount: masters.length,
-          searchResults: searchResults.length
-        }
+          searchResults: searchResults.length,
+        },
       };
     } catch (error) {
       logTest(`❌ 単価マスタエラー: ${error.message}`, 'error');
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   };
@@ -348,14 +358,14 @@ const EstimateEngineIntegrationTest = () => {
   // 4. PDF出力機能テスト
   const testPDFGeneration = async () => {
     logTest('PDF生成機能テスト開始', 'info');
-    
+
     try {
       // テスト用見積データ
       const testEstimateId = 1; // 既存の見積IDを使用
-      
+
       logTest('PDF生成API呼び出し', 'info');
       const pdfBlob = await pdfService.downloadEstimatePDF(testEstimateId);
-      
+
       if (!pdfBlob || pdfBlob.size === 0) {
         throw new Error('PDF生成失敗');
       }
@@ -371,14 +381,14 @@ const EstimateEngineIntegrationTest = () => {
         message: 'PDF生成正常動作',
         data: {
           pdfSize: `${(pdfBlob.size / 1024).toFixed(2)} KB`,
-          mimeType: pdfBlob.type
-        }
+          mimeType: pdfBlob.type,
+        },
       };
     } catch (error) {
       logTest(`❌ PDF生成エラー: ${error.message}`, 'error');
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   };
@@ -386,7 +396,7 @@ const EstimateEngineIntegrationTest = () => {
   // 5. RBAC権限統合テスト
   const testRBACIntegration = async () => {
     logTest('RBAC権限統合テスト開始', 'info');
-    
+
     try {
       if (!authService.isAuthenticated()) {
         throw new Error('認証されていません');
@@ -395,7 +405,7 @@ const EstimateEngineIntegrationTest = () => {
       // ユーザー機能情報取得
       logTest('ユーザー機能情報取得テスト', 'info');
       const features = await authService.loadUserFeatures();
-      
+
       if (!features) {
         throw new Error('機能情報取得失敗');
       }
@@ -423,16 +433,16 @@ const EstimateEngineIntegrationTest = () => {
           permissions: {
             canViewCosts,
             canViewProfits,
-            canAdjustTotal
+            canAdjustTotal,
           },
-          hasPermissionMatrix: Boolean(permissionMatrix)
-        }
+          hasPermissionMatrix: Boolean(permissionMatrix),
+        },
       };
     } catch (error) {
       logTest(`❌ RBAC統合エラー: ${error.message}`, 'error');
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   };
@@ -440,7 +450,7 @@ const EstimateEngineIntegrationTest = () => {
   // 6. 造園業界標準フォーマット検証
   const testIndustryStandardFormat = async () => {
     logTest('造園業界標準フォーマット検証開始', 'info');
-    
+
     try {
       // 見積書フォーマット検証
       logTest('見積書フォーマット検証', 'info');
@@ -455,12 +465,12 @@ const EstimateEngineIntegrationTest = () => {
             quantity: 5,
             unit: '本',
             unit_price: 15000,
-            amount: 75000
-          }
+            amount: 75000,
+          },
         ],
         subtotal: 75000,
         tax_amount: 7500,
-        total_amount: 82500
+        total_amount: 82500,
       };
 
       // フォーマット検証ルール
@@ -468,30 +478,32 @@ const EstimateEngineIntegrationTest = () => {
         {
           name: '見積番号形式',
           test: /^EST-\d{4}-\d{3}$/.test(testEstimate.estimate_number),
-          message: '見積番号は EST-YYYY-XXX 形式'
+          message: '見積番号は EST-YYYY-XXX 形式',
         },
         {
           name: '顧客名必須',
           test: Boolean(testEstimate.customer_name),
-          message: '顧客名は必須項目'
+          message: '顧客名は必須項目',
         },
         {
           name: '明細項目',
           test: testEstimate.items.length > 0,
-          message: '明細は1件以上必要'
+          message: '明細は1件以上必要',
         },
         {
           name: '金額計算',
           test: testEstimate.total_amount === testEstimate.subtotal + testEstimate.tax_amount,
-          message: '合計金額計算が正確'
-        }
+          message: '合計金額計算が正確',
+        },
       ];
 
       const passedValidations = validations.filter(v => v.test);
       const failedValidations = validations.filter(v => !v.test);
 
       if (failedValidations.length > 0) {
-        throw new Error(`フォーマット検証失敗: ${failedValidations.map(v => v.message).join(', ')}`);
+        throw new Error(
+          `フォーマット検証失敗: ${failedValidations.map(v => v.message).join(', ')}`
+        );
       }
 
       logTest('✅ 造園業界標準フォーマット検証完了', 'success');
@@ -501,14 +513,14 @@ const EstimateEngineIntegrationTest = () => {
         data: {
           totalValidations: validations.length,
           passedValidations: passedValidations.length,
-          complianceRate: `${Math.round((passedValidations.length / validations.length) * 100)}%`
-        }
+          complianceRate: `${Math.round((passedValidations.length / validations.length) * 100)}%`,
+        },
       };
     } catch (error) {
       logTest(`❌ フォーマット検証エラー: ${error.message}`, 'error');
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   };
@@ -529,15 +541,15 @@ const EstimateEngineIntegrationTest = () => {
       { name: 'price_master', func: testPriceMaster, title: '単価マスタ機能' },
       { name: 'pdf_generation', func: testPDFGeneration, title: 'PDF出力機能' },
       { name: 'rbac_integration', func: testRBACIntegration, title: 'RBAC権限統合' },
-      { name: 'industry_format', func: testIndustryStandardFormat, title: '業界標準フォーマット' }
+      { name: 'industry_format', func: testIndustryStandardFormat, title: '業界標準フォーマット' },
     ];
 
     for (let i = 0; i < tests.length; i++) {
       const test = tests[i];
-      
+
       setTestResults(prev => ({
         ...prev,
-        [test.name]: { status: 'running', title: test.title }
+        [test.name]: { status: 'running', title: test.title },
       }));
 
       try {
@@ -548,8 +560,8 @@ const EstimateEngineIntegrationTest = () => {
             ...result,
             status: result.success ? 'success' : 'error',
             title: test.title,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         }));
       } catch (error) {
         setTestResults(prev => ({
@@ -558,13 +570,13 @@ const EstimateEngineIntegrationTest = () => {
             status: 'error',
             error: error.message,
             title: test.title,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         }));
       }
 
       setOverallProgress(((i + 1) / tests.length) * 100);
-      
+
       // テスト間の小休止
       await new Promise(resolve => setTimeout(resolve, 500));
     }
@@ -578,7 +590,7 @@ const EstimateEngineIntegrationTest = () => {
   const runIndividualTest = async (testName, testFunction, title) => {
     setTestResults(prev => ({
       ...prev,
-      [testName]: { status: 'running', title }
+      [testName]: { status: 'running', title },
     }));
 
     try {
@@ -589,8 +601,8 @@ const EstimateEngineIntegrationTest = () => {
           ...result,
           status: result.success ? 'success' : 'error',
           title,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }));
     } catch (error) {
       setTestResults(prev => ({
@@ -599,8 +611,8 @@ const EstimateEngineIntegrationTest = () => {
           status: 'error',
           error: error.message,
           title,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }));
     }
   };
@@ -609,11 +621,18 @@ const EstimateEngineIntegrationTest = () => {
     <TestContainer>
       <TestHeader>
         <TestTitle>🚀 見積エンジン全機能統合テスト</TestTitle>
-        <TestSubtitle>Garden DX サイクル6: 100%完成確認テストスイート</TestSubtitle>
+        <TestSubtitle>庭想システム サイクル6: 100%完成確認テストスイート</TestSubtitle>
       </TestHeader>
 
       <TestProgress>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '10px',
+          }}
+        >
           <h3 style={{ margin: 0 }}>テスト進捗</h3>
           <span style={{ fontWeight: 'bold', fontSize: '18px' }}>
             {testStats.passed}/{testStats.total} テスト合格 ({Math.round(overallProgress)}%)
@@ -634,10 +653,7 @@ const EstimateEngineIntegrationTest = () => {
           <FiPlay size={24} />
           テスト実行
         </SectionTitle>
-        <ActionButton 
-          onClick={runAllTests} 
-          disabled={isRunning}
-        >
+        <ActionButton onClick={runAllTests} disabled={isRunning}>
           <FiRefreshCw />
           全テスト実行
         </ActionButton>
@@ -651,16 +667,16 @@ const EstimateEngineIntegrationTest = () => {
             <StatusIcon status={testResults.database_connection?.status} />
             データベース接続テスト
           </TestCardTitle>
-          <ActionButton 
-            onClick={() => runIndividualTest('database_connection', testDatabaseConnection, 'データベース接続')}
+          <ActionButton
+            onClick={() =>
+              runIndividualTest('database_connection', testDatabaseConnection, 'データベース接続')
+            }
             disabled={isRunning}
           >
             実行
           </ActionButton>
           {testResults.database_connection && (
-            <TestResult>
-              {JSON.stringify(testResults.database_connection, null, 2)}
-            </TestResult>
+            <TestResult>{JSON.stringify(testResults.database_connection, null, 2)}</TestResult>
           )}
         </TestCard>
 
@@ -671,16 +687,14 @@ const EstimateEngineIntegrationTest = () => {
             <StatusIcon status={testResults.estimate_apis?.status} />
             見積API動作テスト
           </TestCardTitle>
-          <ActionButton 
+          <ActionButton
             onClick={() => runIndividualTest('estimate_apis', testEstimateAPIs, '見積API動作')}
             disabled={isRunning}
           >
             実行
           </ActionButton>
           {testResults.estimate_apis && (
-            <TestResult>
-              {JSON.stringify(testResults.estimate_apis, null, 2)}
-            </TestResult>
+            <TestResult>{JSON.stringify(testResults.estimate_apis, null, 2)}</TestResult>
           )}
         </TestCard>
 
@@ -691,16 +705,14 @@ const EstimateEngineIntegrationTest = () => {
             <StatusIcon status={testResults.price_master?.status} />
             単価マスタ機能テスト
           </TestCardTitle>
-          <ActionButton 
+          <ActionButton
             onClick={() => runIndividualTest('price_master', testPriceMaster, '単価マスタ機能')}
             disabled={isRunning}
           >
             実行
           </ActionButton>
           {testResults.price_master && (
-            <TestResult>
-              {JSON.stringify(testResults.price_master, null, 2)}
-            </TestResult>
+            <TestResult>{JSON.stringify(testResults.price_master, null, 2)}</TestResult>
           )}
         </TestCard>
 
@@ -711,16 +723,14 @@ const EstimateEngineIntegrationTest = () => {
             <StatusIcon status={testResults.pdf_generation?.status} />
             PDF出力機能テスト
           </TestCardTitle>
-          <ActionButton 
+          <ActionButton
             onClick={() => runIndividualTest('pdf_generation', testPDFGeneration, 'PDF出力機能')}
             disabled={isRunning}
           >
             実行
           </ActionButton>
           {testResults.pdf_generation && (
-            <TestResult>
-              {JSON.stringify(testResults.pdf_generation, null, 2)}
-            </TestResult>
+            <TestResult>{JSON.stringify(testResults.pdf_generation, null, 2)}</TestResult>
           )}
         </TestCard>
 
@@ -731,16 +741,16 @@ const EstimateEngineIntegrationTest = () => {
             <StatusIcon status={testResults.rbac_integration?.status} />
             RBAC権限統合テスト
           </TestCardTitle>
-          <ActionButton 
-            onClick={() => runIndividualTest('rbac_integration', testRBACIntegration, 'RBAC権限統合')}
+          <ActionButton
+            onClick={() =>
+              runIndividualTest('rbac_integration', testRBACIntegration, 'RBAC権限統合')
+            }
             disabled={isRunning}
           >
             実行
           </ActionButton>
           {testResults.rbac_integration && (
-            <TestResult>
-              {JSON.stringify(testResults.rbac_integration, null, 2)}
-            </TestResult>
+            <TestResult>{JSON.stringify(testResults.rbac_integration, null, 2)}</TestResult>
           )}
         </TestCard>
 
@@ -751,16 +761,20 @@ const EstimateEngineIntegrationTest = () => {
             <StatusIcon status={testResults.industry_format?.status} />
             業界標準フォーマット検証
           </TestCardTitle>
-          <ActionButton 
-            onClick={() => runIndividualTest('industry_format', testIndustryStandardFormat, '業界標準フォーマット')}
+          <ActionButton
+            onClick={() =>
+              runIndividualTest(
+                'industry_format',
+                testIndustryStandardFormat,
+                '業界標準フォーマット'
+              )
+            }
             disabled={isRunning}
           >
             実行
           </ActionButton>
           {testResults.industry_format && (
-            <TestResult>
-              {JSON.stringify(testResults.industry_format, null, 2)}
-            </TestResult>
+            <TestResult>{JSON.stringify(testResults.industry_format, null, 2)}</TestResult>
           )}
         </TestCard>
       </TestGrid>
@@ -782,22 +796,25 @@ const EstimateEngineIntegrationTest = () => {
 
       {/* 最終結果サマリー */}
       {testStats.total > 0 && !isRunning && (
-        <TestSection 
-          status={testStats.failed === 0 ? 'success' : 'error'}
-        >
+        <TestSection status={testStats.failed === 0 ? 'success' : 'error'}>
           <SectionTitle>
             <StatusIcon status={testStats.failed === 0 ? 'success' : 'error'} size={24} />
             統合テスト結果サマリー
           </SectionTitle>
           <div style={{ fontSize: '18px', marginBottom: '15px' }}>
             <strong>
-              {testStats.failed === 0 
-                ? '🎉 全機能統合テスト合格！100%完成確認' 
-                : '⚠️ 一部テストで問題が検出されました'
-              }
+              {testStats.failed === 0
+                ? '🎉 全機能統合テスト合格！100%完成確認'
+                : '⚠️ 一部テストで問題が検出されました'}
             </strong>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '15px',
+            }}
+          >
             <div>
               <strong>合格率:</strong> {Math.round((testStats.passed / testStats.total) * 100)}%
             </div>
@@ -805,7 +822,8 @@ const EstimateEngineIntegrationTest = () => {
               <strong>合格テスト:</strong> {testStats.passed}/{testStats.total}
             </div>
             <div>
-              <strong>実行時間:</strong> {testStartTime.current ? `${Date.now() - testStartTime.current}ms` : '-'}
+              <strong>実行時間:</strong>{' '}
+              {testStartTime.current ? `${Date.now() - testStartTime.current}ms` : '-'}
             </div>
           </div>
         </TestSection>

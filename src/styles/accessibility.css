@@ -41,27 +41,31 @@
    ============================================= */
 @media (prefers-contrast: high) {
   /* ボタン */
-  button, .btn {
+  button,
+  .btn {
     border: 2px solid currentColor !important;
     background: transparent !important;
     color: inherit !important;
   }
-  
+
   /* リンク */
   a {
     text-decoration: underline !important;
     color: inherit !important;
   }
-  
+
   /* フォーム要素 */
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     border: 2px solid currentColor !important;
     background: transparent !important;
     color: inherit !important;
   }
-  
+
   /* アイコン */
-  .icon, svg {
+  .icon,
+  svg {
     filter: contrast(2) !important;
   }
 }
@@ -82,27 +86,31 @@
     --error-color: #f87171;
     --success-color: #34d399;
   }
-  
+
   /* 背景とテキスト */
   body {
     background-color: var(--background-color) !important;
     color: var(--text-color) !important;
   }
-  
+
   /* サーフェス要素 */
-  .form-section, .card, .modal {
+  .form-section,
+  .card,
+  .modal {
     background-color: var(--surface-color) !important;
     color: var(--text-color) !important;
     border-color: var(--border-color) !important;
   }
-  
+
   /* 入力要素 */
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     background-color: var(--surface-color) !important;
     color: var(--text-color) !important;
     border-color: var(--border-color) !important;
   }
-  
+
   input::placeholder {
     color: #9ca3af !important;
   }
@@ -127,7 +135,9 @@
 .focus-enhanced:focus {
   outline: 4px solid #007cba !important;
   outline-offset: 3px !important;
-  box-shadow: 0 0 0 2px white, 0 0 0 6px #007cba !important;
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 6px #007cba !important;
 }
 
 /* =============================================
@@ -135,20 +145,23 @@
    ============================================= */
 @media (prefers-reduced-motion: reduce) {
   /* すべてのアニメーションを無効化 */
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
+
   /* パララックス効果の無効化 */
   [data-parallax] {
     transform: none !important;
   }
-  
+
   /* 自動再生の停止 */
-  video, audio {
+  video,
+  audio {
     autoplay: false !important;
   }
 }
@@ -157,7 +170,13 @@
    タッチ・モバイル対応
    ============================================= */
 /* タッチターゲットサイズの最小化保証 */
-button, a, input, select, textarea, [role="button"], [role="link"] {
+button,
+a,
+input,
+select,
+textarea,
+[role='button'],
+[role='link'] {
   min-height: 44px !important;
   min-width: 44px !important;
   padding: 0.5rem !important;
@@ -171,7 +190,7 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
     color: inherit !important;
     transform: none !important;
   }
-  
+
   /* タップハイライトのカスタマイズ */
   * {
     -webkit-tap-highlight-color: rgba(0, 124, 186, 0.3) !important;
@@ -187,7 +206,7 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
     font-size: 1.2rem !important;
     line-height: 1.6 !important;
   }
-  
+
   /* アイコンサイズの調整 */
   .icon {
     width: 1.5em !important;
@@ -199,7 +218,8 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
    エラー・成功メッセージ
    ============================================= */
 /* エラーメッセージ */
-.error-message, [role="alert"] {
+.error-message,
+[role='alert'] {
   color: #dc2626 !important;
   background-color: #fef2f2 !important;
   border: 2px solid #fecaca !important;
@@ -210,12 +230,13 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
 }
 
 .error-message::before {
-  content: "⚠️ " !important;
+  content: '⚠️ ' !important;
   font-weight: bold !important;
 }
 
 /* 成功メッセージ */
-.success-message, [role="status"] {
+.success-message,
+[role='status'] {
   color: #065f46 !important;
   background-color: #ecfdf5 !important;
   border: 2px solid #a7f3d0 !important;
@@ -226,12 +247,13 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
 }
 
 .success-message::before {
-  content: "✅ " !important;
+  content: '✅ ' !important;
   font-weight: bold !important;
 }
 
 /* 情報メッセージ */
-.info-message, [role="note"] {
+.info-message,
+[role='note'] {
   color: #1e40af !important;
   background-color: #eff6ff !important;
   border: 2px solid #bfdbfe !important;
@@ -242,7 +264,7 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
 }
 
 .info-message::before {
-  content: "ℹ️ " !important;
+  content: 'ℹ️ ' !important;
   font-weight: bold !important;
 }
 
@@ -277,7 +299,8 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
    ライブリージョン
    ============================================= */
 /* ARIAライブリージョンのスタイリング */
-[aria-live="polite"], [aria-live="assertive"] {
+[aria-live='polite'],
+[aria-live='assertive'] {
   position: absolute !important;
   left: -10000px !important;
   width: 1px !important;
@@ -319,34 +342,34 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
   .no-print {
     display: none !important;
   }
-  
+
   /* リンクURLの表示 */
   a[href]:after {
-    content: " (" attr(href) ")" !important;
+    content: ' (' attr(href) ')' !important;
     font-size: 0.8em !important;
     color: #666 !important;
   }
-  
+
   /* ページ区切りの制御 */
   .page-break-before {
     page-break-before: always !important;
   }
-  
+
   .page-break-after {
     page-break-after: always !important;
   }
-  
+
   .no-page-break {
     page-break-inside: avoid !important;
   }
-  
+
   /* 印刷時の色とコントラスト */
   * {
     background: white !important;
     color: black !important;
     box-shadow: none !important;
   }
-  
+
   /* 重要な枠線は残す */
   .print-border {
     border: 1px solid black !important;
@@ -423,49 +446,51 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
    WAI-ARIA 状態表示
    ============================================= */
 /* 選択状態 */
-[aria-selected="true"] {
+[aria-selected='true'] {
   background-color: #007cba !important;
   color: white !important;
   font-weight: 600 !important;
 }
 
 /* 展開状態 */
-[aria-expanded="true"] .expand-icon {
+[aria-expanded='true'] .expand-icon {
   transform: rotate(180deg) !important;
 }
 
 /* 無効状態 */
-[aria-disabled="true"] {
+[aria-disabled='true'] {
   opacity: 0.6 !important;
   cursor: not-allowed !important;
   pointer-events: none !important;
 }
 
 /* 必須フィールド */
-[aria-required="true"], [required] {
+[aria-required='true'],
+[required] {
   border-left: 4px solid #dc2626 !important;
 }
 
-[aria-required="true"]::after, [required]::after {
-  content: " *" !important;
+[aria-required='true']::after,
+[required]::after {
+  content: ' *' !important;
   color: #dc2626 !important;
   font-weight: bold !important;
 }
 
 /* エラー状態 */
-[aria-invalid="true"] {
+[aria-invalid='true'] {
   border-color: #dc2626 !important;
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
 }
 
 /* ローディング状態 */
-[aria-busy="true"] {
+[aria-busy='true'] {
   position: relative !important;
   overflow: hidden !important;
 }
 
-[aria-busy="true"]::after {
-  content: "" !important;
+[aria-busy='true']::after {
+  content: '' !important;
   position: absolute !important;
   top: 0 !important;
   left: -100% !important;
@@ -476,8 +501,12 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
 }
 
 @keyframes loading-shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 /* =============================================
@@ -486,17 +515,22 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
 /* モバイル最適化 */
 @media (max-width: 768px) {
   /* タッチターゲットの拡大 */
-  button, a, input, select, textarea, [role="button"] {
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role='button'] {
     min-height: 48px !important;
     min-width: 48px !important;
     padding: 0.75rem !important;
   }
-  
+
   /* フォントサイズの調整 */
   body {
     font-size: 16px !important; /* iOS Safariのズーム防止 */
   }
-  
+
   /* フォーカス範囲の拡大 */
   *:focus {
     outline-width: 4px !important;
@@ -507,7 +541,12 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
 /* タブレット最適化 */
 @media (min-width: 769px) and (max-width: 1024px) {
   /* 中間サイズのタッチターゲット */
-  button, a, input, select, textarea, [role="button"] {
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role='button'] {
     min-height: 46px !important;
     min-width: 46px !important;
   }
@@ -547,7 +586,7 @@ button, a, input, select, textarea, [role="button"], [role="link"] {
   outline: 2px solid blue !important;
 }
 
-.debug-accessibility [aria-label], 
+.debug-accessibility [aria-label],
 .debug-accessibility [aria-labelledby],
 .debug-accessibility [aria-describedby] {
   outline: 2px solid green !important;

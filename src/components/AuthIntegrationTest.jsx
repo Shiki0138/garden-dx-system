@@ -23,7 +23,7 @@ const TestSection = styled.div`
   background: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 `;
 
@@ -81,7 +81,7 @@ const AuthIntegrationTest = () => {
       hasToken: Boolean(authService.token),
       hasUser: Boolean(user),
       hasFeatures: Boolean(features),
-      status: isAuth ? 'success' : 'error'
+      status: isAuth ? 'success' : 'error',
     });
   };
 
@@ -94,7 +94,7 @@ const AuthIntegrationTest = () => {
       features,
       roleDisplay: authService.getRoleDisplayName(),
       isOwner: authService.isOwner(),
-      isEmployee: authService.isEmployee()
+      isEmployee: authService.isEmployee(),
     });
   };
 
@@ -103,38 +103,38 @@ const AuthIntegrationTest = () => {
       canViewCosts: {
         result: authService.canViewCosts(),
         expected: authService.isOwner(),
-        description: '原価情報閲覧権限'
+        description: '原価情報閲覧権限',
       },
       canViewProfits: {
         result: authService.canViewProfits(),
         expected: authService.isOwner(),
-        description: '利益情報閲覧権限'
+        description: '利益情報閲覧権限',
       },
       canAdjustTotal: {
         result: authService.canAdjustTotal(),
         expected: authService.isOwner(),
-        description: '金額調整権限'
+        description: '金額調整権限',
       },
       canApproveEstimates: {
         result: authService.canApproveEstimates(),
         expected: authService.isOwner(),
-        description: '見積承認権限'
+        description: '見積承認権限',
       },
       canIssueInvoices: {
         result: authService.canIssueInvoices(),
         expected: authService.isOwner(),
-        description: '請求書発行権限'
+        description: '請求書発行権限',
       },
       canManageUsers: {
         result: authService.canManageUsers(),
         expected: authService.isOwner(),
-        description: 'ユーザー管理権限'
+        description: 'ユーザー管理権限',
       },
       canViewDashboard: {
         result: authService.canViewDashboard(),
         expected: authService.isOwner(),
-        description: 'ダッシュボード権限'
-      }
+        description: 'ダッシュボード権限',
+      },
     };
 
     // テスト結果評価
@@ -144,7 +144,7 @@ const AuthIntegrationTest = () => {
       evaluatedTests[key] = {
         ...test,
         status: test.result === test.expected ? 'success' : 'error',
-        passed: test.result === test.expected
+        passed: test.result === test.expected,
       };
     });
 
@@ -174,23 +174,35 @@ const AuthIntegrationTest = () => {
     <TestContainer>
       {/* ヘッダー */}
       <TestSection>
-        <h1 style={{ color: '#2c3e50', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <h1
+          style={{
+            color: '#2c3e50',
+            marginBottom: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+          }}
+        >
           <FiShield size={28} />
           Worker4 認証システム統合テスト
         </h1>
         <p style={{ color: '#6c757d', marginBottom: '15px' }}>
           RBAC権限管理システムの統合状況とPermissionGuardコンポーネントの動作確認
         </p>
-        <div style={{ 
-          padding: '10px 15px', 
-          backgroundColor: integrationScore >= 80 ? '#d4edda' : '#f8d7da',
-          borderRadius: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px'
-        }}>
+        <div
+          style={{
+            padding: '10px 15px',
+            backgroundColor: integrationScore >= 80 ? '#d4edda' : '#f8d7da',
+            borderRadius: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+          }}
+        >
           <StatusIcon status={integrationScore >= 80 ? 'success' : 'error'} />
-          <strong>統合スコア: {integrationScore}% ({passedTests}/{totalTests} テスト成功)</strong>
+          <strong>
+            統合スコア: {integrationScore}% ({passedTests}/{totalTests} テスト成功)
+          </strong>
         </div>
       </TestSection>
 
@@ -199,7 +211,9 @@ const AuthIntegrationTest = () => {
         <h3 style={{ marginBottom: '15px' }}>認証状態チェック</h3>
         <TestGrid>
           <TestCard status={authStatus.status}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}
+            >
               <StatusIcon status={authStatus.status} />
               <strong>認証システム接続</strong>
             </div>
@@ -213,7 +227,9 @@ const AuthIntegrationTest = () => {
 
           {userInfo && (
             <TestCard status="success">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}
+              >
                 <FiUser size={20} color="#28a745" />
                 <strong>ユーザー情報</strong>
               </div>
@@ -234,7 +250,9 @@ const AuthIntegrationTest = () => {
         <TestGrid>
           {Object.entries(permissionTests).map(([key, test]) => (
             <TestCard key={key} status={test.status}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}
+              >
                 <StatusIcon status={test.status} />
                 <strong>{test.description}</strong>
               </div>
@@ -297,15 +315,17 @@ const AuthIntegrationTest = () => {
       {/* デバッグ情報 */}
       <TestSection>
         <h3 style={{ marginBottom: '15px' }}>デバッグ情報</h3>
-        <div style={{ 
-          backgroundColor: '#f8f9fa', 
-          padding: '15px', 
-          borderRadius: '4px', 
-          fontSize: '12px',
-          fontFamily: 'monospace',
-          maxHeight: '300px',
-          overflow: 'auto'
-        }}>
+        <div
+          style={{
+            backgroundColor: '#f8f9fa',
+            padding: '15px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontFamily: 'monospace',
+            maxHeight: '300px',
+            overflow: 'auto',
+          }}
+        >
           <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
         </div>
       </TestSection>
@@ -313,20 +333,23 @@ const AuthIntegrationTest = () => {
       {/* 統合ステータス */}
       <TestSection>
         <h3 style={{ marginBottom: '15px' }}>統合完了ステータス</h3>
-        <div style={{ 
-          padding: '20px',
-          backgroundColor: integrationScore >= 95 ? '#d4edda' : '#fff3cd',
-          borderRadius: '8px',
-          textAlign: 'center'
-        }}>
-          <h2 style={{ margin: '0 0 10px 0', color: integrationScore >= 95 ? '#155724' : '#856404' }}>
+        <div
+          style={{
+            padding: '20px',
+            backgroundColor: integrationScore >= 95 ? '#d4edda' : '#fff3cd',
+            borderRadius: '8px',
+            textAlign: 'center',
+          }}
+        >
+          <h2
+            style={{ margin: '0 0 10px 0', color: integrationScore >= 95 ? '#155724' : '#856404' }}
+          >
             {integrationScore >= 95 ? '🎉 Worker4統合完了！' : '⚠️ 統合調整が必要'}
           </h2>
           <p style={{ margin: 0, fontSize: '16px' }}>
-            {integrationScore >= 95 
+            {integrationScore >= 95
               ? 'RBAC権限管理システムが正常に統合されています。Worker3請求書システム連携確認へ進むことができます。'
-              : '一部の権限チェックが期待通りに動作していません。設定を確認してください。'
-            }
+              : '一部の権限チェックが期待通りに動作していません。設定を確認してください。'}
           </p>
         </div>
       </TestSection>

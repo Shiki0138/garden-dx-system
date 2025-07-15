@@ -72,8 +72,10 @@ const Button = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
-  
-  ${props => props.variant === 'primary' && `
+
+  ${props =>
+    props.variant === 'primary' &&
+    `
     background: #1a472a;
     color: white;
     
@@ -82,8 +84,10 @@ const Button = styled.button`
       transform: translateY(-2px);
     }
   `}
-  
-  ${props => props.variant === 'secondary' && `
+
+  ${props =>
+    props.variant === 'secondary' &&
+    `
     background: #f3f4f6;
     color: #374151;
     border: 1px solid #d1d5db;
@@ -97,17 +101,17 @@ const Button = styled.button`
 const ErrorDetails = styled.details`
   margin-top: 20px;
   text-align: left;
-  
+
   summary {
     cursor: pointer;
     color: #6b7280;
     margin-bottom: 10px;
-    
+
     &:hover {
       color: #374151;
     }
   }
-  
+
   pre {
     background: #f8f9fa;
     padding: 15px;
@@ -123,10 +127,10 @@ const ErrorDetails = styled.details`
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      hasError: false, 
-      error: null, 
-      errorInfo: null 
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null,
     };
   }
 
@@ -139,7 +143,7 @@ class ErrorBoundary extends React.Component {
     // エラー情報の保存
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     });
 
     // エラーログ記録
@@ -158,16 +162,16 @@ class ErrorBoundary extends React.Component {
       error: {
         name: error.name,
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       },
       errorInfo: {
-        componentStack: errorInfo.componentStack
+        componentStack: errorInfo.componentStack,
       },
       userAgent: navigator.userAgent,
       url: window.location.href,
       timestamp: new Date().toISOString(),
       userId: this.getUserId(), // ユーザーID取得
-      environment: process.env.REACT_APP_ENVIRONMENT
+      environment: process.env.REACT_APP_ENVIRONMENT,
     };
 
     // 実際のエラー報告サービスに送信
@@ -207,11 +211,9 @@ class ErrorBoundary extends React.Component {
             <ErrorIcon>
               <AlertTriangle size={40} />
             </ErrorIcon>
-            
-            <ErrorTitle>
-              システムエラーが発生しました
-            </ErrorTitle>
-            
+
+            <ErrorTitle>システムエラーが発生しました</ErrorTitle>
+
             <ErrorMessage>
               申し訳ございません。予期しないエラーが発生しました。
               <br />

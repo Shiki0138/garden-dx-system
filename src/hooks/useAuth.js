@@ -9,7 +9,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 export const USER_ROLES = {
   MANAGER: 'manager', // 経営者（親方）
   EMPLOYEE: 'employee', // 従業員
-  VIEWER: 'viewer' // 閲覧者
+  VIEWER: 'viewer', // 閲覧者
 };
 
 // 権限チェック設定
@@ -20,31 +20,31 @@ export const PERMISSIONS = {
   INVOICE_VIEW: 'invoice:view',
   INVOICE_DELETE: 'invoice:delete',
   INVOICE_SEND: 'invoice:send',
-  
+
   // 見積書関連権限
   ESTIMATE_CREATE: 'estimate:create',
   ESTIMATE_EDIT: 'estimate:edit',
   ESTIMATE_VIEW: 'estimate:view',
   ESTIMATE_PRICE_VIEW: 'estimate:price_view', // 原価表示
-  
+
   // プロジェクト管理権限
   PROJECT_CREATE: 'project:create',
   PROJECT_EDIT: 'project:edit',
   PROJECT_VIEW: 'project:view',
   PROJECT_PROFIT_VIEW: 'project:profit_view', // 収益表示
-  
+
   // マスタ管理権限
   MASTER_EDIT: 'master:edit',
   MASTER_VIEW: 'master:view',
-  
+
   // 顧客管理権限
   CUSTOMER_CREATE: 'customer:create',
   CUSTOMER_EDIT: 'customer:edit',
   CUSTOMER_VIEW: 'customer:view',
-  
+
   // システム管理権限
   SYSTEM_ADMIN: 'system:admin',
-  USER_MANAGE: 'user:manage'
+  USER_MANAGE: 'user:manage',
 };
 
 // 役割別権限マッピング（造園業DXシステム標準）
@@ -70,7 +70,7 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.CUSTOMER_EDIT,
     PERMISSIONS.CUSTOMER_VIEW,
     PERMISSIONS.SYSTEM_ADMIN,
-    PERMISSIONS.USER_MANAGE
+    PERMISSIONS.USER_MANAGE,
   ],
   [USER_ROLES.EMPLOYEE]: [
     // 従業員：制限付き権限（原価・収益情報は非表示）
@@ -86,7 +86,7 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.MASTER_VIEW,
     PERMISSIONS.CUSTOMER_CREATE,
     PERMISSIONS.CUSTOMER_EDIT,
-    PERMISSIONS.CUSTOMER_VIEW
+    PERMISSIONS.CUSTOMER_VIEW,
   ],
   [USER_ROLES.VIEWER]: [
     // 閲覧者：参照のみ
@@ -94,8 +94,8 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.ESTIMATE_VIEW,
     PERMISSIONS.PROJECT_VIEW,
     PERMISSIONS.MASTER_VIEW,
-    PERMISSIONS.CUSTOMER_VIEW
-  ]
+    PERMISSIONS.CUSTOMER_VIEW,
+  ],
 };
 
 // 認証コンテキスト
@@ -136,7 +136,7 @@ export const AuthProvider = ({ children }) => {
         email: 'tanaka@landscaping.co.jp',
         role: USER_ROLES.MANAGER,
         company_id: 1,
-        permissions: ROLE_PERMISSIONS[USER_ROLES.MANAGER]
+        permissions: ROLE_PERMISSIONS[USER_ROLES.MANAGER],
       };
 
       setUser(mockUser);
@@ -160,8 +160,8 @@ export const AuthProvider = ({ children }) => {
           email,
           role: USER_ROLES.MANAGER,
           company_id: 1,
-          permissions: ROLE_PERMISSIONS[USER_ROLES.MANAGER]
-        }
+          permissions: ROLE_PERMISSIONS[USER_ROLES.MANAGER],
+        },
       };
 
       localStorage.setItem('authToken', mockResponse.token);
@@ -181,16 +181,16 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
-  const hasPermission = (permission) => {
+  const hasPermission = permission => {
     if (!user || !user.permissions) return false;
     return user.permissions.includes(permission);
   };
 
-  const hasRole = (role) => {
+  const hasRole = role => {
     return user?.role === role;
   };
 
-  const hasAnyRole = (roles) => {
+  const hasAnyRole = roles => {
     return roles.includes(user?.role);
   };
 
@@ -213,20 +213,16 @@ export const AuthProvider = ({ children }) => {
     hasAnyRole,
     isManager,
     isEmployee,
-    checkAuthStatus
+    checkAuthStatus,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 /**
  * 権限チェック用カスタムフック
  */
-export const usePermission = (permission) => {
+export const usePermission = permission => {
   const { hasPermission } = useAuth();
   return hasPermission(permission);
 };
@@ -234,7 +230,7 @@ export const usePermission = (permission) => {
 /**
  * 役割チェック用カスタムフック
  */
-export const useRole = (role) => {
+export const useRole = role => {
   const { hasRole } = useAuth();
   return hasRole(role);
 };
@@ -283,7 +279,7 @@ export const useInvoicePermissions = () => {
     canEdit: hasPermission(PERMISSIONS.INVOICE_EDIT),
     canView: hasPermission(PERMISSIONS.INVOICE_VIEW),
     canDelete: hasPermission(PERMISSIONS.INVOICE_DELETE),
-    canSend: hasPermission(PERMISSIONS.INVOICE_SEND)
+    canSend: hasPermission(PERMISSIONS.INVOICE_SEND),
   };
 };
 
@@ -297,7 +293,7 @@ export const useEstimatePermissions = () => {
     canCreate: hasPermission(PERMISSIONS.ESTIMATE_CREATE),
     canEdit: hasPermission(PERMISSIONS.ESTIMATE_EDIT),
     canView: hasPermission(PERMISSIONS.ESTIMATE_VIEW),
-    canViewPrice: hasPermission(PERMISSIONS.ESTIMATE_PRICE_VIEW)
+    canViewPrice: hasPermission(PERMISSIONS.ESTIMATE_PRICE_VIEW),
   };
 };
 

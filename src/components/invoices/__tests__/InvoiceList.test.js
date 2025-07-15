@@ -5,20 +5,53 @@ import InvoiceList from '../InvoiceList';
 
 import { invoiceApi } from '../../../api/invoiceApi';
 
+// useAuth フックのモック
+jest.mock('../../../hooks/useAuth', () => ({
+  useAuth: () => ({
+    user: {
+      id: 'test-user-id',
+      email: 'test@example.com',
+      role: 'manager',
+      user_metadata: { role: 'manager' },
+    },
+    isAuthenticated: true,
+    loading: false,
+  }),
+  useInvoicePermissions: () => ({
+    canCreate: true,
+    canEdit: true,
+    canView: true,
+    canDelete: true,
+    canSend: true,
+  }),
+  ManagerOnlyComponent: ({ children, fallback }) => {
+    return <div data-testid="manager-only-component">{children || fallback}</div>;
+  },
+  ProtectedComponent: ({ children, fallback }) => {
+    return <div data-testid="protected-component">{children || fallback}</div>;
+  },
+  PERMISSIONS: {
+    INVOICE_CREATE: 'invoice:create',
+    INVOICE_EDIT: 'invoice:edit',
+    INVOICE_DELETE: 'invoice:delete',
+    INVOICE_VIEW: 'invoice:view',
+  },
+}));
+
 // APIモックの設定
 jest.mock('../../../api/invoiceApi', () => ({
   invoiceApi: {
     getInvoices: jest.fn(),
     updateInvoiceStatus: jest.fn(),
-    downloadInvoicePDF: jest.fn()
-  }
+    downloadInvoicePDF: jest.fn(),
+  },
 }));
 
 // React Router モック
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate
+  useNavigate: () => mockNavigate,
 }));
 
 // テストデータ
@@ -32,7 +65,7 @@ const mockInvoices = [
     due_date: '2024-07-15',
     total_amount: 1250000,
     status: '送付済',
-    payment_status: '未払い'
+    payment_status: '未払い',
   },
   {
     id: 2,
@@ -43,8 +76,8 @@ const mockInvoices = [
     due_date: '2024-07-20',
     total_amount: 850000,
     status: '未送付',
-    payment_status: '未払い'
-  }
+    payment_status: '未払い',
+  },
 ];
 
 describe('InvoiceList', () => {
@@ -55,7 +88,7 @@ describe('InvoiceList', () => {
       total: 2,
       page: 1,
       per_page: 20,
-      pages: 1
+      pages: 1,
     });
   });
 
@@ -115,13 +148,16 @@ describe('InvoiceList', () => {
     fireEvent.change(searchInput, { target: { value: '田中' } });
 
     // 検索結果の確認（デバウンス後）
-    await waitFor(() => {
-      expect(invoiceApi.getInvoices).toHaveBeenCalledWith(
-        expect.objectContaining({
-          search_term: '田中'
-        })
-      );
-    }, { timeout: 2000 });
+    await waitFor(
+      () => {
+        expect(invoiceApi.getInvoices).toHaveBeenCalledWith(
+          expect.objectContaining({
+            search_term: '田中',
+          })
+        );
+      },
+      { timeout: 2000 }
+    );
   });
 
   test('新規請求書作成ボタンクリック', async () => {
@@ -225,7 +261,7 @@ describe('InvoiceList', () => {
       total: 0,
       page: 1,
       per_page: 20,
-      pages: 0
+      pages: 0,
     });
 
     render(<InvoiceList />);

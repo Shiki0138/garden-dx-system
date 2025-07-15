@@ -1,0 +1,6 @@
+
+> garden-estimate-system@1.0.0 build
+> react-scripts build
+
+(node:72885) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)

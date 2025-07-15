@@ -17,76 +17,82 @@ const DemoUITest = () => {
     customer_name: '',
     project_name: '',
     estimate_date: new Date().toISOString().split('T')[0],
-    notes: ''
+    notes: '',
   });
 
   // デモデータ（useMemoで最適化）
-  const demoEstimates = useMemo(() => [
-    {
-      estimate_id: 1,
-      estimate_number: "EST-2025-001",
-      estimate_date: "2025-07-01",
-      customer_name: "テスト造園株式会社",
-      project_name: "庭園リフォーム工事",
-      total_amount: 250000,
-      status: "draft"
-    },
-    {
-      estimate_id: 2,
-      estimate_number: "EST-2025-002",
-      estimate_date: "2025-07-01",
-      customer_name: "ABC造園設計",
-      project_name: "商業施設緑化工事",
-      total_amount: 580000,
-      status: "approved"
-    }
-  ], []);
+  const demoEstimates = useMemo(
+    () => [
+      {
+        estimate_id: 1,
+        estimate_number: 'EST-2025-001',
+        estimate_date: '2025-07-01',
+        customer_name: 'テスト造園株式会社',
+        project_name: '庭園リフォーム工事',
+        total_amount: 250000,
+        status: 'draft',
+      },
+      {
+        estimate_id: 2,
+        estimate_number: 'EST-2025-002',
+        estimate_date: '2025-07-01',
+        customer_name: 'ABC造園設計',
+        project_name: '商業施設緑化工事',
+        total_amount: 580000,
+        status: 'approved',
+      },
+    ],
+    []
+  );
 
-  const demoPriceMaster = useMemo(() => [
-    {
-      item_id: 1,
-      category: "植栽工事",
-      sub_category: "高木",
-      item_name: "クロマツ H3.0m",
-      unit: "本",
-      unit_price: 26000
-    },
-    {
-      item_id: 2,
-      category: "植栽工事",
-      sub_category: "低木",
-      item_name: "ヒラドツツジ",
-      unit: "本",
-      unit_price: 2100
-    },
-    {
-      item_id: 3,
-      category: "土工事",
-      sub_category: "土壌改良",
-      item_name: "客土・土壌改良",
-      unit: "m3",
-      unit_price: 6000
-    },
-    {
-      item_id: 4,
-      category: "外構工事",
-      sub_category: "石材",
-      item_name: "御影石縁石",
-      unit: "m",
-      unit_price: 10000
-    }
-  ], []);
+  const demoPriceMaster = useMemo(
+    () => [
+      {
+        item_id: 1,
+        category: '植栽工事',
+        sub_category: '高木',
+        item_name: 'クロマツ H3.0m',
+        unit: '本',
+        unit_price: 26000,
+      },
+      {
+        item_id: 2,
+        category: '植栽工事',
+        sub_category: '低木',
+        item_name: 'ヒラドツツジ',
+        unit: '本',
+        unit_price: 2100,
+      },
+      {
+        item_id: 3,
+        category: '土工事',
+        sub_category: '土壌改良',
+        item_name: '客土・土壌改良',
+        unit: 'm3',
+        unit_price: 6000,
+      },
+      {
+        item_id: 4,
+        category: '外構工事',
+        sub_category: '石材',
+        item_name: '御影石縁石',
+        unit: 'm',
+        unit_price: 10000,
+      },
+    ],
+    []
+  );
 
   useEffect(() => {
     setEstimates(demoEstimates);
     setPriceMaster(demoPriceMaster);
   }, [demoEstimates, demoPriceMaster]);
 
-  const addItemToEstimate = (item) => {
+  const addItemToEstimate = item => {
     const newItem = {
       ...item,
       quantity: 1,
-      line_total: item.unit_price
+      line_total: item.unit_price,
     };
     setSelectedItems([...selectedItems, newItem]);
   };
@@ -98,7 +104,7 @@ const DemoUITest = () => {
     setSelectedItems(updatedItems);
   };
 
-  const removeItem = (index) => {
+  const removeItem = index => {
     const updatedItems = selectedItems.filter((_, i) => i !== index);
     setSelectedItems(updatedItems);
   };
@@ -119,20 +125,20 @@ const DemoUITest = () => {
       estimate_id: estimates.length + 1,
       total_amount: calculateTotal(),
       status: 'draft',
-      items: selectedItems
+      items: selectedItems,
     };
-    
+
     setEstimates([...estimates, newEstimate]);
     log.info('見積書保存:', newEstimate);
     showSuccess('見積書が保存されました！');
-    
+
     // フォームリセット
     setCurrentEstimate({
       estimate_number: `EST-2025-${String(estimates.length + 2).padStart(3, '0')}`,
       customer_name: '',
       project_name: '',
       estimate_date: new Date().toISOString().split('T')[0],
-      notes: ''
+      notes: '',
     });
     setSelectedItems([]);
   };
@@ -149,7 +155,7 @@ const DemoUITest = () => {
         <section className="estimates-section">
           <h2>📋 見積一覧</h2>
           <div className="estimates-grid">
-            {estimates.map((estimate) => (
+            {estimates.map(estimate => (
               <div key={estimate.estimate_id} className="estimate-card">
                 <div className="estimate-header">
                   <span className="estimate-number">{estimate.estimate_number}</span>
@@ -158,14 +164,24 @@ const DemoUITest = () => {
                   </span>
                 </div>
                 <div className="estimate-details">
-                  <p><strong>顧客:</strong> {estimate.customer_name}</p>
-                  <p><strong>工事名:</strong> {estimate.project_name}</p>
-                  <p><strong>金額:</strong> ¥{estimate.total_amount.toLocaleString()}</p>
-                  <p><strong>日付:</strong> {estimate.estimate_date}</p>
+                  <p>
+                    <strong>顧客:</strong> {estimate.customer_name}
+                  </p>
+                  <p>
+                    <strong>工事名:</strong> {estimate.project_name}
+                  </p>
+                  <p>
+                    <strong>金額:</strong> ¥{estimate.total_amount.toLocaleString()}
+                  </p>
+                  <p>
+                    <strong>日付:</strong> {estimate.estimate_date}
+                  </p>
                 </div>
                 <div className="estimate-actions">
                   <button className="btn-primary">編集</button>
-                  <button className="btn-secondary" onClick={generatePDF}>PDF</button>
+                  <button className="btn-secondary" onClick={generatePDF}>
+                    PDF
+                  </button>
                 </div>
               </div>
             ))}
@@ -175,7 +191,7 @@ const DemoUITest = () => {
         {/* 新規見積作成セクション */}
         <section className="new-estimate-section">
           <h2>✨ 新規見積作成</h2>
-          
+
           <div className="estimate-form">
             <div className="form-row">
               <div className="form-group">
@@ -183,7 +199,9 @@ const DemoUITest = () => {
                 <input
                   type="text"
                   value={currentEstimate.estimate_number}
-                  onChange={(e) => setCurrentEstimate({...currentEstimate, estimate_number: e.target.value})}
+                  onChange={e =>
+                    setCurrentEstimate({ ...currentEstimate, estimate_number: e.target.value })
+                  }
                 />
               </div>
               <div className="form-group">
@@ -191,11 +209,13 @@ const DemoUITest = () => {
                 <input
                   type="date"
                   value={currentEstimate.estimate_date}
-                  onChange={(e) => setCurrentEstimate({...currentEstimate, estimate_date: e.target.value})}
+                  onChange={e =>
+                    setCurrentEstimate({ ...currentEstimate, estimate_date: e.target.value })
+                  }
                 />
               </div>
             </div>
-            
+
             <div className="form-row">
               <div className="form-group">
                 <label>顧客名:</label>
@@ -203,7 +223,9 @@ const DemoUITest = () => {
                   type="text"
                   placeholder="例: 田中造園株式会社"
                   value={currentEstimate.customer_name}
-                  onChange={(e) => setCurrentEstimate({...currentEstimate, customer_name: e.target.value})}
+                  onChange={e =>
+                    setCurrentEstimate({ ...currentEstimate, customer_name: e.target.value })
+                  }
                 />
               </div>
               <div className="form-group">
@@ -212,17 +234,19 @@ const DemoUITest = () => {
                   type="text"
                   placeholder="例: 住宅庭園リフォーム工事"
                   value={currentEstimate.project_name}
-                  onChange={(e) => setCurrentEstimate({...currentEstimate, project_name: e.target.value})}
+                  onChange={e =>
+                    setCurrentEstimate({ ...currentEstimate, project_name: e.target.value })
+                  }
                 />
               </div>
             </div>
-            
+
             <div className="form-group">
               <label>備考:</label>
               <textarea
                 placeholder="工事に関する特記事項があれば入力してください"
                 value={currentEstimate.notes}
-                onChange={(e) => setCurrentEstimate({...currentEstimate, notes: e.target.value})}
+                onChange={e => setCurrentEstimate({ ...currentEstimate, notes: e.target.value })}
               />
             </div>
           </div>
@@ -231,17 +255,16 @@ const DemoUITest = () => {
           <div className="price-master-section">
             <h3>🌿 単価マスタから選択</h3>
             <div className="price-master-grid">
-              {priceMaster.map((item) => (
+              {priceMaster.map(item => (
                 <div key={item.item_id} className="price-item">
                   <div className="item-info">
                     <span className="category">{item.category}</span>
                     <h4>{item.item_name}</h4>
-                    <p>単価: ¥{item.unit_price.toLocaleString()} / {item.unit}</p>
+                    <p>
+                      単価: ¥{item.unit_price.toLocaleString()} / {item.unit}
+                    </p>
                   </div>
-                  <button 
-                    className="btn-add"
-                    onClick={() => addItemToEstimate(item)}
-                  >
+                  <button className="btn-add" onClick={() => addItemToEstimate(item)}>
                     追加
                   </button>
                 </div>
@@ -274,17 +297,14 @@ const DemoUITest = () => {
                           type="number"
                           min="1"
                           value={item.quantity}
-                          onChange={(e) => updateQuantity(index, e.target.value)}
+                          onChange={e => updateQuantity(index, e.target.value)}
                           className="quantity-input"
                         />
                       </td>
                       <td>{item.unit}</td>
                       <td>¥{item.line_total.toLocaleString()}</td>
                       <td>
-                        <button
-                          className="btn-remove"
-                          onClick={() => removeItem(index)}
-                        >
+                        <button className="btn-remove" onClick={() => removeItem(index)}>
                           削除
                         </button>
                       </td>
@@ -293,8 +313,12 @@ const DemoUITest = () => {
                 </tbody>
                 <tfoot>
                   <tr className="total-row">
-                    <td colSpan="4"><strong>合計金額</strong></td>
-                    <td><strong>¥{calculateTotal().toLocaleString()}</strong></td>
+                    <td colSpan="4">
+                      <strong>合計金額</strong>
+                    </td>
+                    <td>
+                      <strong>¥{calculateTotal().toLocaleString()}</strong>
+                    </td>
                     <td></td>
                   </tr>
                 </tfoot>
@@ -304,18 +328,18 @@ const DemoUITest = () => {
 
           {/* アクションボタン */}
           <div className="estimate-actions-section">
-            <button 
+            <button
               className="btn-save"
               onClick={saveEstimate}
-              disabled={!currentEstimate.customer_name || !currentEstimate.project_name || selectedItems.length === 0}
+              disabled={
+                !currentEstimate.customer_name ||
+                !currentEstimate.project_name ||
+                selectedItems.length === 0
+              }
             >
               💾 見積保存
             </button>
-            <button 
-              className="btn-pdf"
-              onClick={generatePDF}
-              disabled={selectedItems.length === 0}
-            >
+            <button className="btn-pdf" onClick={generatePDF} disabled={selectedItems.length === 0}>
               📄 PDF生成
             </button>
           </div>

@@ -37,13 +37,13 @@ const LoginCard = styled.div`
 const Logo = styled.div`
   text-align: center;
   margin-bottom: 30px;
-  
+
   h1 {
     color: #2e7d32;
     font-size: 28px;
     margin: 10px 0;
   }
-  
+
   .logo-icon {
     font-size: 50px;
   }
@@ -57,7 +57,7 @@ const Form = styled.form`
 
 const InputGroup = styled.div`
   position: relative;
-  
+
   input {
     width: 100%;
     padding: 12px 40px 12px 15px;
@@ -65,17 +65,17 @@ const InputGroup = styled.div`
     border-radius: 10px;
     font-size: 16px;
     transition: all 0.3s ease;
-    
+
     &:focus {
       outline: none;
       border-color: #2e7d32;
     }
-    
+
     &::placeholder {
       color: #999;
     }
   }
-  
+
   .icon {
     position: absolute;
     right: 15px;
@@ -96,12 +96,12 @@ const SubmitButton = styled.button`
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: #1b5e20;
     transform: translateY(-2px);
   }
-  
+
   &:disabled {
     background: #ccc;
     cursor: not-allowed;
@@ -122,15 +122,15 @@ const Tab = styled.button`
   flex: 1;
   padding: 10px;
   border: none;
-  background: ${props => props.active ? '#2e7d32' : 'transparent'};
-  color: ${props => props.active ? 'white' : '#666'};
+  background: ${props => (props.active ? '#2e7d32' : 'transparent')};
+  color: ${props => (props.active ? 'white' : '#666')};
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:hover {
-    background: ${props => props.active ? '#2e7d32' : '#e0e0e0'};
+    background: ${props => (props.active ? '#2e7d32' : '#e0e0e0')};
   }
 `;
 
@@ -153,7 +153,7 @@ const DemoInfo = styled.div`
   margin-top: 20px;
   font-size: 14px;
   text-align: center;
-  
+
   strong {
     display: block;
     margin-bottom: 5px;
@@ -168,12 +168,12 @@ const LoginPage = () => {
     email: '',
     password: '',
     name: '',
-    companyName: ''
+    companyName: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -187,7 +187,7 @@ const LoginPage = () => {
         const { error } = await signUp(formData.email, formData.password, {
           name: formData.name,
           company_name: formData.companyName,
-          role: 'admin'
+          role: 'admin',
         });
         if (error) throw error;
         navigate('/wizard-pro');
@@ -200,10 +200,10 @@ const LoginPage = () => {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -212,20 +212,14 @@ const LoginPage = () => {
       <LoginCard>
         <Logo>
           <div className="logo-icon">🏡</div>
-          <h1>Garden DX System</h1>
+          <h1>庭想システム</h1>
         </Logo>
 
         <TabContainer>
-          <Tab 
-            active={mode === 'login'} 
-            onClick={() => setMode('login')}
-          >
+          <Tab active={mode === 'login'} onClick={() => setMode('login')}>
             ログイン
           </Tab>
-          <Tab 
-            active={mode === 'register'} 
-            onClick={() => setMode('register')}
-          >
+          <Tab active={mode === 'register'} onClick={() => setMode('register')}>
             新規登録
           </Tab>
         </TabContainer>
@@ -244,7 +238,7 @@ const LoginPage = () => {
                 />
                 <FiUser className="icon" />
               </InputGroup>
-              
+
               <InputGroup>
                 <input
                   type="text"
@@ -298,7 +292,8 @@ const LoginPage = () => {
 
         <DemoInfo>
           <strong>デモアカウント</strong>
-          Email: demo@garden-dx.com<br />
+          Email: demo@garden-dx.com
+          <br />
           Password: demo123
         </DemoInfo>
       </LoginCard>

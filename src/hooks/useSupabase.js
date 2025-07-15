@@ -8,36 +8,36 @@ export const useEstimates = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const createEstimate = async (estimateData) => {
+  const createEstimate = async estimateData => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // 見積番号生成
       const estimateNumber = `EST-${Date.now()}`;
-      
+
       // 見積作成
       const { data: estimate, error: estimateError } = await dbClient.estimates.create({
         ...estimateData,
         company_id: companyId,
-        estimate_number: estimateNumber
+        estimate_number: estimateNumber,
       });
-      
+
       if (estimateError) throw estimateError;
-      
+
       // 見積項目作成
       if (estimateData.items && estimateData.items.length > 0) {
         const { error: itemsError } = await dbClient.estimateItems.createMany(
           estimateData.items.map((item, index) => ({
             ...item,
             estimate_id: estimate.id,
-            sort_order: index
+            sort_order: index,
           }))
         );
-        
+
         if (itemsError) throw itemsError;
       }
-      
+
       return { data: estimate, error: null };
     } catch (err) {
       setError(err);
@@ -50,11 +50,11 @@ export const useEstimates = () => {
   const getEstimates = async (filters = {}) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await dbClient.estimates.list(companyId, filters);
       if (error) throw error;
-      
+
       return { data, error: null };
     } catch (err) {
       setError(err);
@@ -64,14 +64,14 @@ export const useEstimates = () => {
     }
   };
 
-  const getEstimate = async (id) => {
+  const getEstimate = async id => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await dbClient.estimates.get(id);
       if (error) throw error;
-      
+
       return { data, error: null };
     } catch (err) {
       setError(err);
@@ -84,25 +84,25 @@ export const useEstimates = () => {
   const updateEstimate = async (id, updates) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // 見積更新
       const { data: estimate, error: estimateError } = await dbClient.estimates.update(id, updates);
       if (estimateError) throw estimateError;
-      
+
       // 項目更新がある場合
       if (updates.items) {
         const { error: itemsError } = await dbClient.estimateItems.updateMany(
           id,
           updates.items.map((item, index) => ({
             ...item,
-            sort_order: index
+            sort_order: index,
           }))
         );
-        
+
         if (itemsError) throw itemsError;
       }
-      
+
       return { data: estimate, error: null };
     } catch (err) {
       setError(err);
@@ -112,14 +112,14 @@ export const useEstimates = () => {
     }
   };
 
-  const deleteEstimate = async (id) => {
+  const deleteEstimate = async id => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { error } = await dbClient.estimates.delete(id);
       if (error) throw error;
-      
+
       return { error: null };
     } catch (err) {
       setError(err);
@@ -136,7 +136,7 @@ export const useEstimates = () => {
     getEstimates,
     getEstimate,
     updateEstimate,
-    deleteEstimate
+    deleteEstimate,
   };
 };
 
@@ -156,11 +156,11 @@ export const useClients = () => {
   const fetchClients = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await dbClient.clients.list(companyId);
       if (error) throw error;
-      
+
       setClients(data || []);
     } catch (err) {
       setError(err);
@@ -169,18 +169,18 @@ export const useClients = () => {
     }
   };
 
-  const createClient = async (clientData) => {
+  const createClient = async clientData => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await dbClient.clients.create({
         ...clientData,
-        company_id: companyId
+        company_id: companyId,
       });
-      
+
       if (error) throw error;
-      
+
       await fetchClients();
       return { data, error: null };
     } catch (err) {
@@ -194,11 +194,11 @@ export const useClients = () => {
   const updateClient = async (id, updates) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await dbClient.clients.update(id, updates);
       if (error) throw error;
-      
+
       await fetchClients();
       return { data, error: null };
     } catch (err) {
@@ -209,14 +209,14 @@ export const useClients = () => {
     }
   };
 
-  const deleteClient = async (id) => {
+  const deleteClient = async id => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { error } = await dbClient.clients.delete(id);
       if (error) throw error;
-      
+
       await fetchClients();
       return { error: null };
     } catch (err) {
@@ -234,7 +234,7 @@ export const useClients = () => {
     createClient,
     updateClient,
     deleteClient,
-    refetch: fetchClients
+    refetch: fetchClients,
   };
 };
 
@@ -244,21 +244,21 @@ export const useProjects = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const createProject = async (projectData) => {
+  const createProject = async projectData => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const projectNumber = `PRJ-${Date.now()}`;
-      
+
       const { data, error } = await dbClient.projects.create({
         ...projectData,
         company_id: companyId,
-        project_number: projectNumber
+        project_number: projectNumber,
       });
-      
+
       if (error) throw error;
-      
+
       return { data, error: null };
     } catch (err) {
       setError(err);
@@ -271,11 +271,11 @@ export const useProjects = () => {
   const getProjects = async (filters = {}) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await dbClient.projects.list(companyId, filters);
       if (error) throw error;
-      
+
       return { data, error: null };
     } catch (err) {
       setError(err);
@@ -285,14 +285,14 @@ export const useProjects = () => {
     }
   };
 
-  const getProject = async (id) => {
+  const getProject = async id => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await dbClient.projects.get(id);
       if (error) throw error;
-      
+
       return { data, error: null };
     } catch (err) {
       setError(err);
@@ -305,11 +305,11 @@ export const useProjects = () => {
   const updateProject = async (id, updates) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await dbClient.projects.update(id, updates);
       if (error) throw error;
-      
+
       return { data, error: null };
     } catch (err) {
       setError(err);
@@ -325,7 +325,7 @@ export const useProjects = () => {
     createProject,
     getProjects,
     getProject,
-    updateProject
+    updateProject,
   };
 };
 
@@ -345,11 +345,11 @@ export const useItemTemplates = () => {
   const fetchTemplates = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await dbClient.itemTemplates.list(companyId);
       if (error) throw error;
-      
+
       setTemplates(data || []);
     } catch (err) {
       setError(err);
@@ -358,18 +358,18 @@ export const useItemTemplates = () => {
     }
   };
 
-  const createTemplate = async (templateData) => {
+  const createTemplate = async templateData => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await dbClient.itemTemplates.create({
         ...templateData,
-        company_id: companyId
+        company_id: companyId,
       });
-      
+
       if (error) throw error;
-      
+
       await fetchTemplates();
       return { data, error: null };
     } catch (err) {
@@ -383,11 +383,11 @@ export const useItemTemplates = () => {
   const updateTemplate = async (id, updates) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const { data, error } = await dbClient.itemTemplates.update(id, updates);
       if (error) throw error;
-      
+
       await fetchTemplates();
       return { data, error: null };
     } catch (err) {
@@ -404,6 +404,6 @@ export const useItemTemplates = () => {
     error,
     createTemplate,
     updateTemplate,
-    refetch: fetchTemplates
+    refetch: fetchTemplates,
   };
 };

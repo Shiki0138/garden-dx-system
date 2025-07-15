@@ -6,10 +6,11 @@ import App from './App';
 // Wait for DOM to be ready
 function initApp() {
   const rootElement = document.getElementById('root');
-  
+
   if (!rootElement) {
     console.error('Root element not found! Looking for element with id="root"');
-    document.body.innerHTML = '<div style="color: red; padding: 20px;">Error: Root element not found. Please check the HTML.</div>';
+    document.body.innerHTML =
+      '<div style="color: red; padding: 20px;">Error: Root element not found. Please check the HTML.</div>';
     return;
   }
 
@@ -22,7 +23,7 @@ function initApp() {
     );
   } catch (error) {
     console.error('Error rendering app:', error);
-    rootElement.innerHTML = '<div style="color: red; padding: 20px;">Error rendering app: ' + error.message + '</div>';
+    rootElement.innerHTML = `<div style="color: red; padding: 20px;">Error rendering app: ${error.message}</div>`;
   }
 }
 

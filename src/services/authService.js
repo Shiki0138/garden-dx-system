@@ -3,7 +3,7 @@
  * 認証・権限管理サービス（フロントエンド）
  * Worker4 RBAC統合対応 - 企業級型安全性・パフォーマンス最適化
  * @version 1.0.0
- * @author Garden DX Team
+ * @author Teisou System Team
  */
 
 import axios from 'axios';
@@ -28,21 +28,21 @@ class AuthService {
   setupAxiosInterceptors() {
     // リクエストインターセプター（認証トークン付与）
     axios.interceptors.request.use(
-      (config) => {
+      config => {
         if (this.token) {
           config.headers.Authorization = `Bearer ${this.token}`;
         }
         return config;
       },
-      (error) => {
+      error => {
         return Promise.reject(error);
       }
     );
 
     // レスポンスインターセプター（認証エラー処理）
     axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
+      response => response,
+      error => {
         if (error.response?.status === 401) {
           this.logout();
           window.location.href = '/login';
@@ -62,11 +62,11 @@ class AuthService {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         username,
-        password
+        password,
       });
 
       const { access_token, user } = response.data;
-      
+
       this.token = access_token;
       localStorage.setItem('garden_auth_token', access_token);
       localStorage.setItem('garden_user', JSON.stringify(user));
@@ -77,14 +77,13 @@ class AuthService {
       return {
         success: true,
         user,
-        token: access_token
+        token: access_token,
       };
-
     } catch (error) {
       console.error('ログインエラー:', error);
       return {
         success: false,
-        error: error.response?.data?.detail || 'ログインに失敗しました'
+        error: error.response?.data?.detail || 'ログインに失敗しました',
       };
     }
   }
@@ -124,12 +123,11 @@ class AuthService {
   async loadUserFeatures() {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/auth/user-features`);
-      
+
       this.userFeatures = response.data;
       localStorage.setItem('garden_user_features', JSON.stringify(this.userFeatures));
-      
-      return this.userFeatures;
 
+      return this.userFeatures;
     } catch (error) {
       console.error('ユーザー機能情報取得エラー:', error);
       return null;
@@ -165,9 +163,8 @@ class AuthService {
       const response = await axios.get(
         `${API_BASE_URL}/api/auth/check-permission/${resource}/${action}`
       );
-      
-      return response.data.has_permission;
 
+      return response.data.has_permission;
     } catch (error) {
       console.error('権限チェックエラー:', error);
       return false;
@@ -267,14 +264,13 @@ class AuthService {
       const response = await axios.get(`${API_BASE_URL}/api/auth/permission-matrix`);
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
-
     } catch (error) {
       console.error('権限マトリックス取得エラー:', error);
       return {
         success: false,
-        error: error.response?.data?.detail || '権限マトリックスの取得に失敗しました'
+        error: error.response?.data?.detail || '権限マトリックスの取得に失敗しました',
       };
     }
   }
@@ -304,8 +300,8 @@ class AuthService {
         canApproveEstimates: this.canApproveEstimates(),
         canIssueInvoices: this.canIssueInvoices(),
         canManageUsers: this.canManageUsers(),
-        canViewDashboard: this.canViewDashboard()
-      }
+        canViewDashboard: this.canViewDashboard(),
+      },
     };
   }
 }

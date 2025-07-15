@@ -8,9 +8,9 @@
  * @param {string} input - サニタイズ対象の文字列
  * @returns {string} サニタイズされた文字列
  */
-export const sanitizeHTML = (input) => {
+export const sanitizeHTML = input => {
   if (typeof input !== 'string') return input;
-  
+
   const div = document.createElement('div');
   div.textContent = input;
   return div.innerHTML;
@@ -21,9 +21,9 @@ export const sanitizeHTML = (input) => {
  * @param {string} input - 入力文字列
  * @returns {string} 安全な文字列
  */
-export const stripHTML = (input) => {
+export const stripHTML = input => {
   if (typeof input !== 'string') return input;
-  
+
   return input
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     .replace(/<[^>]*>/g, '')
@@ -36,9 +36,9 @@ export const stripHTML = (input) => {
  * @param {string} input - エスケープ対象の文字列
  * @returns {string} エスケープされた文字列
  */
-export const escapeSQLChars = (input) => {
+export const escapeSQLChars = input => {
   if (typeof input !== 'string') return input;
-  
+
   return input
     .replace(/'/g, "''")
     .replace(/"/g, '""')
@@ -57,22 +57,24 @@ export const validateLandscapingInput = {
    * @param {string} name - 顧客名
    * @returns {Object} 検証結果
    */
-  customerName: (name) => {
+  customerName: name => {
     const sanitized = stripHTML(name?.trim() || '');
     const errors = [];
-    
+
     if (!sanitized) {
       errors.push('顧客名は必須です');
     } else if (sanitized.length > 100) {
       errors.push('顧客名は100文字以内で入力してください');
-    } else if (!/^[a-zA-Z0-9ぁ-んァ-ヶ一-龯\s\-_()（）株式会社有限会社合同会社]+$/.test(sanitized)) {
+    } else if (
+      !/^[a-zA-Z0-9ぁ-んァ-ヶ一-龯\s\-_()（）株式会社有限会社合同会社]+$/.test(sanitized)
+    ) {
       errors.push('顧客名に使用できない文字が含まれています');
     }
-    
+
     return {
       isValid: errors.length === 0,
       sanitizedValue: sanitized,
-      errors
+      errors,
     };
   },
 
@@ -81,10 +83,10 @@ export const validateLandscapingInput = {
    * @param {string} phone - 電話番号
    * @returns {Object} 検証結果
    */
-  phoneNumber: (phone) => {
+  phoneNumber: phone => {
     const sanitized = stripHTML(phone?.trim() || '');
     const errors = [];
-    
+
     if (!sanitized) {
       errors.push('電話番号は必須です');
     } else if (!/^[0-9\-+()\\s]+$/.test(sanitized)) {
@@ -92,11 +94,11 @@ export const validateLandscapingInput = {
     } else if (sanitized.replace(/[^0-9]/g, '').length < 10) {
       errors.push('電話番号は10桁以上で入力してください');
     }
-    
+
     return {
       isValid: errors.length === 0,
       sanitizedValue: sanitized,
-      errors
+      errors,
     };
   },
 
@@ -105,18 +107,18 @@ export const validateLandscapingInput = {
    * @param {string} email - メールアドレス
    * @returns {Object} 検証結果
    */
-  email: (email) => {
+  email: email => {
     const sanitized = stripHTML(email?.trim() || '');
     const errors = [];
-    
+
     if (sanitized && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitized)) {
       errors.push('正しいメールアドレス形式で入力してください');
     }
-    
+
     return {
       isValid: errors.length === 0,
       sanitizedValue: sanitized,
-      errors
+      errors,
     };
   },
 
@@ -125,20 +127,20 @@ export const validateLandscapingInput = {
    * @param {string} address - 住所
    * @returns {Object} 検証結果
    */
-  address: (address) => {
+  address: address => {
     const sanitized = stripHTML(address?.trim() || '');
     const errors = [];
-    
+
     if (!sanitized) {
       errors.push('住所は必須です');
     } else if (sanitized.length > 200) {
       errors.push('住所は200文字以内で入力してください');
     }
-    
+
     return {
       isValid: errors.length === 0,
       sanitizedValue: sanitized,
-      errors
+      errors,
     };
   },
 
@@ -147,20 +149,20 @@ export const validateLandscapingInput = {
    * @param {string} projectName - プロジェクト名
    * @returns {Object} 検証結果
    */
-  projectName: (projectName) => {
+  projectName: projectName => {
     const sanitized = stripHTML(projectName?.trim() || '');
     const errors = [];
-    
+
     if (!sanitized) {
       errors.push('プロジェクト名は必須です');
     } else if (sanitized.length > 150) {
       errors.push('プロジェクト名は150文字以内で入力してください');
     }
-    
+
     return {
       isValid: errors.length === 0,
       sanitizedValue: sanitized,
-      errors
+      errors,
     };
   },
 
@@ -174,12 +176,12 @@ export const validateLandscapingInput = {
     const { min = 0, max = 999999999, allowDecimal = false } = options;
     const sanitized = stripHTML(String(value || '').trim());
     const errors = [];
-    
+
     if (!sanitized) {
       errors.push('数値は必須です');
     } else {
       const numValue = parseFloat(sanitized);
-      
+
       if (isNaN(numValue)) {
         errors.push('有効な数値を入力してください');
       } else if (numValue < min) {
@@ -190,14 +192,14 @@ export const validateLandscapingInput = {
         errors.push('整数で入力してください');
       }
     }
-    
+
     return {
       isValid: errors.length === 0,
       sanitizedValue: sanitized,
       numericValue: errors.length === 0 ? parseFloat(sanitized) : null,
-      errors
+      errors,
     };
-  }
+  },
 };
 
 /**
@@ -214,19 +216,19 @@ export const secureLocalStorage = {
   setItem: (key, value, options = {}) => {
     try {
       const { encrypt = false, compress = false } = options;
-      
+
       // キーの検証
       if (!key || typeof key !== 'string') {
         console.error('🔒 localStorage key must be a non-empty string');
         return false;
       }
-      
+
       // 危険なキーパターンをチェック
       if (/[<>"'&]/g.test(key)) {
         console.error('🔒 localStorage key contains unsafe characters');
         return false;
       }
-      
+
       // 値のサニタイズ
       let sanitizedValue = value;
       if (typeof value === 'string') {
@@ -234,23 +236,22 @@ export const secureLocalStorage = {
       } else if (typeof value === 'object') {
         sanitizedValue = JSON.stringify(value);
       }
-      
+
       // サイズ制限チェック（5MB）
       const serialized = JSON.stringify(sanitizedValue);
       if (serialized.length > 5 * 1024 * 1024) {
         console.error('🔒 localStorage data too large (>5MB)');
         return false;
       }
-      
+
       // localStorage存在チェック
       if (typeof window === 'undefined' || !window.localStorage) {
         console.warn('🔒 localStorage not available');
         return false;
       }
-      
+
       window.localStorage.setItem(key, serialized);
       return true;
-      
     } catch (error) {
       console.error('🔒 localStorage setItem failed:', error);
       return false;
@@ -270,27 +271,26 @@ export const secureLocalStorage = {
         console.error('🔒 localStorage key must be a non-empty string');
         return defaultValue;
       }
-      
+
       // localStorage存在チェック
       if (typeof window === 'undefined' || !window.localStorage) {
         console.warn('🔒 localStorage not available');
         return defaultValue;
       }
-      
+
       const item = window.localStorage.getItem(key);
       if (item === null) {
         return defaultValue;
       }
-      
+
       const parsed = JSON.parse(item);
-      
+
       // データの整合性チェック
       if (typeof parsed === 'string') {
         return stripHTML(parsed);
       }
-      
+
       return parsed;
-      
     } catch (error) {
       console.error('🔒 localStorage getItem failed:', error);
       return defaultValue;
@@ -302,21 +302,20 @@ export const secureLocalStorage = {
    * @param {string} key - キー
    * @returns {boolean} 成功/失敗
    */
-  removeItem: (key) => {
+  removeItem: key => {
     try {
       if (!key || typeof key !== 'string') {
         console.error('🔒 localStorage key must be a non-empty string');
         return false;
       }
-      
+
       if (typeof window === 'undefined' || !window.localStorage) {
         console.warn('🔒 localStorage not available');
         return false;
       }
-      
+
       window.localStorage.removeItem(key);
       return true;
-      
     } catch (error) {
       console.error('🔒 localStorage removeItem failed:', error);
       return false;
@@ -332,26 +331,25 @@ export const secureLocalStorage = {
       if (typeof window === 'undefined' || !window.localStorage) {
         return;
       }
-      
+
       const keysToRemove = [];
-      
+
       for (let i = 0; i < window.localStorage.length; i++) {
         const key = window.localStorage.key(i);
         if (key && keyPatterns.some(pattern => key.startsWith(pattern))) {
           keysToRemove.push(key);
         }
       }
-      
+
       keysToRemove.forEach(key => {
         window.localStorage.removeItem(key);
       });
-      
+
       console.info(`🔒 Cleared ${keysToRemove.length} sensitive localStorage items`);
-      
     } catch (error) {
       console.error('🔒 Failed to clear sensitive localStorage data:', error);
     }
-  }
+  },
 };
 
 /**
@@ -383,25 +381,25 @@ export const csrfProtection = {
    * セッション用CSRFトークン管理
    */
   sessionToken: {
-    set: (token) => {
+    set: token => {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         window.sessionStorage.setItem('csrf_token', token);
       }
     },
-    
+
     get: () => {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         return window.sessionStorage.getItem('csrf_token');
       }
       return null;
     },
-    
+
     clear: () => {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         window.sessionStorage.removeItem('csrf_token');
       }
-    }
-  }
+    },
+  },
 };
 
 /**
@@ -420,14 +418,14 @@ export const securityLogger = {
       event,
       details,
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown',
-      url: typeof window !== 'undefined' ? window.location.href : 'unknown'
+      url: typeof window !== 'undefined' ? window.location.href : 'unknown',
     };
-    
+
     // 開発環境でのみコンソール出力
     if (process.env.NODE_ENV === 'development') {
       console.info('🔒 Security Event:', logEntry);
     }
-    
+
     // 本番環境では外部ログ収集サービスに送信（実装時）
     // sendToSecurityService(logEntry);
   },
@@ -450,7 +448,7 @@ export const securityLogger = {
   error: (error, context = {}) => {
     console.error('🚨 Security Error:', error, context);
     securityLogger.log('security_error', { error, context });
-  }
+  },
 };
 
 export default {
@@ -460,5 +458,5 @@ export default {
   validateLandscapingInput,
   secureLocalStorage,
   csrfProtection,
-  securityLogger
+  securityLogger,
 };

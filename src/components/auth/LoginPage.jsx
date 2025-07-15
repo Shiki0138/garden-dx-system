@@ -550,8 +550,8 @@ const LoginPage = ({ onLogin }) => {
     }, 100);
   };
 
-  // デモモードの確認
-  const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true';
+  // デモモードの確認は上部で既に宣言済み（useDemoModeから取得）
+  // const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true';
 
   return (
     <LoginContainer>

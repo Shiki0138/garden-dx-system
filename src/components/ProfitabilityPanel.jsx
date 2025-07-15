@@ -29,11 +29,11 @@ const MetricValue = styled.span`
 `;
 
 const ProfitabilityPanel = ({ profitability }) => {
-  const formatCurrency = (amount) => {
+  const formatCurrency = amount => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount || 0);
   };
 

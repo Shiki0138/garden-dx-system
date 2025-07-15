@@ -17,7 +17,7 @@ export class SecurityTestRunner {
       failed: 0,
       warnings: 0,
       total: 0,
-      details: []
+      details: [],
     };
   }
 
@@ -26,29 +26,28 @@ export class SecurityTestRunner {
    */
   async runAllSecurityTests() {
     console.log('🧪 セキュリティテスト開始...');
-    
+
     try {
       // 1. RBAC テスト
       await this.runRBACTests();
-      
+
       // 2. JWT セキュリティテスト
       await this.runJWTSecurityTests();
-      
+
       // 3. 認証フローテスト
       await this.runAuthenticationTests();
-      
+
       // 4. セッション管理テスト
       await this.runSessionTests();
-      
+
       // 5. 入力検証テスト
       await this.runInputValidationTests();
-      
+
       // 6. 暗号化テスト
       await this.runCryptographyTests();
-      
+
       console.log('✅ セキュリティテスト完了');
       return this.generateTestReport();
-      
     } catch (error) {
       console.error('❌ セキュリティテストエラー:', error);
       return { error: 'セキュリティテスト中にエラーが発生しました' };
@@ -66,7 +65,7 @@ export class SecurityTestRunner {
           const owner = { id: 'test-owner', role: 'owner', company_id: 'test-1' };
           return checkPermissionFast(owner, 'users', 'delete');
         },
-        expected: true
+        expected: true,
       },
       {
         name: 'ビューアー権限制限テスト',
@@ -74,7 +73,7 @@ export class SecurityTestRunner {
           const viewer = { id: 'test-viewer', role: 'viewer', company_id: 'test-1' };
           return checkPermissionFast(viewer, 'users', 'create');
         },
-        expected: false
+        expected: false,
       },
       {
         name: '権限エスカレーション防止テスト',
@@ -82,7 +81,7 @@ export class SecurityTestRunner {
           const employee = { id: 'test-emp', role: 'employee', company_id: 'test-1' };
           return checkPermissionFast(employee, 'settings', 'update');
         },
-        expected: false
+        expected: false,
       },
       {
         name: '無効な役割テスト',
@@ -90,8 +89,8 @@ export class SecurityTestRunner {
           const invalid = { id: 'test-invalid', role: 'hacker', company_id: 'test-1' };
           return checkPermissionFast(invalid, 'estimates', 'read');
         },
-        expected: false
-      }
+        expected: false,
+      },
     ];
 
     this.runTestSuite('RBAC Security Tests', testCases);
@@ -107,46 +106,46 @@ export class SecurityTestRunner {
         test: () => {
           const validSession = {
             access_token: 'valid.jwt.token',
-            expires_at: Math.floor(Date.now() / 1000) + 3600
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
           };
           // モックの有効なセッション
           return true; // Supabaseが処理
         },
-        expected: true
+        expected: true,
       },
       {
         name: '期限切れトークン拒否',
         test: () => {
           const expiredSession = {
             access_token: 'expired.jwt.token',
-            expires_at: Math.floor(Date.now() / 1000) - 3600
+            expires_at: Math.floor(Date.now() / 1000) - 3600,
           };
           return validateSessionFast(expiredSession);
         },
-        expected: false
+        expected: false,
       },
       {
         name: '不正なトークン拒否',
         test: () => {
           const invalidSession = {
             access_token: 'invalid-token',
-            expires_at: Math.floor(Date.now() / 1000) + 3600
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
           };
           return validateSessionFast(invalidSession);
         },
-        expected: false
+        expected: false,
       },
       {
         name: 'トークン改ざん検出',
         test: () => {
           const tamperedSession = {
             access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.tampered.signature',
-            expires_at: Math.floor(Date.now() / 1000) + 3600
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
           };
           return validateSessionFast(tamperedSession);
         },
-        expected: false
-      }
+        expected: false,
+      },
     ];
 
     this.runTestSuite('JWT Security Tests', testCases);
@@ -163,12 +162,12 @@ export class SecurityTestRunner {
           const request = {
             userId: 'test-user-rate-limit',
             inputs: { email: 'test@example.com' },
-            session: { access_token: 'valid-token', expires_at: Date.now() / 1000 + 3600 }
+            session: { access_token: 'valid-token', expires_at: Date.now() / 1000 + 3600 },
           };
           const result = await performSecurityCheck(request);
           return result.checks.rateLimit.allowed;
         },
-        expected: true
+        expected: true,
       },
       {
         name: '空のパスワード拒否',
@@ -176,7 +175,7 @@ export class SecurityTestRunner {
           // パスワード検証テスト
           return false; // 空パスワードは拒否されるべき
         },
-        expected: false
+        expected: false,
       },
       {
         name: '弱いパスワード拒否',
@@ -184,8 +183,8 @@ export class SecurityTestRunner {
           // 弱いパスワード（"123456"）のテスト
           return false; // 弱いパスワードは拒否されるべき
         },
-        expected: false
-      }
+        expected: false,
+      },
     ];
 
     this.runTestSuite('Authentication Flow Tests', testCases);
@@ -201,22 +200,22 @@ export class SecurityTestRunner {
         test: () => {
           const validSession = {
             access_token: 'valid-token',
-            expires_at: Math.floor(Date.now() / 1000) + 3600
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
           };
           return validateSessionFast(validSession);
         },
-        expected: true
+        expected: true,
       },
       {
         name: 'セッション期限切れ検出',
         test: () => {
           const expiredSession = {
             access_token: 'expired-token',
-            expires_at: Math.floor(Date.now() / 1000) - 100
+            expires_at: Math.floor(Date.now() / 1000) - 100,
           };
           return validateSessionFast(expiredSession);
         },
-        expected: false
+        expected: false,
       },
       {
         name: 'セッション無効化',
@@ -224,8 +223,8 @@ export class SecurityTestRunner {
           const nullSession = null;
           return validateSessionFast(nullSession);
         },
-        expected: false
-      }
+        expected: false,
+      },
     ];
 
     this.runTestSuite('Session Management Tests', testCases);
@@ -243,7 +242,7 @@ export class SecurityTestRunner {
           // 入力サニタイズの確認
           return !maliciousInput.includes('DROP TABLE');
         },
-        expected: false // サニタイズ後は危険な文字列が残らない
+        expected: false, // サニタイズ後は危険な文字列が残らない
       },
       {
         name: 'XSS攻撃防止',
@@ -252,7 +251,7 @@ export class SecurityTestRunner {
           // HTMLエスケープの確認
           return !xssInput.includes('<script>');
         },
-        expected: false // エスケープ後はスクリプトタグが残らない
+        expected: false, // エスケープ後はスクリプトタグが残らない
       },
       {
         name: '長すぎる入力拒否',
@@ -260,8 +259,8 @@ export class SecurityTestRunner {
           const longInput = 'a'.repeat(10001);
           return longInput.length <= 10000;
         },
-        expected: false
-      }
+        expected: false,
+      },
     ];
 
     this.runTestSuite('Input Validation Tests', testCases);
@@ -280,7 +279,7 @@ export class SecurityTestRunner {
           }
           return true;
         },
-        expected: true
+        expected: true,
       },
       {
         name: '暗号化強度確認',
@@ -288,7 +287,7 @@ export class SecurityTestRunner {
           // AES-256の使用確認
           return crypto && crypto.subtle;
         },
-        expected: true
+        expected: true,
       },
       {
         name: 'ハッシュアルゴリズム確認',
@@ -296,8 +295,8 @@ export class SecurityTestRunner {
           // SHA-256の使用確認
           return true; // Web Crypto APIサポート前提
         },
-        expected: true
-      }
+        expected: true,
+      },
     ];
 
     this.runTestSuite('Cryptography Tests', testCases);
@@ -308,14 +307,14 @@ export class SecurityTestRunner {
    */
   runTestSuite(suiteName, testCases) {
     console.log(`🧪 ${suiteName} 実行中...`);
-    
+
     testCases.forEach(testCase => {
       try {
         const result = testCase.test();
         const passed = result === testCase.expected;
-        
+
         this.testResults.total++;
-        
+
         if (passed) {
           this.testResults.passed++;
           this.testResults.details.push({
@@ -323,7 +322,7 @@ export class SecurityTestRunner {
             test: testCase.name,
             status: 'PASSED',
             expected: testCase.expected,
-            actual: result
+            actual: result,
           });
         } else {
           this.testResults.failed++;
@@ -332,7 +331,7 @@ export class SecurityTestRunner {
             test: testCase.name,
             status: 'FAILED',
             expected: testCase.expected,
-            actual: result
+            actual: result,
           });
         }
       } catch (error) {
@@ -342,7 +341,7 @@ export class SecurityTestRunner {
           suite: suiteName,
           test: testCase.name,
           status: 'ERROR',
-          error: error.message
+          error: error.message,
         });
       }
     });
@@ -352,8 +351,8 @@ export class SecurityTestRunner {
    * テストレポート生成
    */
   generateTestReport() {
-    const passRate = (this.testResults.passed / this.testResults.total * 100).toFixed(2);
-    
+    const passRate = ((this.testResults.passed / this.testResults.total) * 100).toFixed(2);
+
     return {
       summary: {
         total: this.testResults.total,
@@ -361,11 +360,11 @@ export class SecurityTestRunner {
         failed: this.testResults.failed,
         warnings: this.testResults.warnings,
         passRate: `${passRate}%`,
-        status: this.testResults.failed === 0 ? 'ALL_PASSED' : 'SOME_FAILED'
+        status: this.testResults.failed === 0 ? 'ALL_PASSED' : 'SOME_FAILED',
       },
       details: this.testResults.details,
       recommendations: this.generateRecommendations(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -375,18 +374,18 @@ export class SecurityTestRunner {
   generateRecommendations() {
     const recommendations = [];
     const failedTests = this.testResults.details.filter(test => test.status === 'FAILED');
-    
+
     if (failedTests.length > 0) {
       recommendations.push('失敗したテストケースの修正が必要です');
     }
-    
+
     if (this.testResults.failed > this.testResults.total * 0.1) {
       recommendations.push('セキュリティテストの失敗率が高いため、包括的な見直しが必要です');
     }
-    
+
     recommendations.push('定期的なセキュリティテストの実行を継続してください');
     recommendations.push('新機能追加時はセキュリティテストを更新してください');
-    
+
     return recommendations;
   }
 }
@@ -396,7 +395,7 @@ export class SecurityTestRunner {
  */
 export const runSecurityTests = async () => {
   const runner = new SecurityTestRunner();
-  return await runner.runAllSecurityTests();
+  return runner.runAllSecurityTests();
 };
 
 /**
@@ -404,38 +403,35 @@ export const runSecurityTests = async () => {
  */
 export const performFullSecurityAssessment = async () => {
   console.log('🔍 包括的セキュリティ評価開始...');
-  
+
   try {
     // セキュリティ監査実行
     const auditResults = await new SecurityAuditor().performComprehensiveAudit();
-    
+
     // セキュリティテスト実行
     const testResults = await runSecurityTests();
-    
+
     // 統合評価
-    const overallScore = (auditResults.summary.overallScore + 
-                         (testResults.summary.passRate.replace('%', '') / 1)) / 2;
-    
+    const overallScore =
+      (auditResults.summary.overallScore + testResults.summary.passRate.replace('%', '') / 1) / 2;
+
     return {
       timestamp: new Date().toISOString(),
       overallScore: Math.round(overallScore),
       audit: auditResults,
       tests: testResults,
-      recommendations: [
-        ...auditResults.actionItems,
-        ...testResults.recommendations
-      ],
+      recommendations: [...auditResults.actionItems, ...testResults.recommendations],
       complianceStatus: {
         owasp: auditResults.complianceStatus.owasp,
         securityTests: testResults.summary.status === 'ALL_PASSED' ? 'compliant' : 'non_compliant',
-        overall: overallScore >= 80 ? 'compliant' : 'needs_improvement'
-      }
+        overall: overallScore >= 80 ? 'compliant' : 'needs_improvement',
+      },
     };
   } catch (error) {
     console.error('包括的セキュリティ評価エラー:', error);
-    return { 
+    return {
       error: '包括的セキュリティ評価中にエラーが発生しました',
-      details: error.message 
+      details: error.message,
     };
   }
 };

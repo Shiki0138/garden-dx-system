@@ -5,8 +5,8 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
-import { 
-  Search, 
+import {
+  Search,
   Calendar,
   MapPin,
   User,
@@ -22,13 +22,13 @@ import {
   ChevronUp,
   MessageCircle,
   FileText,
-  Settings
+  Settings,
 } from 'lucide-react';
 
 // 造園業界標準カラーパレット
 const colors = {
   primary: '#1a472a',
-  secondary: '#2d5a3d', 
+  secondary: '#2d5a3d',
   accent: '#4a7c3c',
   success: '#059669',
   warning: '#d97706',
@@ -39,7 +39,7 @@ const colors = {
   border: '#e5e7eb',
   text: '#1f2937',
   textLight: '#6b7280',
-  textWhite: '#ffffff'
+  textWhite: '#ffffff',
 };
 
 // プロジェクトステータス定義
@@ -52,7 +52,7 @@ const PROJECT_STATUSES = {
   in_progress: { label: '施工中', color: colors.primary, icon: Settings },
   completed: { label: '完了', color: colors.success, icon: CheckCircle },
   cancelled: { label: 'キャンセル', color: colors.error, icon: AlertCircle },
-  maintenance: { label: '保守管理', color: colors.secondary, icon: RefreshCw }
+  maintenance: { label: '保守管理', color: colors.secondary, icon: RefreshCw },
 };
 
 // メインコンテナ
@@ -81,7 +81,7 @@ const HeaderTitle = styled.h1`
   display: flex;
   align-items: center;
   gap: 12px;
-  
+
   &::before {
     content: '🌿';
     font-size: 1.5rem;
@@ -109,12 +109,12 @@ const FiltersGrid = styled.div`
   grid-template-columns: 1fr 200px 200px 150px 120px;
   gap: 15px;
   align-items: end;
-  
+
   @media (max-width: 1024px) {
     grid-template-columns: 1fr 1fr;
     gap: 15px;
   }
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -131,13 +131,13 @@ const SearchField = styled.input`
   border-radius: 8px;
   font-size: 16px;
   transition: all 0.3s ease;
-  
+
   &:focus {
     outline: none;
     border-color: ${colors.primary};
     box-shadow: 0 0 0 3px rgba(26, 71, 42, 0.1);
   }
-  
+
   &::placeholder {
     color: ${colors.textLight};
   }
@@ -162,7 +162,7 @@ const FilterSelect = styled.select`
   background: ${colors.surface};
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:focus {
     outline: none;
     border-color: ${colors.primary};
@@ -182,8 +182,10 @@ const ActionButton = styled.button`
   align-items: center;
   gap: 8px;
   justify-content: center;
-  
-  ${props => props.variant === 'primary' && `
+
+  ${props =>
+    props.variant === 'primary' &&
+    `
     background: ${colors.primary};
     color: ${colors.textWhite};
     
@@ -193,8 +195,10 @@ const ActionButton = styled.button`
       box-shadow: 0 4px 15px rgba(26, 71, 42, 0.3);
     }
   `}
-  
-  ${props => props.variant === 'secondary' && `
+
+  ${props =>
+    props.variant === 'secondary' &&
+    `
     background: ${colors.surface};
     color: ${colors.primary};
     border: 2px solid ${colors.primary};
@@ -227,7 +231,7 @@ const StatCard = styled.div`
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   border-left: 4px solid ${props => props.color || colors.primary};
   transition: transform 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -260,7 +264,7 @@ const ProjectCard = styled.div`
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   border: 1px solid ${colors.border};
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
@@ -346,12 +350,12 @@ const ActionIcon = styled.button`
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -383,17 +387,17 @@ const PageButton = styled.button`
   height: 40px;
   border: 2px solid ${colors.border};
   border-radius: 8px;
-  background: ${props => props.active ? colors.primary : colors.surface};
-  color: ${props => props.active ? colors.textWhite : colors.text};
+  background: ${props => (props.active ? colors.primary : colors.surface)};
+  color: ${props => (props.active ? colors.textWhite : colors.text)};
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:hover {
     border-color: ${colors.primary};
-    background: ${props => props.active ? colors.secondary : colors.primary};
+    background: ${props => (props.active ? colors.secondary : colors.primary)};
     color: ${colors.textWhite};
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -415,71 +419,74 @@ const ProjectHistoryManager = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  
+
   // サンプルデータ（実際の実装では API から取得）
-  const sampleProjects = useMemo(() => [
-    {
-      id: 'P2024001',
-      title: '田中邸庭園リニューアル工事',
-      customer: '田中太郎',
-      location: '東京都世田谷区',
-      status: 'completed',
-      amount: 2500000,
-      estimateDate: '2024-06-15',
-      contractDate: '2024-07-01',
-      completionDate: '2024-08-15',
-      workType: '庭園造成工事',
-      description: '既存庭園の全面リニューアル、植栽・石積み・水回り工事'
-    },
-    {
-      id: 'P2024002', 
-      title: '佐藤商事ビル外構工事',
-      customer: '佐藤商事株式会社',
-      location: '神奈川県横浜市',
-      status: 'in_progress',
-      amount: 4800000,
-      estimateDate: '2024-07-10',
-      contractDate: '2024-07-25',
-      workType: '外構工事',
-      description: 'オフィスビル敷地の外構整備、駐車場・植栽・照明工事'
-    },
-    {
-      id: 'P2024003',
-      title: '山田邸新築外構工事',
-      customer: '山田花子',
-      location: '千葉県柏市',
-      status: 'proposal',
-      amount: 1800000,
-      estimateDate: '2024-08-05',
-      workType: '新築外構工事',
-      description: '新築住宅の外構工事、門柱・フェンス・駐車場・植栽'
-    },
-    {
-      id: 'P2024004',
-      title: '公園リニューアル設計',
-      customer: '○○市役所',
-      location: '埼玉県○○市',
-      status: 'contracted',
-      amount: 12000000,
-      estimateDate: '2024-05-20',
-      contractDate: '2024-06-10',
-      workType: '設計監理',
-      description: '市民公園のリニューアル設計・監理業務'
-    },
-    {
-      id: 'P2024005',
-      title: '鈴木邸植栽メンテナンス',
-      customer: '鈴木一郎',
-      location: '東京都杉並区',
-      status: 'maintenance',
-      amount: 350000,
-      estimateDate: '2024-08-20',
-      contractDate: '2024-09-01',
-      workType: '維持管理',
-      description: '年間植栽メンテナンス契約、剪定・施肥・病害虫防除'
-    }
-  ], []);
-  
+  const sampleProjects = useMemo(
+    () => [
+      {
+        id: 'P2024001',
+        title: '田中邸庭園リニューアル工事',
+        customer: '田中太郎',
+        location: '東京都世田谷区',
+        status: 'completed',
+        amount: 2500000,
+        estimateDate: '2024-06-15',
+        contractDate: '2024-07-01',
+        completionDate: '2024-08-15',
+        workType: '庭園造成工事',
+        description: '既存庭園の全面リニューアル、植栽・石積み・水回り工事',
+      },
+      {
+        id: 'P2024002',
+        title: '佐藤商事ビル外構工事',
+        customer: '佐藤商事株式会社',
+        location: '神奈川県横浜市',
+        status: 'in_progress',
+        amount: 4800000,
+        estimateDate: '2024-07-10',
+        contractDate: '2024-07-25',
+        workType: '外構工事',
+        description: 'オフィスビル敷地の外構整備、駐車場・植栽・照明工事',
+      },
+      {
+        id: 'P2024003',
+        title: '山田邸新築外構工事',
+        customer: '山田花子',
+        location: '千葉県柏市',
+        status: 'proposal',
+        amount: 1800000,
+        estimateDate: '2024-08-05',
+        workType: '新築外構工事',
+        description: '新築住宅の外構工事、門柱・フェンス・駐車場・植栽',
+      },
+      {
+        id: 'P2024004',
+        title: '公園リニューアル設計',
+        customer: '○○市役所',
+        location: '埼玉県○○市',
+        status: 'contracted',
+        amount: 12000000,
+        estimateDate: '2024-05-20',
+        contractDate: '2024-06-10',
+        workType: '設計監理',
+        description: '市民公園のリニューアル設計・監理業務',
+      },
+      {
+        id: 'P2024005',
+        title: '鈴木邸植栽メンテナンス',
+        customer: '鈴木一郎',
+        location: '東京都杉並区',
+        status: 'maintenance',
+        amount: 350000,
+        estimateDate: '2024-08-20',
+        contractDate: '2024-09-01',
+        workType: '維持管理',
+        description: '年間植栽メンテナンス契約、剪定・施肥・病害虫防除',
+      },
+    ],
+    []
+  );
+
   // 初期データ読み込み
   useEffect(() => {
     setLoading(true);
@@ -490,26 +497,27 @@ const ProjectHistoryManager = () => {
       setLoading(false);
     }, 500);
   }, [sampleProjects]);
-  
+
   // フィルタリング・検索処理
   useEffect(() => {
     let filtered = [...projects];
-    
+
     // 検索フィルター
     if (searchTerm) {
-      filtered = filtered.filter(project =>
-        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.id.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        project =>
+          project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          project.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          project.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          project.id.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     // ステータスフィルター
     if (statusFilter !== 'all') {
       filtered = filtered.filter(project => project.status === statusFilter);
     }
-    
+
     // 年度フィルター
     if (yearFilter !== 'all') {
       filtered = filtered.filter(project => {
@@ -517,113 +525,115 @@ const ProjectHistoryManager = () => {
         return year.toString() === yearFilter;
       });
     }
-    
+
     // 金額フィルター
     if (amountFilter !== 'all') {
       filtered = filtered.filter(project => {
         const amount = project.amount;
         switch (amountFilter) {
-          case 'small': return amount < 1000000;
-          case 'medium': return amount >= 1000000 && amount < 5000000;
-          case 'large': return amount >= 5000000;
-          default: return true;
+          case 'small':
+            return amount < 1000000;
+          case 'medium':
+            return amount >= 1000000 && amount < 5000000;
+          case 'large':
+            return amount >= 5000000;
+          default:
+            return true;
         }
       });
     }
-    
+
     // ソート
     filtered.sort((a, b) => {
       const dateA = new Date(a.estimateDate);
       const dateB = new Date(b.estimateDate);
       return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
-    
+
     setFilteredProjects(filtered);
     setCurrentPage(1);
   }, [projects, searchTerm, statusFilter, yearFilter, amountFilter, sortOrder]);
-  
+
   // 統計情報計算
   const stats = useMemo(() => {
     const total = projects.length;
     const completed = projects.filter(p => p.status === 'completed').length;
     const inProgress = projects.filter(p => p.status === 'in_progress').length;
     const totalAmount = projects.reduce((sum, p) => sum + (p.amount || 0), 0);
-    
+
     return {
       total,
       completed,
       inProgress,
       totalAmount,
-      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0
+      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
     };
   }, [projects]);
-  
+
   // ページング計算
   const paginatedProjects = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredProjects.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredProjects, currentPage, itemsPerPage]);
-  
+
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
-  
+
   // イベントハンドラー
-  const handleSearch = useCallback((event) => {
+  const handleSearch = useCallback(event => {
     setSearchTerm(event.target.value);
   }, []);
-  
-  const handleStatusFilter = useCallback((event) => {
+
+  const handleStatusFilter = useCallback(event => {
     setStatusFilter(event.target.value);
   }, []);
-  
-  const handleYearFilter = useCallback((event) => {
+
+  const handleYearFilter = useCallback(event => {
     setYearFilter(event.target.value);
   }, []);
-  
-  const handleAmountFilter = useCallback((event) => {
+
+  const handleAmountFilter = useCallback(event => {
     setAmountFilter(event.target.value);
   }, []);
-  
+
   const handleSortToggle = useCallback(() => {
-    setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
+    setSortOrder(prev => (prev === 'desc' ? 'asc' : 'desc'));
   }, []);
-  
+
   const handleProjectAction = useCallback((projectId, action) => {
     console.log(`プロジェクト ${projectId} のアクション: ${action}`);
     // 実際の実装では対応する処理を実行
   }, []);
-  
+
   // ユーティリティ関数
-  const formatCurrency = (amount) => {
+  const formatCurrency = amount => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount);
   };
-  
-  const formatDate = (dateString) => {
+
+  const formatDate = dateString => {
     const date = new Date(dateString);
     return date.toLocaleDateString('ja-JP', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
-  
-  const getStatusInfo = (status) => {
+
+  const getStatusInfo = status => {
     return PROJECT_STATUSES[status] || PROJECT_STATUSES.inquiry;
   };
-  
+
   return (
     <Container>
       {/* ヘッダー */}
       <Header>
         <HeaderTitle>案件履歴管理</HeaderTitle>
-        <HeaderSubtitle>
-          造園工事案件の検索・フィルター・ステータス管理システム
-        </HeaderSubtitle>
+        <HeaderSubtitle>造園工事案件の検索・フィルター・ステータス管理システム</HeaderSubtitle>
       </Header>
-      
+
       {/* 統計情報 */}
       <StatsSection>
         <StatCard color={colors.primary}>
@@ -643,13 +653,11 @@ const ProjectHistoryManager = () => {
           <StatLabel>完成率</StatLabel>
         </StatCard>
         <StatCard color={colors.accent}>
-          <StatValue color={colors.accent}>
-            {formatCurrency(stats.totalAmount)}
-          </StatValue>
+          <StatValue color={colors.accent}>{formatCurrency(stats.totalAmount)}</StatValue>
           <StatLabel>総契約金額</StatLabel>
         </StatCard>
       </StatsSection>
-      
+
       {/* 検索・フィルター */}
       <FiltersSection>
         <FiltersGrid>
@@ -662,40 +670,46 @@ const ProjectHistoryManager = () => {
             />
             <SearchIcon />
           </SearchInput>
-          
+
           <FilterSelect value={statusFilter} onChange={handleStatusFilter}>
             <option value="all">全ステータス</option>
             {Object.entries(PROJECT_STATUSES).map(([key, status]) => (
-              <option key={key} value={key}>{status.label}</option>
+              <option key={key} value={key}>
+                {status.label}
+              </option>
             ))}
           </FilterSelect>
-          
+
           <FilterSelect value={yearFilter} onChange={handleYearFilter}>
             <option value="all">全年度</option>
             <option value="2024">2024年</option>
             <option value="2023">2023年</option>
             <option value="2022">2022年</option>
           </FilterSelect>
-          
+
           <FilterSelect value={amountFilter} onChange={handleAmountFilter}>
             <option value="all">全金額</option>
             <option value="small">100万円未満</option>
             <option value="medium">100万円～500万円</option>
             <option value="large">500万円以上</option>
           </FilterSelect>
-          
+
           <ActionButton variant="secondary" onClick={handleSortToggle}>
             {sortOrder === 'desc' ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
             日付順
           </ActionButton>
         </FiltersGrid>
       </FiltersSection>
-      
+
       {/* プロジェクト一覧 */}
       <ProjectsGrid>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '50px' }}>
-            <RefreshCw size={48} color={colors.primary} style={{ animation: 'spin 1s linear infinite' }} />
+            <RefreshCw
+              size={48}
+              color={colors.primary}
+              style={{ animation: 'spin 1s linear infinite' }}
+            />
             <p style={{ marginTop: '20px', color: colors.textLight }}>読み込み中...</p>
           </div>
         ) : paginatedProjects.length === 0 ? (
@@ -709,7 +723,7 @@ const ProjectHistoryManager = () => {
           paginatedProjects.map(project => {
             const statusInfo = getStatusInfo(project.status);
             const StatusIcon = statusInfo.icon;
-            
+
             return (
               <ProjectCard key={project.id}>
                 <ProjectHeader>
@@ -724,21 +738,21 @@ const ProjectHistoryManager = () => {
                     </StatusBadge>
                   </ProjectInfo>
                   <ProjectActions>
-                    <ActionIcon 
+                    <ActionIcon
                       color={colors.info}
                       onClick={() => handleProjectAction(project.id, 'view')}
                       title="詳細表示"
                     >
                       <Eye size={16} />
                     </ActionIcon>
-                    <ActionIcon 
+                    <ActionIcon
                       color={colors.accent}
                       onClick={() => handleProjectAction(project.id, 'edit')}
                       title="編集"
                     >
                       <Edit size={16} />
                     </ActionIcon>
-                    <ActionIcon 
+                    <ActionIcon
                       color={colors.warning}
                       onClick={() => handleProjectAction(project.id, 'download')}
                       title="ダウンロード"
@@ -747,7 +761,7 @@ const ProjectHistoryManager = () => {
                     </ActionIcon>
                   </ProjectActions>
                 </ProjectHeader>
-                
+
                 <ProjectMeta>
                   <MetaItem>
                     <User size={16} />
@@ -768,15 +782,15 @@ const ProjectHistoryManager = () => {
                     </MetaItem>
                   )}
                 </ProjectMeta>
-                
+
                 <div style={{ marginBottom: '10px', color: colors.textLight }}>
                   <strong>工事種別:</strong> {project.workType}
                 </div>
-                
+
                 <div style={{ marginBottom: '15px', color: colors.text }}>
                   {project.description}
                 </div>
-                
+
                 <AmountDisplay>
                   <DollarSign size={18} style={{ display: 'inline', marginRight: '8px' }} />
                   契約金額: {formatCurrency(project.amount)}
@@ -786,7 +800,7 @@ const ProjectHistoryManager = () => {
           })
         )}
       </ProjectsGrid>
-      
+
       {/* ページネーション */}
       {totalPages > 1 && (
         <Pagination>
@@ -796,7 +810,7 @@ const ProjectHistoryManager = () => {
           >
             ‹
           </PageButton>
-          
+
           {[...Array(totalPages)].map((_, index) => {
             const pageNum = index + 1;
             if (
@@ -813,15 +827,12 @@ const ProjectHistoryManager = () => {
                   {pageNum}
                 </PageButton>
               );
-            } else if (
-              pageNum === currentPage - 3 ||
-              pageNum === currentPage + 3
-            ) {
+            } else if (pageNum === currentPage - 3 || pageNum === currentPage + 3) {
               return <span key={pageNum}>...</span>;
             }
             return null;
           })}
-          
+
           <PageButton
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}

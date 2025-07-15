@@ -26,8 +26,8 @@ const DEMO_USERS = {
     user_metadata: {
       role: 'manager',
       company_name: '緑化工業株式会社',
-      full_name: '田中 太郎'
-    }
+      full_name: '田中 太郎',
+    },
   },
   employee: {
     id: 'demo-employee-001',
@@ -38,9 +38,9 @@ const DEMO_USERS = {
     user_metadata: {
       role: 'employee',
       company_name: '緑化工業株式会社',
-      full_name: '佐藤 花子'
-    }
-  }
+      full_name: '佐藤 花子',
+    },
+  },
 };
 
 // サンプルデータ
@@ -52,8 +52,8 @@ export const DEMO_DATA = {
       address: '東京都渋谷区神宮前1-1-1',
       phone: '03-1234-5678',
       email: 'info@garden-dx.com',
-      created_at: '2024-01-01'
-    }
+      created_at: '2024-01-01',
+    },
   ],
   clients: [
     {
@@ -63,7 +63,7 @@ export const DEMO_DATA = {
       email: 'yamada@gardenhome.jp',
       phone: '090-1234-5678',
       address: '東京都世田谷区駒沢2-2-2',
-      created_at: '2024-01-15'
+      created_at: '2024-01-15',
     },
     {
       id: 'demo-client-002',
@@ -72,8 +72,8 @@ export const DEMO_DATA = {
       email: 'suzuki@suzukikensetsu.co.jp',
       phone: '090-8765-4321',
       address: '神奈川県横浜市青葉区美しが丘3-3-3',
-      created_at: '2024-02-01'
-    }
+      created_at: '2024-02-01',
+    },
   ],
   projects: [
     {
@@ -86,7 +86,7 @@ export const DEMO_DATA = {
       end_date: '2024-04-30',
       budget: 2500000,
       location: '東京都世田谷区駒沢2-2-2',
-      created_at: '2024-02-15'
+      created_at: '2024-02-15',
     },
     {
       id: 'demo-project-002',
@@ -98,8 +98,8 @@ export const DEMO_DATA = {
       end_date: '2024-06-30',
       budget: 1800000,
       location: '神奈川県横浜市青葉区美しが丘3-3-3',
-      created_at: '2024-03-01'
-    }
+      created_at: '2024-03-01',
+    },
   ],
   estimates: [
     {
@@ -119,7 +119,7 @@ export const DEMO_DATA = {
           quantity: 3,
           unit: '本',
           unit_price: 35000,
-          amount: 105000
+          amount: 105000,
         },
         {
           category: '植栽工事',
@@ -127,7 +127,7 @@ export const DEMO_DATA = {
           quantity: 5,
           unit: '本',
           unit_price: 25000,
-          amount: 125000
+          amount: 125000,
         },
         {
           category: '石工事',
@@ -135,13 +135,13 @@ export const DEMO_DATA = {
           quantity: 8,
           unit: '個',
           unit_price: 45000,
-          amount: 360000
-        }
+          amount: 360000,
+        },
       ],
       created_at: '2024-02-20',
-      updated_at: '2024-02-25'
-    }
-  ]
+      updated_at: '2024-02-25',
+    },
+  ],
 };
 
 export const DemoModeProvider = ({ children }) => {
@@ -149,20 +149,17 @@ export const DemoModeProvider = ({ children }) => {
   const [demoUser, setDemoUser] = useState(null);
   const [demoData, setDemoData] = useState(DEMO_DATA);
 
-  // デモモード初期化
+  // デモモード初期化（開発段階では常に有効）
   useEffect(() => {
-    // 環境変数またはローカルストレージでデモモード判定
-    const isDemo = process.env.REACT_APP_DEMO_MODE === 'true' || 
-                   localStorage.getItem('demo_mode') === 'true' ||
-                   window.location.hostname.includes('demo');
-    
-    setIsDemoMode(isDemo);
-    
-    if (isDemo) {
-      console.log('🎭 デモモードが有効になりました');
-      // デフォルトでマネージャーユーザーを設定
-      setDemoUser(DEMO_USERS.manager);
-    }
+    // 開発段階では常にデモモードを有効化（ログイン機能完全無効化）
+    const finalDemoMode = true; // 開発段階では常にtrue
+
+    setIsDemoMode(finalDemoMode);
+
+    // デフォルトでマネージャーユーザーを設定
+    setDemoUser(DEMO_USERS.manager);
+    localStorage.setItem('demo_mode', 'true');
+    console.log('🎭 開発段階：デモモード常時有効（ログイン不要）');
   }, []);
 
   // デモモード有効化
@@ -170,7 +167,7 @@ export const DemoModeProvider = ({ children }) => {
     setIsDemoMode(true);
     setDemoUser(DEMO_USERS.manager);
     localStorage.setItem('demo_mode', 'true');
-    console.log('🎭 デモモードを有効にしました');
+    // console.log('🎭 デモモードを有効にしました');
   };
 
   // デモモード無効化
@@ -178,14 +175,14 @@ export const DemoModeProvider = ({ children }) => {
     setIsDemoMode(false);
     setDemoUser(null);
     localStorage.removeItem('demo_mode');
-    console.log('🔒 デモモードを無効にしました');
+    // console.log('🔒 デモモードを無効にしました');
   };
 
   // デモユーザー切り替え
-  const switchDemoUser = (userType) => {
+  const switchDemoUser = userType => {
     if (DEMO_USERS[userType]) {
       setDemoUser(DEMO_USERS[userType]);
-      console.log(`👤 デモユーザーを${userType}に切り替えました`);
+      // console.log(`👤 デモユーザーを${userType}に切り替えました`);
     }
   };
 
@@ -193,7 +190,7 @@ export const DemoModeProvider = ({ children }) => {
   const addDemoData = (dataType, newData) => {
     setDemoData(prev => ({
       ...prev,
-      [dataType]: [...prev[dataType], newData]
+      [dataType]: [...prev[dataType], newData],
     }));
   };
 
@@ -201,9 +198,7 @@ export const DemoModeProvider = ({ children }) => {
   const updateDemoData = (dataType, id, updates) => {
     setDemoData(prev => ({
       ...prev,
-      [dataType]: prev[dataType].map(item => 
-        item.id === id ? { ...item, ...updates } : item
-      )
+      [dataType]: prev[dataType].map(item => (item.id === id ? { ...item, ...updates } : item)),
     }));
   };
 
@@ -211,15 +206,15 @@ export const DemoModeProvider = ({ children }) => {
   const deleteDemoData = (dataType, id) => {
     setDemoData(prev => ({
       ...prev,
-      [dataType]: prev[dataType].filter(item => item.id !== id)
+      [dataType]: prev[dataType].filter(item => item.id !== id),
     }));
   };
 
   // デモ用API呼び出しシミュレーション
   const simulateApiCall = async (operation, delay = 500) => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
-        console.log(`🎭 デモAPI呼び出し: ${operation}`);
+        // console.log(`🎭 デモAPI呼び出し: ${operation}`);
         resolve({ success: true, message: `${operation}が完了しました（デモ）` });
       }, delay);
     });
@@ -230,29 +225,25 @@ export const DemoModeProvider = ({ children }) => {
     isDemoMode,
     demoUser,
     demoData,
-    
+
     // デモモード制御
     enableDemoMode,
     disableDemoMode,
     switchDemoUser,
-    
+
     // データ操作
     addDemoData,
     updateDemoData,
     deleteDemoData,
-    
+
     // ユーティリティ
     simulateApiCall,
-    
+
     // デモユーザー情報
-    availableUsers: DEMO_USERS
+    availableUsers: DEMO_USERS,
   };
 
-  return (
-    <DemoModeContext.Provider value={value}>
-      {children}
-    </DemoModeContext.Provider>
-  );
+  return <DemoModeContext.Provider value={value}>{children}</DemoModeContext.Provider>;
 };
 
 export default DemoModeProvider;

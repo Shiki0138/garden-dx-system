@@ -15,14 +15,16 @@ export const estimateApi = {
   getEstimates: async (userId = null, filters = {}) => {
     return supabaseApiCall(
       supabaseClient,
-      (client) => {
+      client => {
         let query = client
           .from(TABLES.ESTIMATES)
-          .select(`
+          .select(
+            `
             *,
             customer:customers(*),
             items:estimate_items(*)
-          `)
+          `
+          )
           .order('created_at', { ascending: false });
 
         // RLS適用
@@ -48,7 +50,7 @@ export const estimateApi = {
       },
       {
         timeout: 15000,
-        mockData: [] // 開発モード用モックデータ
+        mockData: [], // 開発モード用モックデータ
       }
     );
   },
@@ -58,12 +60,14 @@ export const estimateApi = {
     try {
       let query = supabaseClient
         .from(TABLES.ESTIMATES)
-        .select(`
+        .select(
+          `
           *,
           customer:customers(*),
           items:estimate_items(*),
           project:projects(*)
-        `)
+        `
+        )
         .eq('id', id)
         .single();
 
@@ -99,7 +103,7 @@ export const estimateApi = {
         const estimateItems = items.map(item => ({
           ...item,
           estimate_id: estimateResult.id,
-          user_id: userId
+          user_id: userId,
         }));
 
         const { error: itemsError } = await supabaseClient
@@ -121,35 +125,27 @@ export const estimateApi = {
       const { items, ...estimate } = estimateData;
 
       // 見積基本情報更新
-      let query = supabaseClient
-        .from(TABLES.ESTIMATES)
-        .update(estimate)
-        .eq('id', id);
+      let query = supabaseClient.from(TABLES.ESTIMATES).update(estimate).eq('id', id);
 
       if (userId) {
         query = withRLS(query, userId);
       }
 
-      const { data: estimateResult, error: estimateError } = await query
-        .select()
-        .single();
+      const { data: estimateResult, error: estimateError } = await query.select().single();
 
       if (estimateError) throw estimateError;
 
       // 見積明細更新（既存削除 + 新規作成）
       if (items) {
         // 既存明細削除
-        await supabaseClient
-          .from(TABLES.ESTIMATE_ITEMS)
-          .delete()
-          .eq('estimate_id', id);
+        await supabaseClient.from(TABLES.ESTIMATE_ITEMS).delete().eq('estimate_id', id);
 
         // 新規明細作成
         if (items.length > 0) {
           const estimateItems = items.map(item => ({
             ...item,
             estimate_id: id,
-            user_id: userId
+            user_id: userId,
           }));
 
           const { error: itemsError } = await supabaseClient
@@ -169,10 +165,7 @@ export const estimateApi = {
   // 見積削除
   deleteEstimate: async (id, userId) => {
     try {
-      let query = supabaseClient
-        .from(TABLES.ESTIMATES)
-        .delete()
-        .eq('id', id);
+      let query = supabaseClient.from(TABLES.ESTIMATES).delete().eq('id', id);
 
       if (userId) {
         query = withRLS(query, userId);
@@ -185,7 +178,7 @@ export const estimateApi = {
     } catch (error) {
       return { error: handleSupabaseError(error) };
     }
-  }
+  },
 };
 
 // =====================================
@@ -198,12 +191,14 @@ export const invoiceApi = {
     try {
       let query = supabaseClient
         .from(TABLES.INVOICES)
-        .select(`
+        .select(
+          `
           *,
           customer:customers(*),
           items:invoice_items(*),
           estimate:estimates(*)
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (userId) {
@@ -246,7 +241,7 @@ export const invoiceApi = {
         const invoiceItems = items.map(item => ({
           ...item,
           invoice_id: invoiceResult.id,
-          user_id: userId
+          user_id: userId,
         }));
 
         const { error: itemsError } = await supabaseClient
@@ -260,7 +255,7 @@ export const invoiceApi = {
     } catch (error) {
       return { data: null, error: handleSupabaseError(error) };
     }
-  }
+  },
 };
 
 // =====================================
@@ -271,10 +266,7 @@ export const customerApi = {
   // 顧客一覧取得
   getCustomers: async (userId = null) => {
     try {
-      let query = supabaseClient
-        .from(TABLES.CUSTOMERS)
-        .select('*')
-        .order('name');
+      let query = supabaseClient.from(TABLES.CUSTOMERS).select('*').order('name');
 
       if (userId) {
         query = withRLS(query, userId);
@@ -303,7 +295,7 @@ export const customerApi = {
     } catch (error) {
       return { data: null, error: handleSupabaseError(error) };
     }
-  }
+  },
 };
 
 // =====================================
@@ -316,10 +308,12 @@ export const unitPriceApi = {
     try {
       let query = supabaseClient
         .from(TABLES.UNIT_PRICES)
-        .select(`
+        .select(
+          `
           *,
           category:categories(*)
-        `)
+        `
+        )
         .order('category_id', { ascending: true })
         .order('sort_order', { ascending: true });
 
@@ -343,10 +337,7 @@ export const unitPriceApi = {
   // カテゴリ一覧取得
   getCategories: async (userId = null) => {
     try {
-      let query = supabaseClient
-        .from(TABLES.CATEGORIES)
-        .select('*')
-        .order('sort_order');
+      let query = supabaseClient.from(TABLES.CATEGORIES).select('*').order('sort_order');
 
       if (userId) {
         query = withRLS(query, userId);
@@ -359,7 +350,7 @@ export const unitPriceApi = {
     } catch (error) {
       return { data: null, error: handleSupabaseError(error) };
     }
-  }
+  },
 };
 
 // =====================================
@@ -372,12 +363,14 @@ export const projectApi = {
     try {
       let query = supabaseClient
         .from(TABLES.PROJECTS)
-        .select(`
+        .select(
+          `
           *,
           estimate:estimates(*),
           customer:customers(*),
           tasks:project_tasks(*)
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (userId) {
@@ -407,7 +400,7 @@ export const projectApi = {
     } catch (error) {
       return { data: null, error: handleSupabaseError(error) };
     }
-  }
+  },
 };
 
 // =====================================
@@ -421,7 +414,7 @@ export const dashboardApi = {
       const promises = [
         estimateApi.getEstimates(userId),
         invoiceApi.getInvoices(userId),
-        projectApi.getProjects(userId)
+        projectApi.getProjects(userId),
       ];
 
       const [estimatesResult, invoicesResult, projectsResult] = await Promise.all(promises);
@@ -434,25 +427,25 @@ export const dashboardApi = {
         estimates: {
           total: estimatesResult.data?.length || 0,
           pending: estimatesResult.data?.filter(e => e.status === 'pending').length || 0,
-          approved: estimatesResult.data?.filter(e => e.status === 'approved').length || 0
+          approved: estimatesResult.data?.filter(e => e.status === 'approved').length || 0,
         },
         invoices: {
           total: invoicesResult.data?.length || 0,
           unpaid: invoicesResult.data?.filter(i => i.payment_status === 'unpaid').length || 0,
-          paid: invoicesResult.data?.filter(i => i.payment_status === 'paid').length || 0
+          paid: invoicesResult.data?.filter(i => i.payment_status === 'paid').length || 0,
         },
         projects: {
           total: projectsResult.data?.length || 0,
           active: projectsResult.data?.filter(p => p.status === 'active').length || 0,
-          completed: projectsResult.data?.filter(p => p.status === 'completed').length || 0
-        }
+          completed: projectsResult.data?.filter(p => p.status === 'completed').length || 0,
+        },
       };
 
       return { data: stats, error: null };
     } catch (error) {
       return { data: null, error: handleSupabaseError(error) };
     }
-  }
+  },
 };
 
 // =====================================
@@ -463,24 +456,23 @@ export const dashboardApi = {
 export const subscribeToTable = (tableName, callback, filters = {}) => {
   if (!supabaseClient) return null;
 
-  const subscription = supabaseClient
-    .channel(`public:${tableName}`)
-    .on('postgres_changes', 
-      { 
-        event: '*', 
-        schema: 'public', 
-        table: tableName,
-        ...filters 
-      },
-      callback
-    );
+  const subscription = supabaseClient.channel(`public:${tableName}`).on(
+    'postgres_changes',
+    {
+      event: '*',
+      schema: 'public',
+      table: tableName,
+      ...filters,
+    },
+    callback
+  );
 
   subscription.subscribe();
   return subscription;
 };
 
 // 購読解除
-export const unsubscribeFromTable = (subscription) => {
+export const unsubscribeFromTable = subscription => {
   if (subscription) {
     subscription.unsubscribe();
   }
@@ -495,7 +487,7 @@ export const supabaseApiService = {
   projectApi,
   dashboardApi,
   subscribeToTable,
-  unsubscribeFromTable
+  unsubscribeFromTable,
 };
 
 export default supabaseApiService;

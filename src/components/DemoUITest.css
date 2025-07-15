@@ -62,7 +62,9 @@
   border-radius: 8px;
   padding: 20px;
   background: #fafafa;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .estimate-card:hover {
@@ -365,38 +367,104 @@
   border-top: 1px solid #e0e0e0;
 }
 
-/* レスポンシブ対応 */
+/* レスポンシブ対応 - 統一ブレークポイント使用 */
 @media (max-width: 768px) {
   .demo-ui-container {
-    padding: 10px;
+    padding: var(--container-padding-mobile, 16px);
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md, 16px);
   }
-  
+
   .estimates-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md, 16px);
   }
-  
+
   .price-master-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md, 16px);
   }
-  
+
   .estimate-actions-section {
     flex-direction: column;
+    gap: var(--spacing-md, 16px);
   }
-  
+
   .estimate-actions {
     flex-direction: column;
+    gap: var(--spacing-sm, 8px);
   }
-  
+
   .items-table {
-    font-size: 0.9em;
+    font-size: var(--font-sm, 14px);
   }
-  
+
   .items-table th,
   .items-table td {
-    padding: 8px;
+    padding: var(--spacing-sm, 8px);
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-add,
+  .btn-save,
+  .btn-pdf,
+  .btn-remove {
+    min-height: var(--touch-target-mobile, 48px);
+    padding: var(--spacing-md, 16px) var(--spacing-lg, 24px);
+  }
+}
+
+@media (max-width: 480px) {
+  .demo-ui-container {
+    padding: var(--container-padding-small, 12px);
+  }
+
+  .demo-header {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .demo-header h1 {
+    font-size: var(--font-xl, 20px);
+  }
+
+  .estimates-section,
+  .new-estimate-section {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .estimate-card {
+    padding: var(--spacing-md, 16px);
+  }
+}
+
+@media (max-width: 360px) {
+  .demo-ui-container {
+    padding: var(--spacing-sm, 8px);
+  }
+
+  .demo-header {
+    padding: var(--spacing-sm, 8px);
+  }
+
+  .demo-header h1 {
+    font-size: var(--font-lg, 18px);
+  }
+
+  .estimates-section,
+  .new-estimate-section {
+    padding: var(--spacing-sm, 8px);
+  }
+
+  .estimate-card {
+    padding: var(--spacing-sm, 8px);
+  }
+
+  .form-group input,
+  .form-group textarea {
+    font-size: var(--font-md, 16px); /* iOS Safari ズーム回避 */
   }
 }
