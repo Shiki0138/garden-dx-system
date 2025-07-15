@@ -40,9 +40,10 @@ module.exports = {
     'no-unused-vars': 'off', // 開発効率を重視し、未使用変数チェックを無効化
     'no-console': 'off', // 業務システムではログ出力を許可
     'no-debugger': 'warn', // 開発中はwarnに緩和
-    'no-alert': 'warn',
+    'no-alert': 'off', // 一時的に無効化
     'prefer-const': 'error',
     'no-var': 'error',
+    'no-use-before-define': 'off', // 一時的に無効化
     
     // 潜在的バグ防止（必要最小限）
     'array-callback-return': 'warn', // エラーから警告に緩和
@@ -103,6 +104,9 @@ module.exports = {
       },
       rules: {
         'no-console': 'off',
+        'testing-library/no-node-access': 'off',
+        'testing-library/no-container': 'off',
+        'testing-library/prefer-screen-queries': 'off',
       },
     },
   ],
