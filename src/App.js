@@ -1,22 +1,18 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext';
 import { DemoModeProvider, useDemoMode } from './contexts/DemoModeContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import { LandscapingErrorBoundary } from './components/ui/ErrorBoundary';
 import DemoBanner from './components/DemoBanner';
 import EstimateCreator from './components/EstimateCreator';
-import InvoiceForm from './components/invoices/InvoiceForm';
-import InvoiceList from './components/invoices/InvoiceList';
-import DemoUITest from './components/DemoUITest';
-import DemoLandingPage from './components/DemoLandingPage';
-import EstimateWizardTest from './components/EstimateWizardTest';
 import EstimateWizardPro from './components/EstimateWizardPro';
 import PDFGenerator from './components/PDFGenerator';
-import LoginPage from './components/auth/LoginPage';
-import ProtectedRoute from './components/auth/ProtectedRoute';
 import { checkEnvironmentVariables } from './utils/apiErrorHandler';
 import { log } from './utils/logger';
+import { initNotificationSystem } from './utils/notifications';
+import { initMonitoring } from './utils/monitoring';
 import DebugInfo from './components/DebugInfo';
 
 // アプリケーションコンテンツ
@@ -30,19 +26,33 @@ const AppContent = () => {
     } else {
       document.body.classList.remove('demo-mode');
     }
-    
+
     return () => {
       document.body.classList.remove('demo-mode');
     };
   }, [isDemoMode]);
 
-  // 環境変数チェック（開発環境のみ）
+  // システム初期化（通知、監視、環境変数チェック）
   useEffect(() => {
+    // 通知システムの初期化
+    initNotificationSystem();
+
+    // 本番環境監視システムの初期化
+    if (process.env.REACT_APP_PERFORMANCE_MONITORING === 'true') {
+      initMonitoring();
+    }
+
+    // 環境変数チェック（開発環境のみ）
     if (process.env.REACT_APP_ENVIRONMENT === 'development') {
       const envCheck = checkEnvironmentVariables();
       if (!envCheck.isValid) {
         log.warn('🚨 環境変数が不足しています:', envCheck.missing);
       }
+    }
+
+    // 本番環境セットアップ完了ログ
+    if (process.env.REACT_APP_ENVIRONMENT === 'production') {
+      log.info('🚀 本番環境セットアップ完了 - Garden DX System');
     }
   }, []);
 
@@ -50,112 +60,85 @@ const AppContent = () => {
     <Router>
       <div className="App">
         {/* <DebugInfo /> */}
-        <DemoBanner />
-        <nav style={{ 
-          padding: '20px', 
-          background: '#4a7c59', 
-          marginBottom: '20px',
-          display: 'flex',
-          gap: '20px',
-          alignItems: 'center'
-        }}>
-          <h2 style={{ color: 'white', margin: 0 }}>
-            🏡 Garden DX システム{isDemoMode ? '（デモ版）' : '（本番版）'}
-          </h2>
-          <Link to="/demo" style={{ 
-            color: 'white', 
-            textDecoration: 'none', 
-            padding: '8px 16px',
-            background: isDemoMode ? '#ff9800' : '#2d5016',
-            borderRadius: '5px',
-            fontWeight: 'bold'
-          }}>
-            {isDemoMode ? '🎭 デモ体験中' : '✨ UI動作確認デモ'}
-          </Link>
-              <Link to="/wizard" style={{ 
-                color: 'white', 
-                textDecoration: 'none', 
-                padding: '8px 16px',
-                background: '#7cb342',
-                borderRadius: '5px',
-                fontWeight: 'bold'
-              }}>
-                🚀 見積ウィザード
-              </Link>
-              <Link to="/wizard-pro" style={{ 
-                color: 'white', 
-                textDecoration: 'none', 
-                padding: '8px 16px',
+        {isDemoMode && <DemoBanner />}
+        <nav
+          style={{
+            padding: '20px',
+            background: '#4a7c59',
+            marginBottom: '20px',
+            display: 'flex',
+            gap: '20px',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <h2 style={{ color: 'white', margin: 0 }}>🏡 庭想システム</h2>
+          <div style={{ display: 'flex', gap: '15px' }}>
+            <Link
+              to="/wizard-pro"
+              style={{
+                color: 'white',
+                textDecoration: 'none',
+                padding: '10px 20px',
                 background: '#2e7d32',
                 borderRadius: '5px',
-                fontWeight: 'bold'
-              }}>
-                ⭐ 本番ウィザード
-              </Link>
-              <Link to="/pdf" style={{ 
-                color: 'white', 
-                textDecoration: 'none', 
-                padding: '8px 16px',
+                fontWeight: 'bold',
+                fontSize: '16px',
+              }}
+            >
+              📝 見積作成
+            </Link>
+            <Link
+              to="/pdf"
+              style={{
+                color: 'white',
+                textDecoration: 'none',
+                padding: '10px 20px',
                 background: '#1565c0',
                 borderRadius: '5px',
-                fontWeight: 'bold'
-              }}>
-                📄 PDF生成
-              </Link>
-              <Link to="/login" style={{ 
-                color: 'white', 
-                textDecoration: 'none', 
-                padding: '8px 16px',
+                fontWeight: 'bold',
+                fontSize: '16px',
+              }}
+            >
+              📄 PDF出力
+            </Link>
+            <Link
+              to="/dashboard"
+              style={{
+                color: 'white',
+                textDecoration: 'none',
+                padding: '10px 20px',
                 background: '#f57c00',
                 borderRadius: '5px',
-                fontWeight: 'bold'
-              }}>
-                🔐 ログイン
-              </Link>
-            </nav>
-            
-            <Routes>
-              {/* パブリックルート */}
-              <Route path="/demo" element={<DemoLandingPage />} />
-              <Route path="/demo/ui" element={<DemoUITest />} />
-              <Route path="/login" element={<LoginPage />} />
-              
-              {/* 保護されたルート */}
-              <Route path="/wizard" element={
-                <ProtectedRoute>
-                  <EstimateWizardTest />
-                </ProtectedRoute>
-              } />
-              <Route path="/wizard-pro" element={
-                <ProtectedRoute>
-                  <EstimateWizardPro />
-                </ProtectedRoute>
-              } />
-              <Route path="/pdf" element={
-                <ProtectedRoute>
-                  <PDFGenerator />
-                </ProtectedRoute>
-              } />
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <EstimateCreator />
-                </ProtectedRoute>
-              } />
-              <Route path="/invoices" element={
-                <ProtectedRoute>
-                  <InvoiceList />
-                </ProtectedRoute>
-              } />
-              <Route path="/invoices/new" element={
-                <ProtectedRoute requireRole="manager">
-                  <InvoiceForm />
-                </ProtectedRoute>
-              } />
-              <Route path="/invoices/:id/edit" element={
-                <ProtectedRoute requireRole="manager">
-                  <InvoiceForm />
-                </ProtectedRoute>
-              } />
+                fontWeight: 'bold',
+                fontSize: '16px',
+              }}
+            >
+              🏠 ダッシュボード
+            </Link>
+          </div>
+        </nav>
+
+        <Routes>
+          {/* メインルート - 造園業者向けの実用機能のみ */}
+          <Route path="/wizard-pro" element={<EstimateWizardPro />} />
+          <Route path="/pdf" element={<PDFGenerator />} />
+          
+          {/* ルート（/）は常にダッシュボードへリダイレクト */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+          {/* ダッシュボード - メインの見積管理画面 */}
+          <Route
+            path="/dashboard"
+            element={
+              <LandscapingErrorBoundary>
+                <EstimateCreator />
+              </LandscapingErrorBoundary>
+            }
+          />
+          
+          {/* 404エラー対応 - 存在しないURLは全てダッシュボードへ */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </div>
     </Router>
