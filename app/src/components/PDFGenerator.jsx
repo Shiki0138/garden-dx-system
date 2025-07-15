@@ -26,7 +26,12 @@ import {
   downloadLandscapingInvoicePDF,
   LANDSCAPING_STANDARDS,
 } from '../utils/landscapingInvoicePDFGenerator';
-import { getPDFOptimizer } from '../utils/pdfOptimizer';
+import {
+  optimizePDFGeneration,
+  createOptimizedPDF,
+  optimizeImage,
+  PDFPerformanceMonitor,
+} from '../utils/pdfOptimizer';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
 
 // 造園業界標準カラーパレット
@@ -54,6 +59,12 @@ const Container = styled.div`
   margin: 20px 0;
   box-shadow: 0 4px 20px rgba(26, 71, 42, 0.1);
   border: 1px solid ${colors.border};
+
+  @media (max-width: 768px) {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+  }
 `;
 
 // ヘッダーセクション
@@ -64,6 +75,14 @@ const Header = styled.div`
   margin-bottom: 25px;
   padding-bottom: 20px;
   border-bottom: 2px solid ${colors.border};
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+  }
 `;
 
 const HeaderIcon = styled.div`
@@ -86,6 +105,10 @@ const HeaderTitle = styled.h2`
   font-weight: 700;
   color: ${colors.text};
   margin: 0 0 5px 0;
+
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
 `;
 
 const HeaderSubtitle = styled.p`
@@ -114,6 +137,11 @@ const SettingsGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
 `;
 
 const SettingCard = styled.div`
@@ -121,6 +149,10 @@ const SettingCard = styled.div`
   border-radius: 8px;
   padding: 20px;
   border: 1px solid ${colors.border};
+
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
 `;
 
 const SettingLabel = styled.label`
@@ -143,6 +175,11 @@ const SettingInput = styled.input`
     border-color: ${colors.primary};
     box-shadow: 0 0 0 3px rgba(26, 71, 42, 0.1);
   }
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
 `;
 
 const SettingSelect = styled.select`
@@ -159,6 +196,11 @@ const SettingSelect = styled.select`
     border-color: ${colors.primary};
     box-shadow: 0 0 0 3px rgba(26, 71, 42, 0.1);
   }
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
 `;
 
 const FileUpload = styled.div`
@@ -174,8 +216,16 @@ const FileUpload = styled.div`
     background: rgba(26, 71, 42, 0.05);
   }
 
+  &:active {
+    transform: scale(0.98);
+  }
+
   input[type='file'] {
     display: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 15px;
   }
 `;
 
@@ -234,6 +284,11 @@ const ActionsSection = styled.div`
   flex-wrap: wrap;
   gap: 15px;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+  }
 `;
 
 const ActionButton = styled.button`
@@ -250,6 +305,13 @@ const ActionButton = styled.button`
   min-width: 140px;
   justify-content: center;
 
+  @media (max-width: 768px) {
+    padding: 14px 24px;
+    font-size: 18px;
+    min-width: 160px;
+    min-height: 50px;
+  }
+
   ${props =>
     props.variant === 'primary' &&
     `
@@ -260,6 +322,10 @@ const ActionButton = styled.button`
       background: ${colors.secondary};
       transform: translateY(-2px);
       box-shadow: 0 4px 15px rgba(26, 71, 42, 0.3);
+    }
+    
+    &:active:not(:disabled) {
+      transform: translateY(0);
     }
   `}
 
@@ -274,6 +340,10 @@ const ActionButton = styled.button`
       background: ${colors.primary};
       color: ${colors.textWhite};
     }
+    
+    &:active:not(:disabled) {
+      transform: scale(0.95);
+    }
   `}
   
   ${props =>
@@ -285,6 +355,10 @@ const ActionButton = styled.button`
     &:hover:not(:disabled) {
       background: #047857;
       transform: translateY(-2px);
+    }
+    
+    &:active:not(:disabled) {
+      transform: translateY(0);
     }
   `}
   
@@ -298,12 +372,22 @@ const ActionButton = styled.button`
       background: #c2410c;
       transform: translateY(-2px);
     }
+    
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
   `}
   
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+  }
+
+  @media (hover: none) {
+    &:hover {
+      transform: none;
+    }
   }
 `;
 
@@ -316,6 +400,11 @@ const StatusMessage = styled.div`
   align-items: center;
   gap: 10px;
   font-weight: 500;
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
 
   ${props =>
     props.type === 'success' &&
@@ -374,7 +463,7 @@ const StatItem = styled.div`
   align-items: center;
   margin: 5px 0;
   font-size: 0.9rem;
-  
+
   strong {
     color: ${colors.primary};
   }
@@ -397,85 +486,140 @@ const PDFGenerator = ({
   const [progress, setProgress] = useState(0);
   const [optimizationStats, setOptimizationStats] = useState(null);
   const [companyInfo, setCompanyInfo] = useState({
-    name: '造園業株式会社',
-    postal_code: '123-0000',
-    address: '東京都新宿区○○1-1-1 ○○ビル3F',
-    phone: '03-0000-0000',
-    fax: '03-0000-0001',
+    name: '庭想人株式会社',
+    catchphrase: '癒し空間に流れる風を...',
+    postal_code: '639-2153',
+    address: '奈良県葛城市太田262-1',
+    representative: '安井利典',
+    phone: '0745-48-3057',
+    mobile: '090-8937-1314',
+    fax: '0745-48-3057',
     email: 'info@landscaping-company.co.jp',
-    business_license: '東京都知事許可（般-XX）第XXXXX号',
+    business_license: '奈良県知事許可　第17752号',
+    registration_number: 'TG15000102757５',
     bank_name: 'みずほ銀行 新宿支店',
     account_type: '普通預金',
     account_number: '1234567',
-    account_holder: '造園業株式会社',
+    account_holder: '庭想人株式会社',
     logo: null,
     company_seal: null,
   });
 
   const logoInputRef = useRef(null);
   const sealInputRef = useRef(null);
-  const pdfOptimizerRef = useRef(null);
+  const performanceMonitor = useRef(null);
 
-  // PDF最適化インスタンスの初期化
+  // パフォーマンスモニター初期化
   useEffect(() => {
     if (enableOptimization) {
-      pdfOptimizerRef.current = getPDFOptimizer({
-        cacheSize: 20 * 1024 * 1024, // 20MB
-        enableCache: true,
-        enableCompression: true,
-      });
+      performanceMonitor.current = new PDFPerformanceMonitor();
     }
-
-    return () => {
-      // クリーンアップ
-      if (pdfOptimizerRef.current) {
-        pdfOptimizerRef.current.cleanup();
-      }
-    };
   }, [enableOptimization]);
 
-  // サンプルデータ
+  // サンプルデータ（実際の見積書に基づく）
   const sampleData = {
-    invoice_number: 'INV-2024-001',
-    customer_name: 'テスト造園株式会社',
-    customer_address: '東京都世田谷区テスト1-1-1',
+    documentType: 'estimate', // 'estimate' or 'invoice'
+    estimate_number: 'NO.1',
+    customer_name: '創建工房　緑',
+    customer_address: '大阪府枚方市東香里南町20-10地内',
     customer_phone: '03-TEST-0000',
     customer_contact: 'テスト太郎',
-    project_name: 'テスト庭園工事',
-    site_address: '東京都工事区工事1-1-1',
-    invoice_date: new Date().toISOString().split('T')[0],
-    due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    project_name: '山田様邸新築造園工事',
+    site_address: '大阪府枚方市東香里南町20-10地内',
+    estimate_date: new Date().toISOString().split('T')[0],
+    validity_period: '1ヶ月',
+    work_period: '180日',
+    works_description: '拝啓、時下ますますご清栄のこととお喜び申し上げます。',
     notes: '造園業界標準準拠のテストPDF生成',
     items: [
       {
-        category: '植栽工事',
-        item_name: 'ソメイヨシノ H3.0',
+        content: '土工',
+        category: 'NO.2',
+        spec: '式',
+        quantity: 1,
+        unit_price: 413500,
+        amount: 413500,
+      },
+      {
+        content: '土留め石積み工',
+        spec: 'm',
+        quantity: 21.5,
+        unit_price: 60000,
+        amount: 1290000,
+      },
+      {
+        content: 'アプローチ自然石乱張り',
+        spec: 'm',
+        quantity: 6,
+        unit_price: 70000,
+        amount: 420000,
+      },
+      {
+        content: 'アプローチ三和土',
+        spec: 'm',
         quantity: 3,
-        unit: '本',
-        unit_price: 45000,
-        amount: 135000,
-        notes: '根回し済み',
+        unit_price: 22000,
+        amount: 66000,
       },
       {
-        category: '外構工事',
-        item_name: '石積み工事',
-        quantity: 15,
-        unit: 'm2',
-        unit_price: 35000,
-        amount: 525000,
-      },
-      {
-        category: '造成工事',
-        item_name: '土壌改良工事',
-        quantity: 100,
-        unit: 'm2',
-        unit_price: 1500,
+        content: '版築門柱（900×1500）',
+        spec: '式',
+        quantity: 1,
+        unit_price: 150000,
         amount: 150000,
       },
+      {
+        content: '自然石水栓パン',
+        spec: '式',
+        quantity: 1,
+        unit_price: 20000,
+        amount: 20000,
+      },
+      {
+        content: 'カーポート',
+        category: 'NO.3',
+        spec: '式',
+        quantity: 1,
+        unit_price: 1107948,
+        amount: 1107948,
+      },
+      {
+        content: 'テラス',
+        category: 'NO.3',
+        spec: '式',
+        quantity: 1,
+        unit_price: 396776,
+        amount: 396776,
+      },
+      {
+        content: '庭園灯等',
+        category: 'NO.3',
+        spec: '式',
+        quantity: 1,
+        unit_price: 87600,
+        amount: 87600,
+      },
+      {
+        content: 'ウッドフェンス建柱',
+        spec: '式',
+        quantity: 1,
+        unit_price: 116170,
+        amount: 116170,
+      },
+      {
+        content: '植栽',
+        spec: '式',
+        quantity: 1,
+        unit_price: 663450,
+        amount: 663450,
+      }
     ],
-    subtotal: 810000,
-    tax_amount: 81000,
-    total_amount: 891000,
+    design_fee: 200000,
+    expenses: 641088,
+    subtotal: 5572532,
+    discount: 0,
+    tax_amount: 557253,
+    total_amount: 6129785,
   };
 
   // イベントハンドラー
@@ -489,7 +633,13 @@ const PDFGenerator = ({
   const handleFileUpload = useCallback(
     (type, event) => {
       const file = event.target.files[0];
-      if (!file) return;
+      if (!file) {
+        setStatus({
+          type: 'error',
+          message: 'ファイルが選択されていません',
+        });
+        return;
+      }
 
       // ファイルサイズチェック（2MB制限）
       if (file.size > 2 * 1024 * 1024) {
@@ -501,7 +651,8 @@ const PDFGenerator = ({
       }
 
       // 画像ファイルタイプチェック
-      if (!file.type.startsWith('image/')) {
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
         setStatus({
           type: 'error',
           message: '画像ファイル（PNG, JPG, GIF）を選択してください',
@@ -511,10 +662,23 @@ const PDFGenerator = ({
 
       const reader = new FileReader();
       reader.onload = e => {
-        handleCompanyInfoChange(type, e.target.result);
+        try {
+          handleCompanyInfoChange(type, e.target.result);
+          setStatus({
+            type: 'success',
+            message: `${type === 'logo' ? 'ロゴ' : '印鑑'}画像がアップロードされました（${(file.size / 1024).toFixed(1)}KB）`,
+          });
+        } catch (error) {
+          setStatus({
+            type: 'error',
+            message: '画像の処理中にエラーが発生しました',
+          });
+        }
+      };
+      reader.onerror = () => {
         setStatus({
-          type: 'success',
-          message: `${type === 'logo' ? 'ロゴ' : '印鑑'}画像がアップロードされました`,
+          type: 'error',
+          message: 'ファイルの読み込みに失敗しました',
         });
       };
       reader.readAsDataURL(file);
@@ -528,16 +692,25 @@ const PDFGenerator = ({
     setProgress(0);
 
     try {
+      // 基本データのバリデーション
       const dataToUse = documentData || sampleData;
+      if (!dataToUse || !dataToUse.items || dataToUse.items.length === 0) {
+        throw new Error('PDF生成に必要なデータが不足しています');
+      }
+
+      // 会社情報の基本チェック
+      if (!companyInfo.name || !companyInfo.phone) {
+        throw new Error('会社名と電話番号は必須項目です');
+      }
 
       let pdf;
-      
-      if (enableOptimization && pdfOptimizerRef.current) {
-        // 最適化されたPDF生成
-        const optimizer = pdfOptimizerRef.current;
-        
+
+      if (enableOptimization && performanceMonitor.current) {
+        // パフォーマンスモニター開始
+        performanceMonitor.current.start();
+
         // プログレス更新関数
-        const updateProgress = (value) => {
+        const updateProgress = value => {
           setProgress(Math.min(value, 100));
         };
 
@@ -551,39 +724,47 @@ const PDFGenerator = ({
 
         // データ前処理の進捗
         updateProgress(10);
-        
+
         // 統一されたPDF生成関数を使用
-        const generator = documentType === 'invoice' 
-          ? generateLandscapingInvoicePDF 
-          : generateInvoicePDF;
+        const generator =
+          documentType === 'invoice' ? generateLandscapingInvoicePDF : generateInvoicePDF;
 
         updateProgress(20);
-        
+
         // 最適化されたPDF生成
-        pdf = await optimizer.generateOptimizedPDF(
-          { ...dataToUse, companyInfo },
+        pdf = await optimizePDFGeneration(
           async (data, options) => {
             updateProgress(50);
-            const result = await generator(data, data.companyInfo, null, options);
+            const result = await generator(dataToUse, companyInfo, null, {
+              ...optimizationOptions,
+              ...options,
+            });
             updateProgress(90);
             return result;
           },
+          dataToUse,
           optimizationOptions
         );
-        
+
         updateProgress(100);
 
-        // 統計情報の取得
-        if (showStats) {
-          const stats = optimizer.getOptimizationStats();
-          setOptimizationStats(stats);
+        // パフォーマンス統計情報の取得
+        if (showStats && pdf) {
+          const pdfSize = pdf.output('blob').size;
+          performanceMonitor.current.end(pdfSize);
+
+          setOptimizationStats({
+            renderTime: performanceMonitor.current.metrics.renderTime,
+            memoryUsage: performanceMonitor.current.metrics.memoryUsage,
+            pdfSize,
+            optimizationEnabled: true,
+          });
         }
       } else {
         // 通常のPDF生成
-        const generator = documentType === 'invoice' 
-          ? generateLandscapingInvoicePDF 
-          : generateInvoicePDF;
-          
+        const generator =
+          documentType === 'invoice' ? generateLandscapingInvoicePDF : generateInvoicePDF;
+
         pdf = await generator(dataToUse, companyInfo, null, {
           quality: 'high',
           includeMetadata: true,
@@ -600,16 +781,39 @@ const PDFGenerator = ({
       return pdf;
     } catch (error) {
       console.error('PDF生成エラー:', error);
+      let errorMessage = 'PDF生成でエラーが発生しました';
+
+      if (error.message.includes('必要なデータが不足')) {
+        errorMessage = 'PDF生成に必要なデータが不足しています';
+      } else if (error.message.includes('会社名と電話番号')) {
+        errorMessage = '会社名と電話番号は必須項目です';
+      } else if (error.message.includes('network')) {
+        errorMessage = 'ネットワークエラーが発生しました。インターネット接続を確認してください';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = '処理がタイムアウトしました。再度お試しください';
+      } else if (error.message) {
+        errorMessage = `エラー: ${error.message}`;
+      }
+
       setStatus({
         type: 'error',
-        message: `PDF生成でエラーが発生しました: ${error.message}`,
+        message: errorMessage,
       });
       onError(error);
     } finally {
       setLoading(false);
       setProgress(0);
     }
-  }, [documentData, sampleData, companyInfo, documentType, enableOptimization, showStats, onGenerated, onError]);
+  }, [
+    documentData,
+    sampleData,
+    companyInfo,
+    documentType,
+    enableOptimization,
+    showStats,
+    onGenerated,
+    onError,
+  ]);
 
   const downloadPDF = useCallback(async () => {
     setLoading(true);
@@ -843,56 +1047,30 @@ const PDFGenerator = ({
       {showStats && optimizationStats && (
         <StatsCard>
           <SectionTitle>
-            <BarChart size={20} />
+            <Zap size={20} />
             パフォーマンス統計
           </SectionTitle>
-          
-          {optimizationStats.cache && (
-            <>
-              <StatItem>
-                <span>キャッシュヒット率:</span>
-                <strong>{(optimizationStats.cache.hitRate * 100).toFixed(0)}%</strong>
-              </StatItem>
-              <StatItem>
-                <span>キャッシュサイズ:</span>
-                <strong>{(optimizationStats.cache.currentSize / 1024 / 1024).toFixed(1)} MB</strong>
-              </StatItem>
-            </>
-          )}
-          
-          {optimizationStats.memory?.supported && (
-            <>
-              <StatItem>
-                <span>メモリ使用量:</span>
-                <strong>{optimizationStats.memory.usedJSHeapSize}</strong>
-              </StatItem>
-            </>
-          )}
+          <StatItem>
+            <span>生成時間:</span>
+            <strong>{optimizationStats.renderTime?.toFixed(2) || 0}ms</strong>
+          </StatItem>
+          <StatItem>
+            <span>メモリ使用量:</span>
+            <strong>{((optimizationStats.memoryUsage || 0) / 1024 / 1024).toFixed(2)}MB</strong>
+          </StatItem>
+          <StatItem>
+            <span>PDFサイズ:</span>
+            <strong>{((optimizationStats.pdfSize || 0) / 1024).toFixed(2)}KB</strong>
+          </StatItem>
+          <StatItem>
+            <span>最適化:</span>
+            <strong>{optimizationStats.optimizationEnabled ? '有効' : '無効'}</strong>
+          </StatItem>
         </StatsCard>
       )}
 
       {/* アクションボタン */}
       <ActionsSection>
-        {enableOptimization && (
-          <ActionButton 
-            variant="secondary" 
-            onClick={() => {
-              if (pdfOptimizerRef.current) {
-                pdfOptimizerRef.current.cleanup();
-                setOptimizationStats(null);
-                setStatus({
-                  type: 'info',
-                  message: 'キャッシュをクリアしました',
-                });
-              }
-            }}
-            disabled={loading}
-            title="PDFキャッシュをクリア"
-          >
-            <Zap size={18} />
-            キャッシュクリア
-          </ActionButton>
-        )}
         <ActionButton variant="primary" onClick={previewPDF} disabled={loading}>
           {loading ? <Loader size={18} className="animate-spin" /> : <Eye size={18} />}
           プレビュー

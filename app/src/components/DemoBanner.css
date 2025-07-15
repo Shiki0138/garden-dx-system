@@ -133,12 +133,12 @@
   transform: translateY(-1px);
 }
 
-/* レスポンシブ対応 */
+/* レスポンシブ対応 - 統一ブレークポイント使用 */
 @media (max-width: 768px) {
   .demo-banner-content {
     flex-direction: column;
-    gap: 8px;
-    padding: 12px 15px;
+    gap: var(--spacing-sm, 8px);
+    padding: var(--spacing-sm, 8px) var(--container-padding-mobile, 16px);
   }
 
   .demo-banner-center {
@@ -146,17 +146,44 @@
   }
 
   .demo-controls {
-    gap: 8px;
+    gap: var(--spacing-sm, 8px);
   }
 
   .demo-user-selector {
-    font-size: 11px;
-    padding: 3px 6px;
+    font-size: var(--font-xs, 12px);
+    padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+    min-height: var(--touch-target-mobile, 48px);
   }
 
   .demo-exit-btn {
-    font-size: 11px;
-    padding: 3px 8px;
+    font-size: var(--font-xs, 12px);
+    padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+    min-height: var(--touch-target-mobile, 48px);
+  }
+}
+
+@media (max-width: 480px) {
+  .demo-banner-content {
+    padding: var(--spacing-xs, 4px) var(--container-padding-small, 12px);
+  }
+
+  .demo-banner-text strong {
+    font-size: var(--font-sm, 14px);
+  }
+
+  .demo-banner-text span {
+    font-size: var(--font-xs, 12px);
+  }
+}
+
+@media (max-width: 360px) {
+  .demo-banner-content {
+    padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  }
+
+  .demo-user-info {
+    font-size: var(--font-xs, 12px);
+    padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
   }
 }
 
@@ -168,5 +195,17 @@ body.demo-mode {
 @media (max-width: 768px) {
   body.demo-mode {
     padding-top: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  body.demo-mode {
+    padding-top: 85px;
+  }
+}
+
+@media (max-width: 360px) {
+  body.demo-mode {
+    padding-top: 90px;
   }
 }

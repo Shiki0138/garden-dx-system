@@ -1,480 +1,410 @@
 /**
  * PDF生成最適化ユーティリティ
- * Garden DXプロジェクト - 共通PDF最適化ロジック
- * パフォーマンス向上・メモリ効率化・キャッシュ管理
+ * 造園業界標準準拠・高性能PDF生成のための共通最適化機能
  */
 
 import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
-// パフォーマンス監視クラス
-class PerformanceMonitor {
+// パフォーマンス最適化用キャッシュ
+const FONT_CACHE = new Map();
+const LAYOUT_CACHE = new Map();
+const IMAGE_CACHE = new Map();
+
+// 最適化設定
+const OPTIMIZATION_CONFIG = {
+  // メモリ管理
+  maxCacheSize: 50 * 1024 * 1024, // 50MB
+  chunkSize: 1000, // バッチ処理サイズ
+  gcInterval: 5000, // ガベージコレクション間隔
+
+  // パフォーマンス
+  enableWebWorker: true,
+  parallelProcessing: true,
+  compressionLevel: 9,
+
+  // 画質設定
+  imageQuality: 0.92,
+  dpi: 300,
+  fontSubsetting: true,
+};
+
+/**
+ * PDF生成パフォーマンス監視
+ */
+class PDFPerformanceMonitor {
   constructor() {
-    this.metrics = new Map();
-    this.thresholds = {
-      renderTime: 100, // ms
-      memoryUsage: 50 * 1024 * 1024, // 50MB
-      cacheHitRate: 0.7, // 70%
+    this.metrics = {
+      startTime: 0,
+      endTime: 0,
+      memoryUsage: 0,
+      dataSize: 0,
+      renderTime: 0,
+      compressionRatio: 0,
     };
   }
 
-  startMeasure(label) {
-    this.metrics.set(label, {
-      startTime: performance.now(),
-      startMemory: performance.memory?.usedJSHeapSize || 0,
+  start() {
+    this.metrics.startTime = performance.now();
+    this.metrics.memoryUsage = performance.memory?.usedJSHeapSize || 0;
+  }
+
+  end(pdfSize) {
+    this.metrics.endTime = performance.now();
+    this.metrics.renderTime = this.metrics.endTime - this.metrics.startTime;
+
+    const currentMemory = performance.memory?.usedJSHeapSize || 0;
+    this.metrics.memoryUsage = currentMemory - this.metrics.memoryUsage;
+
+    console.log('PDF生成パフォーマンス:', {
+      renderTime: `${this.metrics.renderTime.toFixed(2)}ms`,
+      memoryUsage: `${(this.metrics.memoryUsage / 1024 / 1024).toFixed(2)}MB`,
+      pdfSize: `${(pdfSize / 1024).toFixed(2)}KB`,
     });
-  }
-
-  endMeasure(label) {
-    const start = this.metrics.get(label);
-    if (!start) return null;
-
-    const endTime = performance.now();
-    const endMemory = performance.memory?.usedJSHeapSize || 0;
-    
-    const duration = endTime - start.startTime;
-    const memoryDelta = endMemory - start.startMemory;
-
-    const result = {
-      label,
-      duration,
-      memoryDelta,
-      timestamp: new Date().toISOString(),
-    };
-
-    // パフォーマンス警告
-    if (duration > this.thresholds.renderTime) {
-      console.warn(`⚠️ PDF生成パフォーマンス警告: ${label} - ${duration.toFixed(2)}ms`);
-    }
-
-    if (memoryDelta > this.thresholds.memoryUsage) {
-      console.warn(`⚠️ メモリ使用量警告: ${label} - ${(memoryDelta / 1024 / 1024).toFixed(2)}MB`);
-    }
-
-    return result;
-  }
-
-  getMetrics() {
-    return Array.from(this.metrics.values());
   }
 }
 
-// キャッシュマネージャー
-class PDFCacheManager {
-  constructor(maxSize = 10 * 1024 * 1024) { // 10MB
-    this.cache = new Map();
-    this.maxSize = maxSize;
-    this.currentSize = 0;
-    this.hitCount = 0;
-    this.missCount = 0;
-  }
+/**
+ * メモリ効率的なデータ処理
+ */
+export const processDataInChunks = async (
+  data,
+  chunkProcessor,
+  chunkSize = OPTIMIZATION_CONFIG.chunkSize
+) => {
+  const results = [];
+  const totalChunks = Math.ceil(data.length / chunkSize);
 
-  generateKey(data) {
-    // データからユニークなキーを生成
-    const str = JSON.stringify(data);
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * chunkSize;
+    const end = Math.min(start + chunkSize, data.length);
+    const chunk = data.slice(start, end);
+
+    // チャンク処理
+    const chunkResult = await chunkProcessor(chunk, i, totalChunks);
+    results.push(...chunkResult);
+
+    // メモリ解放のための短い遅延
+    if (i % 10 === 0) {
+      await new Promise(resolve => setTimeout(resolve, 0));
     }
-    return `pdf_${hash}_${str.length}`;
   }
 
-  get(key) {
-    if (this.cache.has(key)) {
-      this.hitCount++;
-      const entry = this.cache.get(key);
-      entry.lastAccessed = Date.now();
-      // LRU: 最近使用したものを最後に移動
-      this.cache.delete(key);
-      this.cache.set(key, entry);
-      return entry.data;
-    }
-    this.missCount++;
-    return null;
+  return results;
+};
+
+/**
+ * フォントの最適化とキャッシュ
+ */
+export const optimizeFont = async (doc, fontName, fontData) => {
+  const cacheKey = `font_${fontName}`;
+
+  if (FONT_CACHE.has(cacheKey)) {
+    return FONT_CACHE.get(cacheKey);
   }
 
-  set(key, data, size) {
-    // キャッシュサイズ管理
-    while (this.currentSize + size > this.maxSize && this.cache.size > 0) {
-      // 最も古いエントリを削除（LRU）
-      const oldestKey = this.cache.keys().next().value;
-      const oldestEntry = this.cache.get(oldestKey);
-      this.currentSize -= oldestEntry.size;
-      this.cache.delete(oldestKey);
-    }
-
-    this.cache.set(key, {
-      data,
-      size,
-      created: Date.now(),
-      lastAccessed: Date.now(),
-    });
-    this.currentSize += size;
+  // フォントサブセット化（使用文字のみ含める）
+  if (OPTIMIZATION_CONFIG.fontSubsetting && fontData) {
+    const optimizedFont = await createFontSubset(fontData);
+    FONT_CACHE.set(cacheKey, optimizedFont);
+    return optimizedFont;
   }
 
-  clear() {
-    this.cache.clear();
-    this.currentSize = 0;
-    this.hitCount = 0;
-    this.missCount = 0;
+  FONT_CACHE.set(cacheKey, fontData);
+  return fontData;
+};
+
+/**
+ * 画像の最適化とキャッシュ
+ */
+export const optimizeImage = async (imageUrl, options = {}) => {
+  const cacheKey = `img_${imageUrl}_${JSON.stringify(options)}`;
+
+  if (IMAGE_CACHE.has(cacheKey)) {
+    return IMAGE_CACHE.get(cacheKey);
   }
 
-  getStats() {
-    const hitRate = this.hitCount + this.missCount > 0
-      ? this.hitCount / (this.hitCount + this.missCount)
-      : 0;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
 
-    return {
-      size: this.cache.size,
-      currentSize: this.currentSize,
-      maxSize: this.maxSize,
-      hitCount: this.hitCount,
-      missCount: this.missCount,
-      hitRate: hitRate.toFixed(2),
-    };
-  }
-}
+  return new Promise((resolve, reject) => {
+    img.onload = async () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
 
-// メモリ効率的なデータ処理
-export class PDFDataOptimizer {
-  constructor() {
-    this.chunkSize = 100; // バッチ処理サイズ
-  }
+      // 最適なサイズに調整
+      const maxWidth = options.maxWidth || 800;
+      const maxHeight = options.maxHeight || 600;
 
-  /**
-   * 大量データの分割処理
-   */
-  async processLargeDataset(items, processor, options = {}) {
-    const { 
-      chunkSize = this.chunkSize,
-      onProgress = () => {},
-      delayBetweenChunks = 0,
-    } = options;
+      let width = img.width;
+      let height = img.height;
 
-    const results = [];
-    const totalChunks = Math.ceil(items.length / chunkSize);
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width *= ratio;
+        height *= ratio;
+      }
 
-    for (let i = 0; i < totalChunks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min((i + 1) * chunkSize, items.length);
-      const chunk = items.slice(start, end);
+      canvas.width = width;
+      canvas.height = height;
 
-      // チャンク処理
-      const chunkResults = await Promise.all(
-        chunk.map(item => processor(item))
-      );
-      results.push(...chunkResults);
+      // 画像を描画
+      ctx.drawImage(img, 0, 0, width, height);
 
-      // 進捗通知
-      onProgress({
-        current: end,
-        total: items.length,
-        percentage: (end / items.length) * 100,
+      // 最適化された画像データを取得
+      const optimizedDataUrl = canvas.toDataURL('image/jpeg', OPTIMIZATION_CONFIG.imageQuality);
+
+      IMAGE_CACHE.set(cacheKey, {
+        dataUrl: optimizedDataUrl,
+        width,
+        height,
       });
 
-      // メモリ解放のための遅延
-      if (delayBetweenChunks > 0 && i < totalChunks - 1) {
-        await new Promise(resolve => setTimeout(resolve, delayBetweenChunks));
-      }
-    }
+      // キャッシュサイズ管理
+      manageCacheSize();
 
-    return results;
+      resolve(IMAGE_CACHE.get(cacheKey));
+    };
+
+    img.onerror = reject;
+    img.src = imageUrl;
+  });
+};
+
+/**
+ * レイアウトキャッシュ
+ */
+export const getCachedLayout = (layoutKey, calculator) => {
+  if (LAYOUT_CACHE.has(layoutKey)) {
+    return LAYOUT_CACHE.get(layoutKey);
   }
 
-  /**
-   * 画像最適化
-   */
-  async optimizeImage(imageData, options = {}) {
-    const {
-      maxWidth = 800,
-      maxHeight = 600,
-      quality = 0.8,
-      format = 'image/jpeg',
-    } = options;
+  const layout = calculator();
+  LAYOUT_CACHE.set(layoutKey, layout);
 
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+  return layout;
+};
 
-        // アスペクト比を保持してリサイズ
-        let { width, height } = img;
-        if (width > maxWidth || height > maxHeight) {
-          const ratio = Math.min(maxWidth / width, maxHeight / height);
-          width *= ratio;
-          height *= ratio;
-        }
+/**
+ * キャッシュサイズ管理
+ */
+const manageCacheSize = () => {
+  const totalSize = estimateCacheSize();
 
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
+  if (totalSize > OPTIMIZATION_CONFIG.maxCacheSize) {
+    // 最も古いエントリから削除
+    const caches = [FONT_CACHE, LAYOUT_CACHE, IMAGE_CACHE];
 
-        canvas.toBlob(
-          blob => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          },
-          format,
-          quality
-        );
-      };
-      img.onerror = reject;
-      img.src = imageData;
+    caches.forEach(cache => {
+      const entriesToRemove = Math.floor(cache.size * 0.3); // 30%削除
+      const keys = Array.from(cache.keys());
+
+      for (let i = 0; i < entriesToRemove; i++) {
+        cache.delete(keys[i]);
+      }
     });
   }
+};
 
-  /**
-   * テキストの最適化（長いテキストの省略など）
-   */
-  optimizeText(text, maxLength = 100) {
-    if (!text || text.length <= maxLength) return text;
-    
-    return text.substring(0, maxLength - 3) + '...';
+/**
+ * キャッシュサイズ推定
+ */
+const estimateCacheSize = () => {
+  let totalSize = 0;
+
+  // 簡易的なサイズ推定
+  FONT_CACHE.forEach(value => {
+    totalSize += JSON.stringify(value).length * 2; // UTF-16
+  });
+
+  IMAGE_CACHE.forEach(value => {
+    totalSize += value.dataUrl.length;
+  });
+
+  LAYOUT_CACHE.forEach(value => {
+    totalSize += JSON.stringify(value).length * 2;
+  });
+
+  return totalSize;
+};
+
+/**
+ * PDFストリーム最適化
+ */
+export const createOptimizedPDF = (options = {}) => {
+  const defaultOptions = {
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+    compress: true,
+    precision: 2,
+    userUnit: 1.0,
+    ...options,
+  };
+
+  const doc = new jsPDF(defaultOptions);
+
+  // 圧縮設定
+  doc.internal.compression = OPTIMIZATION_CONFIG.compressionLevel;
+
+  return doc;
+};
+
+/**
+ * 大量データの効率的な描画
+ */
+export const renderLargeTable = async (doc, tableData, options = {}) => {
+  const monitor = new PDFPerformanceMonitor();
+  monitor.start();
+
+  const {
+    startY = 20,
+    columnWidths = [],
+    rowHeight = 10,
+    headerRows = 1,
+    pageBreakThreshold = 20,
+  } = options;
+
+  let currentY = startY;
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // ヘッダー描画関数
+  const drawHeader = () => {
+    for (let i = 0; i < headerRows; i++) {
+      const row = tableData[i];
+      drawRow(doc, row, currentY, columnWidths, true);
+      currentY += rowHeight;
+    }
+  };
+
+  // 最初のヘッダー描画
+  drawHeader();
+
+  // データ行を効率的に描画
+  await processDataInChunks(tableData.slice(headerRows), async chunk => {
+    chunk.forEach(row => {
+      // ページ送りチェック
+      if (currentY + rowHeight > pageHeight - pageBreakThreshold) {
+        doc.addPage();
+        currentY = startY;
+        drawHeader();
+      }
+
+      drawRow(doc, row, currentY, columnWidths, false);
+      currentY += rowHeight;
+    });
+
+    return [];
+  });
+
+  monitor.end(doc.output('blob').size);
+};
+
+/**
+ * 行描画ヘルパー
+ */
+const drawRow = (doc, row, y, columnWidths, isHeader) => {
+  let x = 20;
+
+  row.forEach((cell, index) => {
+    const width = columnWidths[index] || 30;
+
+    if (isHeader) {
+      doc.setFillColor(240, 240, 240);
+      doc.rect(x, y, width, 10, 'F');
+      doc.setFont(undefined, 'bold');
+    } else {
+      doc.setFont(undefined, 'normal');
+    }
+
+    doc.text(String(cell), x + 2, y + 7);
+    x += width;
+  });
+};
+
+/**
+ * Web Worker を使用した並列処理
+ */
+export const processInWorker = async (workerScript, data) => {
+  if (!OPTIMIZATION_CONFIG.enableWebWorker || !window.Worker) {
+    // Web Workerが使用できない場合は通常処理
+    return processDataInChunks(data, async chunk => chunk);
   }
 
-  /**
-   * 数値フォーマットの最適化
-   */
-  formatNumber(value, options = {}) {
-    const {
-      decimals = 0,
-      thousandsSeparator = ',',
-      prefix = '',
-      suffix = '',
-    } = options;
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(workerScript);
 
-    if (typeof value !== 'number') return value;
-
-    const formatted = value.toFixed(decimals)
-      .replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSeparator);
-
-    return `${prefix}${formatted}${suffix}`;
-  }
-}
-
-// PDF生成最適化メインクラス
-export class PDFOptimizer {
-  constructor(options = {}) {
-    this.performanceMonitor = new PerformanceMonitor();
-    this.cacheManager = new PDFCacheManager(options.cacheSize);
-    this.dataOptimizer = new PDFDataOptimizer();
-    this.options = {
-      enableCache: true,
-      enableCompression: true,
-      enableLazyLoading: true,
-      compressionLevel: 9,
-      ...options,
+    worker.onmessage = e => {
+      if (e.data.error) {
+        reject(new Error(e.data.error));
+      } else {
+        resolve(e.data.result);
+      }
+      worker.terminate();
     };
-  }
 
-  /**
-   * 最適化されたPDF生成
-   */
-  async generateOptimizedPDF(data, generator, options = {}) {
-    const cacheKey = this.cacheManager.generateKey({ data, options });
-    
-    // キャッシュチェック
-    if (this.options.enableCache) {
-      const cached = this.cacheManager.get(cacheKey);
-      if (cached) {
-        console.log('📋 PDFキャッシュヒット');
-        return cached;
-      }
-    }
-
-    // パフォーマンス測定開始
-    this.performanceMonitor.startMeasure('pdf_generation');
-
-    try {
-      // PDF生成オプションの最適化
-      const optimizedOptions = {
-        ...options,
-        compress: this.options.enableCompression,
-        precision: 2,
-        floatPrecision: 2,
-      };
-
-      // データの前処理（最適化）
-      const optimizedData = await this.preprocessData(data);
-
-      // PDF生成
-      const pdf = await generator(optimizedData, optimizedOptions);
-
-      // 圧縮処理
-      if (this.options.enableCompression) {
-        await this.compressPDF(pdf);
-      }
-
-      // キャッシュ保存
-      if (this.options.enableCache) {
-        const pdfSize = pdf.output('arraybuffer').byteLength;
-        this.cacheManager.set(cacheKey, pdf, pdfSize);
-      }
-
-      return pdf;
-    } finally {
-      const metrics = this.performanceMonitor.endMeasure('pdf_generation');
-      console.log(`✅ PDF生成完了: ${metrics?.duration.toFixed(2)}ms`);
-    }
-  }
-
-  /**
-   * データの前処理と最適化
-   */
-  async preprocessData(data) {
-    this.performanceMonitor.startMeasure('data_preprocessing');
-
-    try {
-      const optimized = { ...data };
-
-      // 画像の最適化
-      if (data.images && Array.isArray(data.images)) {
-        optimized.images = await this.dataOptimizer.processLargeDataset(
-          data.images,
-          img => this.dataOptimizer.optimizeImage(img.data, img.options),
-          { chunkSize: 5 }
-        );
-      }
-
-      // テキストの最適化
-      if (data.items && Array.isArray(data.items)) {
-        optimized.items = data.items.map(item => ({
-          ...item,
-          description: this.dataOptimizer.optimizeText(item.description, 200),
-          notes: this.dataOptimizer.optimizeText(item.notes, 150),
-        }));
-      }
-
-      return optimized;
-    } finally {
-      this.performanceMonitor.endMeasure('data_preprocessing');
-    }
-  }
-
-  /**
-   * PDF圧縮処理
-   */
-  async compressPDF(pdf) {
-    this.performanceMonitor.startMeasure('pdf_compression');
-
-    try {
-      // jsPDFの内部圧縮設定
-      if (pdf.internal && pdf.internal.scaleFactor) {
-        pdf.internal.scaleFactor = 1.5; // 解像度調整
-      }
-
-      // 画像圧縮設定
-      if (pdf.internal && pdf.internal.collections) {
-        const images = pdf.internal.collections.images;
-        if (images) {
-          Object.keys(images).forEach(key => {
-            const img = images[key];
-            if (img.compressionLevel !== undefined) {
-              img.compressionLevel = this.options.compressionLevel;
-            }
-          });
-        }
-      }
-
-      return pdf;
-    } finally {
-      this.performanceMonitor.endMeasure('pdf_compression');
-    }
-  }
-
-  /**
-   * バッチPDF生成（複数PDF同時生成）
-   */
-  async generateBatchPDFs(dataArray, generator, options = {}) {
-    this.performanceMonitor.startMeasure('batch_pdf_generation');
-
-    try {
-      const batchOptions = {
-        ...options,
-        concurrency: options.concurrency || 3,
-        onProgress: options.onProgress || (() => {}),
-      };
-
-      const results = await this.dataOptimizer.processLargeDataset(
-        dataArray,
-        async (data) => this.generateOptimizedPDF(data, generator, batchOptions),
-        {
-          chunkSize: batchOptions.concurrency,
-          onProgress: batchOptions.onProgress,
-          delayBetweenChunks: 100, // メモリ解放のための遅延
-        }
-      );
-
-      return results;
-    } finally {
-      const metrics = this.performanceMonitor.endMeasure('batch_pdf_generation');
-      console.log(`✅ バッチPDF生成完了: ${dataArray.length}件 - ${metrics?.duration.toFixed(2)}ms`);
-    }
-  }
-
-  /**
-   * メモリ使用量の監視
-   */
-  getMemoryUsage() {
-    if (!performance.memory) {
-      return { supported: false };
-    }
-
-    return {
-      supported: true,
-      usedJSHeapSize: (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2) + ' MB',
-      totalJSHeapSize: (performance.memory.totalJSHeapSize / 1024 / 1024).toFixed(2) + ' MB',
-      jsHeapSizeLimit: (performance.memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2) + ' MB',
+    worker.onerror = error => {
+      reject(error);
+      worker.terminate();
     };
-  }
 
-  /**
-   * 最適化統計情報の取得
-   */
-  getOptimizationStats() {
-    return {
-      cache: this.cacheManager.getStats(),
-      memory: this.getMemoryUsage(),
-      performance: this.performanceMonitor.getMetrics(),
-    };
-  }
+    worker.postMessage({ data });
+  });
+};
 
-  /**
-   * リソースクリーンアップ
-   */
-  cleanup() {
-    this.cacheManager.clear();
-    this.performanceMonitor = new PerformanceMonitor();
-    
-    // ガベージコレクションのヒント
+/**
+ * フォントサブセット作成（簡易版）
+ */
+const createFontSubset = async fontData => {
+  // 実際の実装では、使用文字を分析してサブセットを作成
+  // ここでは簡易的に元のフォントを返す
+  return fontData;
+};
+
+/**
+ * PDF最適化のメイン関数
+ */
+export const optimizePDFGeneration = async (generateFunc, data, options = {}) => {
+  const monitor = new PDFPerformanceMonitor();
+  monitor.start();
+
+  try {
+    // メモリクリーンアップ
     if (global.gc) {
       global.gc();
     }
+
+    // 最適化されたPDF生成
+    const result = await generateFunc(data, {
+      ...options,
+      optimizer: {
+        processDataInChunks,
+        optimizeFont,
+        optimizeImage,
+        getCachedLayout,
+        renderLargeTable,
+      },
+    });
+
+    monitor.end(result.size || 0);
+
+    return result;
+  } catch (error) {
+    console.error('PDF生成エラー:', error);
+    throw error;
+  } finally {
+    // 定期的なキャッシュクリーンアップ
+    setTimeout(manageCacheSize, OPTIMIZATION_CONFIG.gcInterval);
   }
-}
+};
 
-// シングルトンインスタンス
-let optimizerInstance = null;
-
-/**
- * PDF最適化インスタンスの取得
- */
-export function getPDFOptimizer(options = {}) {
-  if (!optimizerInstance) {
-    optimizerInstance = new PDFOptimizer(options);
-  }
-  return optimizerInstance;
-}
-
-// デフォルトエクスポート
 export default {
-  PDFOptimizer,
-  PDFDataOptimizer,
-  PDFCacheManager,
-  PerformanceMonitor,
-  getPDFOptimizer,
+  optimizePDFGeneration,
+  createOptimizedPDF,
+  processDataInChunks,
+  optimizeImage,
+  optimizeFont,
+  getCachedLayout,
+  renderLargeTable,
+  PDFPerformanceMonitor,
 };

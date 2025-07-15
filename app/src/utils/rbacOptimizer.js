@@ -340,7 +340,7 @@ const rbacOptimizer = {
   checkMultiplePermissions,
   checkEstimatePermission,
   checkInvoicePermission,
-  getRBACStats
+  getRBACStats,
 };
 
 export default rbacOptimizer;
@@ -368,5 +368,5 @@ export const legacyDefault = {
   checkResourceAccess,
   checkConditionalPermission,
   getRBACStats,
-  clearRBACCache
+  clearRBACCache,
 };

@@ -171,7 +171,9 @@
 
 .user-option:focus-within .user-info {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.25), 0 5px 15px rgba(74, 124, 89, 0.2);
+  box-shadow:
+    0 0 0 3px rgba(74, 124, 89, 0.25),
+    0 5px 15px rgba(74, 124, 89, 0.2);
 }
 
 .user-avatar {
@@ -245,7 +247,9 @@
 
 .demo-start-btn:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.25), 0 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 0 0 3px rgba(74, 124, 89, 0.25),
+    0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .demo-start-btn:disabled {
@@ -308,45 +312,121 @@
   font-weight: bold;
 }
 
-/* レスポンシブ対応 */
+/* レスポンシブ対応 - 統一ブレークポイント使用 */
 @media (max-width: 768px) {
   .demo-landing {
-    padding: 20px 10px;
+    padding: var(--spacing-lg, 24px) var(--container-padding-mobile, 16px);
   }
 
   .demo-header {
-    padding: 30px 20px;
+    padding: var(--spacing-xl, 32px) var(--spacing-lg, 24px);
   }
 
   .demo-title {
-    font-size: 2rem;
+    font-size: var(--font-xxl, 24px);
   }
 
   .demo-subtitle {
-    font-size: 1rem;
+    font-size: var(--font-md, 16px);
   }
 
   .demo-badge {
     position: static;
-    margin-top: 20px;
+    margin-top: var(--spacing-lg, 24px);
     display: inline-block;
   }
 
   .features-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md, 16px);
   }
 
   .user-options {
     flex-direction: column;
+    gap: var(--spacing-md, 16px);
   }
 
   .demo-info {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: var(--spacing-lg, 24px);
   }
 
   .user-info {
     flex-direction: column;
     text-align: center;
+    gap: var(--spacing-md, 16px);
+  }
+
+  .demo-start-btn {
+    min-height: var(--touch-target-mobile, 48px);
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .demo-landing {
+    padding: var(--spacing-md, 16px) var(--container-padding-small, 12px);
+  }
+
+  .demo-header {
+    padding: var(--spacing-lg, 24px) var(--spacing-md, 16px);
+  }
+
+  .demo-title {
+    font-size: var(--font-xl, 20px);
+  }
+
+  .demo-subtitle {
+    font-size: var(--font-sm, 14px);
+  }
+
+  .demo-intro,
+  .demo-features,
+  .demo-user-selection,
+  .demo-actions {
+    padding: var(--spacing-lg, 24px);
+  }
+
+  .features-grid {
+    gap: var(--spacing-sm, 8px);
+  }
+
+  .feature-card {
+    padding: var(--spacing-md, 16px);
+  }
+}
+
+@media (max-width: 360px) {
+  .demo-landing {
+    padding: var(--spacing-sm, 8px);
+  }
+
+  .demo-header {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .demo-title {
+    font-size: var(--font-lg, 18px);
+  }
+
+  .demo-subtitle {
+    font-size: var(--font-sm, 14px);
+  }
+
+  .demo-intro,
+  .demo-features,
+  .demo-user-selection,
+  .demo-actions {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .feature-card {
+    padding: var(--spacing-sm, 8px);
+  }
+
+  .user-info {
+    padding: var(--spacing-sm, 8px);
+    gap: var(--spacing-sm, 8px);
   }
 }

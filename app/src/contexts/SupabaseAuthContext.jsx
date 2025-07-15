@@ -114,7 +114,8 @@ export const SupabaseAuthProvider = ({ children }) => {
 
       // 本番リリース前はログイン機能を無効化
       if (process.env.REACT_APP_DEMO_MODE === 'true') {
-        const errorMessage = '現在デモ版のため、ログイン機能は利用できません。「デモ版を体験」ボタンをご利用ください。';
+        const errorMessage =
+          '現在デモ版のため、ログイン機能は利用できません。「デモ版を体験」ボタンをご利用ください。';
         setError(errorMessage);
         return { success: false, error: errorMessage };
       }

@@ -310,8 +310,10 @@ const StepsIndicator = styled.div`
   position: relative;
 
   @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 8px;
+    flex-wrap: wrap;
   }
 `;
 
@@ -324,9 +326,11 @@ const StepItem = styled.div`
   z-index: 2;
 
   @media (max-width: 768px) {
-    flex-direction: row;
-    justify-content: flex-start;
-    text-align: left;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    flex: 0 1 auto;
+    min-width: 70px;
   }
 `;
 
@@ -350,7 +354,11 @@ const StepNumber = styled.div`
     props.completed || props.active ? '0 4px 15px rgba(74, 124, 74, 0.3)' : 'none'};
 
   @media (max-width: 768px) {
-    margin-right: 15px;
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+    margin-right: 0;
+    margin-bottom: 8px;
   }
 `;
 
@@ -363,7 +371,9 @@ const StepLabel = styled.span`
 
   @media (max-width: 768px) {
     margin-top: 0;
-    text-align: left;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.2;
   }
 `;
 
@@ -578,7 +588,8 @@ const ItemInfo = styled.div`
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 12px;
+    width: 100%;
   }
 `;
 
@@ -594,48 +605,76 @@ const ItemDetails = styled.span`
 
 const QuantityInput = styled.input`
   width: 80px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border: 1px solid #ddd;
   border-radius: 6px;
   text-align: center;
   font-weight: 600;
+  font-size: 16px;
+  min-height: 44px;
+  touch-action: manipulation;
 
   &:focus {
     outline: none;
     border-color: #4a7c4a;
     box-shadow: 0 0 0 2px rgba(74, 124, 74, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    width: 100px;
+    padding: 14px 16px;
+    font-size: 18px;
+    min-height: 48px;
   }
 `;
 
 const PriceInput = styled.input`
   width: 100px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 6px;
   text-align: right;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
+  min-height: 44px;
+  touch-action: manipulation;
 
   &:focus {
     outline: none;
     border-color: #4a7c4a;
     box-shadow: 0 0 0 2px rgba(74, 124, 74, 0.1);
   }
+
+  @media (max-width: 768px) {
+    width: 120px;
+    padding: 12px 14px;
+    font-size: 16px;
+    min-height: 48px;
+  }
 `;
 
 const MarkupInput = styled.input`
   width: 60px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 6px;
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
+  min-height: 44px;
+  touch-action: manipulation;
 
   &:focus {
     outline: none;
     border-color: #4a7c4a;
     box-shadow: 0 0 0 2px rgba(74, 124, 74, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    width: 80px;
+    padding: 12px 14px;
+    font-size: 16px;
+    min-height: 48px;
   }
 `;
 
@@ -644,14 +683,17 @@ const ItemEditRow = styled.div`
   align-items: center;
   gap: 8px;
   margin-top: 10px;
-  padding: 10px;
+  padding: 12px;
   background: #f8fdf8;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid #e8f5e8;
+  min-height: 60px;
 
   @media (max-width: 768px) {
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
+    padding: 16px;
+    min-height: auto;
   }
 `;
 
@@ -1410,7 +1452,18 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
               className={errors.customer_name ? 'error' : ''}
             />
             {errors.customer_name && (
-              <span style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}>
+              <span
+                style={{
+                  color: '#e74c3c',
+                  fontSize: '14px',
+                  marginTop: '8px',
+                  display: 'block',
+                  padding: '4px 8px',
+                  backgroundColor: '#fdf2f2',
+                  borderRadius: '4px',
+                  border: '1px solid #e74c3c',
+                }}
+              >
                 {errors.customer_name}
               </span>
             )}
@@ -1453,7 +1506,18 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
               className={errors.phone ? 'error' : ''}
             />
             {errors.phone && (
-              <span style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}>
+              <span
+                style={{
+                  color: '#e74c3c',
+                  fontSize: '14px',
+                  marginTop: '8px',
+                  display: 'block',
+                  padding: '4px 8px',
+                  backgroundColor: '#fdf2f2',
+                  borderRadius: '4px',
+                  border: '1px solid #e74c3c',
+                }}
+              >
                 {errors.phone}
               </span>
             )}
@@ -1487,7 +1551,18 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
               className={errors.address ? 'error' : ''}
             />
             {errors.address && (
-              <span style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px' }}>
+              <span
+                style={{
+                  color: '#e74c3c',
+                  fontSize: '14px',
+                  marginTop: '8px',
+                  display: 'block',
+                  padding: '4px 8px',
+                  backgroundColor: '#fdf2f2',
+                  borderRadius: '4px',
+                  border: '1px solid #e74c3c',
+                }}
+              >
                 {errors.address}
               </span>
             )}
@@ -1687,8 +1762,17 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
                         {item.unit}
                       </ItemDetails>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span>数量:</span>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <span style={{ minWidth: '50px', fontSize: '14px', fontWeight: '600' }}>
+                        数量:
+                      </span>
                       <QuantityInput
                         type="number"
                         min="0"
@@ -1699,8 +1783,15 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
                         }
                         onClick={e => e.stopPropagation()}
                       />
-                      <span>{item.unit}</span>
-                      <span style={{ fontWeight: '600', marginLeft: '10px' }}>
+                      <span style={{ fontSize: '14px' }}>{item.unit}</span>
+                      <span
+                        style={{
+                          fontWeight: '600',
+                          marginLeft: '10px',
+                          color: '#2d5a2d',
+                          fontSize: '16px',
+                        }}
+                      >
                         {formatCurrency(
                           (itemSelections[item.id]?.quantity || 0) *
                             (itemSelections[item.id]?.purchase_price || item.purchase_price) *

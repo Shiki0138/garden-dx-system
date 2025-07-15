@@ -37,8 +37,14 @@ const ErrorContainer = styled.div`
   animation: fadeIn 0.3s ease-out;
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   ${props => {
@@ -262,7 +268,7 @@ const ErrorDisplay = ({
             再試行
           </ErrorButton>
         )}
-        
+
         {onDismiss && (
           <ErrorButton variant="secondary" onClick={onDismiss}>
             閉じる
@@ -276,10 +282,7 @@ const ErrorDisplay = ({
           </ErrorButton>
         )}
 
-        <ErrorButton
-          variant="secondary"
-          onClick={() => window.location.reload()}
-        >
+        <ErrorButton variant="secondary" onClick={() => window.location.reload()}>
           <Home size={16} />
           ページを再読み込み
         </ErrorButton>
@@ -310,7 +313,7 @@ class LandscapingErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     this.setState({
       error,
       errorInfo,

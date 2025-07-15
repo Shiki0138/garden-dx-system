@@ -54,6 +54,12 @@ const TestControls = styled.div`
   justify-content: center;
   gap: 20px;
   flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    padding: 20px;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
 `;
 
 const ControlButton = styled.button`
@@ -67,6 +73,8 @@ const ControlButton = styled.button`
   align-items: center;
   gap: 10px;
   transition: all 0.3s ease;
+  min-height: 48px;
+  touch-action: manipulation;
 
   ${props => {
     switch (props.variant) {
@@ -117,6 +125,14 @@ const ControlButton = styled.button`
     transform: none !important;
     box-shadow: none !important;
   }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+    padding: 16px 24px;
+    font-size: 18px;
+    min-height: 56px;
+  }
 `;
 
 const DemoInfo = styled.div`
@@ -129,6 +145,14 @@ const DemoInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 15px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px 15px;
+    margin-bottom: 20px;
+    gap: 12px;
+  }
 `;
 
 const DemoText = styled.div`

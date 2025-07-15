@@ -12,26 +12,21 @@ const MockAuthProvider = ({ children }) => {
       email: 'test@example.com',
       role: 'manager',
       user_metadata: {
-        role: 'manager'
-      }
+        role: 'manager',
+      },
     },
     isAuthenticated: true,
     loading: false,
     signIn: jest.fn(),
     signOut: jest.fn(),
-    signUp: jest.fn()
+    signUp: jest.fn(),
   };
 
-  return (
-    <AuthContext.Provider value={mockAuthValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={mockAuthValue}>{children}</AuthContext.Provider>;
 };
 
 // カスタムrender関数
-const customRender = (ui, options) =>
-  render(ui, { wrapper: MockAuthProvider, ...options });
+const customRender = (ui, options) => render(ui, { wrapper: MockAuthProvider, ...options });
 
 // re-export everything
 export * from '@testing-library/react';

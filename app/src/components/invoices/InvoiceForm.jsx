@@ -10,6 +10,7 @@ import {
 } from '../../hooks/useAuth';
 import { log } from '../../utils/logger';
 import { showError, showSuccess, showWarning, showConfirmDialog } from '../../utils/notifications';
+import { useErrorHandler, withErrorHandling } from '../../utils/errorHandler';
 
 // アニメーション定義（UX向上）
 const fadeInUp = keyframes`
@@ -102,9 +103,23 @@ const BackButton = styled.button`
   border-radius: 6px;
   cursor: pointer;
   margin-right: 15px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-height: 44px; /* タッチ操作のための最小サイズ */
 
   &:hover {
     background: #7f8c8d;
+    transform: translateY(-1px);
+  }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 10px;
+    padding: 12px 20px;
+    font-size: 16px;
   }
 `;
 
@@ -203,6 +218,12 @@ const FormGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
   margin-bottom: 20px;
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
 `;
 
 const FormGroup = styled.div`
@@ -272,31 +293,49 @@ const Input = styled.input`
 `;
 
 const Select = styled.select`
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 12px 16px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
   font-size: 14px;
   background: white;
+  transition: all 0.3s ease;
+  min-height: 44px; /* タッチ操作のための最小サイズ */
 
   &:focus {
     outline: none;
     border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+    background: #fafbfc;
+  }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    padding: 14px 16px;
+    font-size: 16px; /* iOS Safari のズーム防止 */
   }
 `;
 
 const TextArea = styled.textarea`
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 12px 16px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
   font-size: 14px;
   min-height: 80px;
   resize: vertical;
+  transition: all 0.3s ease;
 
   &:focus {
     outline: none;
     border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+    background: #fafbfc;
+  }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    padding: 14px 16px;
+    font-size: 16px; /* iOS Safari のズーム防止 */
+    min-height: 100px;
   }
 `;
 
@@ -304,6 +343,11 @@ const ItemsTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 15px;
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
 `;
 
 const TableHeader = styled.th`
@@ -326,19 +370,61 @@ const ItemInput = styled.input`
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  min-height: 36px; /* タッチ操作のための最小サイズ */
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    padding: 10px;
+    font-size: 16px; /* iOS Safari のズーム防止 */
+  }
 `;
 
 const AddItemButton = styled.button`
   background: #3498db;
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
   margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-height: 44px; /* タッチ操作のための最小サイズ */
 
   &:hover {
     background: #2980b9;
+    transform: translateY(-1px);
+  }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 16px;
+  }
+`;
+
+const ActionButton = styled.button`
+  background: none;
+  border: 1px solid #3498db;
+  color: #3498db;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 36px;
+
+  &:hover {
+    background: #3498db;
+    color: white;
+  }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    padding: 10px 16px;
+    font-size: 14px;
   }
 `;
 
@@ -405,6 +491,9 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   const { user, isManager } = useAuth();
   const invoicePermissions = useInvoicePermissions();
 
+  // エラーハンドリング
+  const handleError = useErrorHandler('InvoiceForm');
+
   // パフォーマンス状態管理
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -454,7 +543,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   useEffect(() => {
     // TODO: 顧客・プロジェクト・見積データの取得
     loadInitialData();
-  }, [invoiceId, estimateId, loadInitialData]);
+  }, [invoiceId, estimateId]);
 
   // 計算値の更新（最適化）
   useEffect(() => {
@@ -489,8 +578,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
         generateInvoiceNumber();
       }
     } catch (error) {
-      log.error('初期データの読み込みに失敗:', error);
-      showError('初期データの読み込みに失敗しました。再度お試しください。');
+      handleError(error, { context: 'loadInitialData' });
     }
   }, [estimateId, invoiceId]);
 
@@ -543,8 +631,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
         setItems(mockItems);
       }
     } catch (error) {
-      log.error('見積からの請求書生成に失敗:', error);
-      showError('見積からの請求書生成に失敗しました。');
+      handleError(error, { context: 'generateFromEstimate' });
     }
   };
 
@@ -576,8 +663,24 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   }, [formData, items]);
 
   // アクセシビリティ: キーボードナビゲーション
-  const handleKeyDown = useCallback(
-    e => {
+  const handleKeyDown = useCallback(e => {
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key) {
+        case 's':
+          e.preventDefault();
+          handleSave();
+          break;
+        case 'p':
+          e.preventDefault();
+          handlePreviewPDF();
+          break;
+      }
+    }
+  }, []);
+
+  // キーボードイベントの設定
+  useEffect(() => {
+    const keydownHandler = e => {
       if (e.ctrlKey || e.metaKey) {
         switch (e.key) {
           case 's':
@@ -590,17 +693,13 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
             break;
         }
       }
-    },
-    [handleSave, handlePreviewPDF]
-  );
-
-  // キーボードイベントの設定
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleKeyDown]);
+
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, [handleSave, handlePreviewPDF]);
 
   // メモ化されたイベントハンドラー
   const handleInputChange = useCallback(
@@ -698,8 +797,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
       showSuccess('請求書を保存しました');
       setIsDirty(false);
     } catch (error) {
-      log.error('請求書の保存に失敗:', error);
-      showError('保存に失敗しました。再度お試しください。');
+      handleError(error, { context: 'saveInvoice' });
       setErrors({ general: '保存に失敗しました。再度お試しください。' });
     } finally {
       setIsLoading(false);
@@ -741,8 +839,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
         notifySuccess: true,
       });
     } catch (error) {
-      log.error('PDF生成に失敗:', error);
-      showError('PDF生成に失敗しました。再度お試しください。');
+      handleError(error, { context: 'generatePDF' });
     } finally {
       setIsLoading(false);
     }
@@ -776,7 +873,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   return (
     <Container>
       <Header>
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <BackButton onClick={() => window.history.back()}>戻る</BackButton>
           <Title>{invoiceId ? '請求書編集' : '請求書作成'}</Title>
         </div>
@@ -808,19 +905,20 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
             {isLoading ? '保存中...' : '保存'}
           </SaveButton>
         </ManagerOnlyComponent>
-        <SaveButton
-          onClick={handlePreviewPDF}
-          disabled={isLoading}
-          style={{
-            background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
-            marginLeft: '10px',
-            boxShadow: '0 2px 4px rgba(52, 152, 219, 0.3)',
-          }}
-          aria-label="PDFを出力 (Ctrl+P)"
-          title="PDFを出力 (Ctrl+P)"
-        >
-          {isLoading ? 'PDF生成中...' : 'PDF出力'}
-        </SaveButton>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <SaveButton
+            onClick={handlePreviewPDF}
+            disabled={isLoading}
+            style={{
+              background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
+              boxShadow: '0 2px 4px rgba(52, 152, 219, 0.3)',
+            }}
+            aria-label="PDFを出力 (Ctrl+P)"
+            title="PDFを出力 (Ctrl+P)"
+          >
+            {isLoading ? 'PDF生成中...' : 'PDF出力'}
+          </SaveButton>
+        </div>
       </Header>
 
       <FormSection>
@@ -973,64 +1071,78 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
 
       <FormSection>
         <SectionTitle>請求明細</SectionTitle>
-        <ItemsTable>
-          <thead>
-            <tr>
-              <TableHeader>カテゴリ</TableHeader>
-              <TableHeader>品目・摘要</TableHeader>
-              <TableHeader>数量</TableHeader>
-              <TableHeader>単位</TableHeader>
-              <TableHeader>単価</TableHeader>
-              <TableHeader>金額</TableHeader>
-              <TableHeader>操作</TableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item, index) => (
-              <tr key={index}>
-                <TableCell>
-                  <ItemInput
-                    type="text"
-                    value={item.category}
-                    onChange={e => handleItemChange(index, 'category', e.target.value)}
-                  />
-                </TableCell>
-                <TableCell>
-                  <ItemInput
-                    type="text"
-                    value={item.item_name}
-                    onChange={e => handleItemChange(index, 'item_name', e.target.value)}
-                  />
-                </TableCell>
-                <TableCell>
-                  <ItemInput
-                    type="number"
-                    value={item.quantity}
-                    onChange={e => handleItemChange(index, 'quantity', e.target.value)}
-                  />
-                </TableCell>
-                <TableCell>
-                  <ItemInput
-                    type="text"
-                    value={item.unit}
-                    onChange={e => handleItemChange(index, 'unit', e.target.value)}
-                  />
-                </TableCell>
-                <TableCell>
-                  <ItemInput
-                    type="number"
-                    value={item.unit_price}
-                    onChange={e => handleItemChange(index, 'unit_price', e.target.value)}
-                  />
-                </TableCell>
-                <TableCell>{formatCurrency(item.amount)}</TableCell>
-                <TableCell>
-                  <button onClick={() => removeItem(index)}>削除</button>
-                </TableCell>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <ItemsTable>
+            <thead>
+              <tr>
+                <TableHeader>カテゴリ</TableHeader>
+                <TableHeader>品目・摘要</TableHeader>
+                <TableHeader>数量</TableHeader>
+                <TableHeader>単位</TableHeader>
+                <TableHeader>単価</TableHeader>
+                <TableHeader>金額</TableHeader>
+                <TableHeader>操作</TableHeader>
               </tr>
-            ))}
-          </tbody>
-        </ItemsTable>
+            </thead>
+            <tbody>
+              {items.map((item, index) => (
+                <tr key={index}>
+                  <TableCell>
+                    <ItemInput
+                      type="text"
+                      value={item.category}
+                      onChange={e => handleItemChange(index, 'category', e.target.value)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <ItemInput
+                      type="text"
+                      value={item.item_name}
+                      onChange={e => handleItemChange(index, 'item_name', e.target.value)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <ItemInput
+                      type="number"
+                      value={item.quantity}
+                      onChange={e => handleItemChange(index, 'quantity', e.target.value)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <ItemInput
+                      type="text"
+                      value={item.unit}
+                      onChange={e => handleItemChange(index, 'unit', e.target.value)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <ItemInput
+                      type="number"
+                      value={item.unit_price}
+                      onChange={e => handleItemChange(index, 'unit_price', e.target.value)}
+                    />
+                  </TableCell>
+                  <TableCell>{formatCurrency(item.amount)}</TableCell>
+                  <TableCell>
+                    <ActionButton
+                      onClick={() => removeItem(index)}
+                      style={{
+                        background: '#e74c3c',
+                        color: 'white',
+                        border: 'none',
+                        minHeight: '36px',
+                        padding: '8px 12px',
+                      }}
+                      aria-label={`明細行 ${index + 1} を削除`}
+                    >
+                      削除
+                    </ActionButton>
+                  </TableCell>
+                </tr>
+              ))}
+            </tbody>
+          </ItemsTable>
+        </div>
 
         <AddItemButton onClick={addItem}>明細追加</AddItemButton>
 

@@ -407,12 +407,12 @@ const securityOptimizer = {
   parseJWTOptimized,
   validateSessionFast,
   performSecurityCheck,
-  getSecurityMetrics
+  getSecurityMetrics,
 };
 
 export default securityOptimizer;
 
-// Legacy default export for compatibility  
+// Legacy default export for compatibility
 export const legacyDefault = {
   fastHash,
   validatePasswordFast,

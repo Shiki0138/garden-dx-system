@@ -3,7 +3,13 @@
  * テンプレート改良・業界標準準拠強化のための補助関数群
  */
 
-import { LANDSCAPING_STANDARDS } from './landscapingInvoicePDFGenerator';
+// LANDSCAPING_STANDARDSを内部で定義
+const LANDSCAPING_STANDARDS = {
+  colors: {
+    text: '#1f1f1f',
+    secondary: '#2d5a3d',
+  }
+};
 
 /**
  * 造園業界工種分類による色分けマッピング
@@ -162,19 +168,27 @@ export const formatLandscapingPeriod = (startDate, endDate) => {
  */
 export const formatProjectScale = totalAmount => {
   if (!totalAmount) return '';
-
+  
   const amount = parseFloat(totalAmount);
   if (isNaN(amount)) return '';
-
-  if (amount < 500000) {
-    return '小規模工事';
-  } else if (amount < 3000000) {
-    return '中規模工事';
-  } else if (amount < 10000000) {
+  
+  if (amount >= 10000000) {
     return '大規模工事';
+  } else if (amount >= 3000000) {
+    return '中規模工事';
   } else {
-    return '大型工事';
+    return '小規模工事';
   }
+};
+
+/**
+ * パフォーマンス統計更新
+ */
+const performanceStats = {
+  table_rendering: [],
+  formatting_operations: [],
+  cache_hits: 0,
+  cache_misses: 0,
 };
 
 /**
@@ -214,16 +228,6 @@ export const formatPlantingSpecification = item => {
   }
 
   return parts.join(' ');
-};
-
-/**
- * パフォーマンス統計更新関数
- */
-const performanceStats = {
-  table_rendering: [],
-  formatting_operations: [],
-  cache_hits: 0,
-  cache_misses: 0,
 };
 
 export const updatePerformanceStats = (operation, time) => {

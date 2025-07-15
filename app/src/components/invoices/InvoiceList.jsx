@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useTable, useSortBy, useFilters, usePagination } from '@tanstack/react-table';
 import {
   useAuth,
   useInvoicePermissions,
@@ -13,6 +12,11 @@ const Container = styled.div`
   padding: 20px;
   background-color: #f8f9fa;
   min-height: 100vh;
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 `;
 
 const Header = styled.div`
@@ -24,6 +28,14 @@ const Header = styled.div`
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    text-align: center;
+  }
 `;
 
 const Title = styled.h1`
@@ -43,9 +55,17 @@ const CreateButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
+  min-height: 44px; /* タッチ操作のための最小サイズ */
 
   &:hover {
     background: #219a52;
+  }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 16px;
   }
 `;
 
@@ -57,6 +77,13 @@ const FilterContainer = styled.div`
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
 `;
 
 const FilterSelect = styled.select`
@@ -65,6 +92,13 @@ const FilterSelect = styled.select`
   border-radius: 4px;
   font-size: 14px;
   min-width: 120px;
+  min-height: 44px; /* タッチ操作のための最小サイズ */
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    width: 100%;
+    font-size: 16px; /* iOS Safari のズーム防止 */
+  }
 `;
 
 const SearchInput = styled.input`
@@ -73,6 +107,13 @@ const SearchInput = styled.input`
   border-radius: 4px;
   font-size: 14px;
   min-width: 200px;
+  min-height: 44px; /* タッチ操作のための最小サイズ */
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    width: 100%;
+    font-size: 16px; /* iOS Safari のズーム防止 */
+  }
 `;
 
 const TableContainer = styled.div`
@@ -80,11 +121,22 @@ const TableContainer = styled.div`
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    min-width: 800px; /* 最小幅を設定して横スクロールを可能にする */
+  }
 `;
 
 const TableHeader = styled.th`
@@ -148,20 +200,36 @@ const ActionButton = styled.button`
   cursor: pointer;
   margin-right: 5px;
   transition: all 0.2s;
+  min-height: 36px; /* タッチ操作のための最小サイズ */
 
   &:hover {
     background: #3498db;
     color: white;
   }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+    font-size: 14px;
+    margin-right: 3px;
+    min-height: 40px;
+  }
 `;
 
 const PaginationContainer = styled.div`
   display: flex;
-  justify-content: between;
+  justify-content: space-between;
   align-items: center;
   padding: 15px;
   background: #f8f9fa;
   border-top: 1px solid #eee;
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
 `;
 
 const InvoiceList = () => {
@@ -348,7 +416,7 @@ const InvoiceList = () => {
                   <ManagerOnlyComponent>
                     <ActionButton
                       onClick={() => handleSendInvoice(invoice.id)}
-                      style={{ background: '#27ae60' }}
+                      style={{ background: '#27ae60', color: 'white' }}
                     >
                       送付
                     </ActionButton>

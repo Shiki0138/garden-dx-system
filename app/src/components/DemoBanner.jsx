@@ -18,8 +18,8 @@ const DemoBanner = () => {
         <div className="demo-banner-left">
           <span className="demo-banner-icon">🎭</span>
           <div className="demo-banner-text">
-            <strong>デモモード</strong>
-            <span>テスト環境でご利用中です</span>
+            <strong>UI プレビュー版</strong>
+            <span>画面確認用・データ保存機能は準備中です</span>
           </div>
         </div>
 

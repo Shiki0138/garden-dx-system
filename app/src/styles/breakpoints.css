@@ -1,0 +1,334 @@
+/**
+ * Garden DXシステム - 統一ブレークポイント定義
+ * 全コンポーネントで共通使用する画面サイズ定義
+ * 
+ * モバイルファースト設計
+ * - 小さい画面から大きい画面へ段階的に対応
+ * - 統一的なユーザーエクスペリエンスを提供
+ */
+
+/* ==========================================
+   CSS カスタムプロパティ（変数）定義
+   ========================================== */
+
+:root {
+  /* ブレークポイント */
+  --breakpoint-mobile: 360px; /* 極小スマートフォン */
+  --breakpoint-mobile-l: 480px; /* 大きめスマートフォン */
+  --breakpoint-tablet: 768px; /* タブレット */
+  --breakpoint-tablet-l: 1024px; /* 大きめタブレット */
+  --breakpoint-desktop: 1200px; /* デスクトップ */
+  --breakpoint-desktop-l: 1400px; /* 大きめデスクトップ */
+
+  /* コンテナ最大幅 */
+  --container-max-width: 1200px;
+  --container-padding: 20px;
+  --container-padding-mobile: 16px;
+  --container-padding-small: 12px;
+
+  /* 共通スペーシング */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+  /* フォントサイズ */
+  --font-xs: 12px;
+  --font-sm: 14px;
+  --font-md: 16px;
+  --font-lg: 18px;
+  --font-xl: 20px;
+  --font-xxl: 24px;
+  --font-xxxl: 32px;
+
+  /* タッチターゲットサイズ */
+  --touch-target-min: 44px; /* WCAG AA推奨 */
+  --touch-target-mobile: 48px; /* モバイル推奨 */
+  --touch-target-comfortable: 56px; /* 快適操作 */
+}
+
+/* ==========================================
+   ユーティリティクラス
+   ========================================== */
+
+/* コンテナ */
+.container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.container-fluid {
+  width: 100%;
+  padding: 0 var(--container-padding);
+}
+
+/* レスポンシブ表示/非表示 */
+.visible-mobile {
+  display: block;
+}
+
+.visible-tablet {
+  display: none;
+}
+
+.visible-desktop {
+  display: none;
+}
+
+.hidden-mobile {
+  display: none;
+}
+
+.hidden-tablet {
+  display: block;
+}
+
+.hidden-desktop {
+  display: block;
+}
+
+/* ==========================================
+   ブレークポイント別スタイル
+   ========================================== */
+
+/* 極小スマートフォン (360px未満) */
+@media (max-width: 359px) {
+  .container,
+  .container-fluid {
+    padding: 0 var(--container-padding-small);
+  }
+
+  .font-responsive {
+    font-size: var(--font-sm);
+  }
+
+  .touch-target {
+    min-height: var(--touch-target-mobile);
+    min-width: var(--touch-target-mobile);
+  }
+}
+
+/* スマートフォン (360px以上) */
+@media (min-width: 360px) {
+  .container,
+  .container-fluid {
+    padding: 0 var(--container-padding-mobile);
+  }
+
+  .font-responsive {
+    font-size: var(--font-md);
+  }
+
+  .touch-target {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+  }
+}
+
+/* 大きめスマートフォン (480px以上) */
+@media (min-width: 480px) {
+  .font-responsive {
+    font-size: var(--font-md);
+  }
+
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* タブレット (768px以上) */
+@media (min-width: 768px) {
+  .container,
+  .container-fluid {
+    padding: 0 var(--container-padding);
+  }
+
+  .visible-mobile {
+    display: none;
+  }
+
+  .visible-tablet {
+    display: block;
+  }
+
+  .hidden-mobile {
+    display: block;
+  }
+
+  .hidden-tablet {
+    display: none;
+  }
+
+  .font-responsive {
+    font-size: var(--font-lg);
+  }
+
+  .grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .touch-target {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+  }
+}
+
+/* 大きめタブレット (1024px以上) */
+@media (min-width: 1024px) {
+  .grid-responsive {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .font-responsive {
+    font-size: var(--font-xl);
+  }
+}
+
+/* デスクトップ (1200px以上) */
+@media (min-width: 1200px) {
+  .visible-tablet {
+    display: none;
+  }
+
+  .visible-desktop {
+    display: block;
+  }
+
+  .hidden-tablet {
+    display: block;
+  }
+
+  .hidden-desktop {
+    display: none;
+  }
+
+  .grid-responsive {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* 大きめデスクトップ (1400px以上) */
+@media (min-width: 1400px) {
+  .container {
+    max-width: var(--breakpoint-desktop-l);
+  }
+
+  .grid-responsive {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* ==========================================
+   モバイル最適化
+   ========================================== */
+
+/* モバイルランドスケープ */
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobile-landscape-adjust {
+    height: 100vh;
+    height: 100dvh;
+  }
+}
+
+/* モバイルキーボード表示時の調整 */
+@media (max-width: 768px) and (max-height: 600px) {
+  .keyboard-adjust {
+    height: auto;
+    min-height: auto;
+  }
+}
+
+/* 高解像度ディスプレイ */
+@media (min-resolution: 2dppx) {
+  .high-dpi-adjust {
+    /* 高解像度向け調整 */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* ==========================================
+   印刷対応
+   ========================================== */
+
+@media print {
+  .container {
+    max-width: none;
+    padding: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .page-break {
+    page-break-after: always;
+  }
+
+  .no-page-break {
+    page-break-inside: avoid;
+  }
+}
+
+/* ==========================================
+   デバッグ用（開発時のみ）
+   ========================================== */
+
+.debug-breakpoints {
+  position: fixed;
+  top: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  font-size: 12px;
+  z-index: 9999;
+  border-radius: 0 0 0 8px;
+}
+
+.debug-breakpoints::before {
+  content: 'XS';
+}
+
+@media (min-width: 360px) {
+  .debug-breakpoints::before {
+    content: 'SM';
+  }
+}
+
+@media (min-width: 480px) {
+  .debug-breakpoints::before {
+    content: 'MD';
+  }
+}
+
+@media (min-width: 768px) {
+  .debug-breakpoints::before {
+    content: 'LG';
+  }
+}
+
+@media (min-width: 1024px) {
+  .debug-breakpoints::before {
+    content: 'XL';
+  }
+}
+
+@media (min-width: 1200px) {
+  .debug-breakpoints::before {
+    content: 'XXL';
+  }
+}
+
+@media (min-width: 1400px) {
+  .debug-breakpoints::before {
+    content: 'XXXL';
+  }
+}

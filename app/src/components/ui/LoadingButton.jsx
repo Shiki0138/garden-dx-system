@@ -165,7 +165,9 @@ const StyledButton = styled.button`
     box-shadow: none;
   }
 
-  ${props => props.loading && `
+  ${props =>
+    props.loading &&
+    `
     pointer-events: none;
     opacity: 0.8;
   `}
@@ -193,7 +195,7 @@ const LoadingOverlay = styled.div`
 
 /**
  * ローディングボタンコンポーネント
- * 
+ *
  * @param {Object} props - プロパティ
  * @param {React.ReactNode} props.children - ボタンの子要素
  * @param {boolean} props.loading - ローディング状態
@@ -214,7 +216,7 @@ const LoadingButton = ({
   disabled = false,
   ...rest
 }) => {
-  const handleClick = (e) => {
+  const handleClick = e => {
     if (loading || disabled) {
       e.preventDefault();
       return;

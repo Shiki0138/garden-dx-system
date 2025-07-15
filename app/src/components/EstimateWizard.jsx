@@ -365,14 +365,23 @@ const ItemRow = styled.div`
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 15px;
+    padding: 20px;
   }
 `;
 
 const ItemInput = styled(Input)`
   margin: 0;
-  padding: 10px 12px;
-  font-size: 14px;
+  padding: 12px 14px;
+  font-size: 16px;
+  min-height: 44px;
+  touch-action: manipulation;
+
+  @media (max-width: 768px) {
+    padding: 16px 18px;
+    font-size: 18px;
+    min-height: 48px;
+  }
 `;
 
 const AddItemButton = styled.button`
@@ -414,8 +423,11 @@ const AddItemButton = styled.button`
   }
 
   @media (max-width: 768px) {
-    padding: 14px 18px;
-    min-height: 48px;
+    width: 100%;
+    justify-content: center;
+    padding: 16px 20px;
+    min-height: 52px;
+    font-size: 16px;
   }
 `;
 

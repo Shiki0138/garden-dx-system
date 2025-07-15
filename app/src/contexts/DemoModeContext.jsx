@@ -149,33 +149,17 @@ export const DemoModeProvider = ({ children }) => {
   const [demoUser, setDemoUser] = useState(null);
   const [demoData, setDemoData] = useState(DEMO_DATA);
 
-  // デモモード初期化
+  // デモモード初期化（開発段階では常に有効）
   useEffect(() => {
-    // 開発環境では常にデモモードを有効化（ログイン機能を無効化）
-    const isDevEnvironment = process.env.REACT_APP_ENVIRONMENT === 'development';
-    const isDemo = process.env.REACT_APP_DEMO_MODE === 'true';
-
-    // URLパラメータでデモモードを有効化できるようにする（オプション）
-    const urlParams = new URLSearchParams(window.location.search);
-    const demoParam = urlParams.get('demo') === 'true';
-
-    // 最終的なデモモード判定（開発環境では常にtrue）
-    const finalDemoMode = isDevEnvironment || isDemo || demoParam;
+    // 開発段階では常にデモモードを有効化（ログイン機能完全無効化）
+    const finalDemoMode = true; // 開発段階では常にtrue
 
     setIsDemoMode(finalDemoMode);
 
-    if (finalDemoMode) {
-      // console.log('🎭 デモモードが有効になりました');
-      // デフォルトでマネージャーユーザーを設定
-      setDemoUser(DEMO_USERS.manager);
-      // URLパラメータで有効化した場合はlocalStorageに保存しない
-      if (!demoParam) {
-        localStorage.setItem('demo_mode', 'true');
-      }
-    } else {
-      // デモモードが無効の場合はlocalStorageからも削除
-      localStorage.removeItem('demo_mode');
-    }
+    // デフォルトでマネージャーユーザーを設定
+    setDemoUser(DEMO_USERS.manager);
+    localStorage.setItem('demo_mode', 'true');
+    console.log('🎭 開発段階：デモモード常時有効（ログイン不要）');
   }, []);
 
   // デモモード有効化

@@ -12,11 +12,30 @@ jest.mock('../../../hooks/useAuth', () => ({
       id: 'test-user-id',
       email: 'test@example.com',
       role: 'manager',
-      user_metadata: { role: 'manager' }
+      user_metadata: { role: 'manager' },
     },
     isAuthenticated: true,
-    loading: false
-  })
+    loading: false,
+  }),
+  useInvoicePermissions: () => ({
+    canCreate: true,
+    canEdit: true,
+    canView: true,
+    canDelete: true,
+    canSend: true,
+  }),
+  ManagerOnlyComponent: ({ children, fallback }) => {
+    return <div data-testid="manager-only-component">{children || fallback}</div>;
+  },
+  ProtectedComponent: ({ children, fallback }) => {
+    return <div data-testid="protected-component">{children || fallback}</div>;
+  },
+  PERMISSIONS: {
+    INVOICE_CREATE: 'invoice:create',
+    INVOICE_EDIT: 'invoice:edit',
+    INVOICE_DELETE: 'invoice:delete',
+    INVOICE_VIEW: 'invoice:view',
+  },
 }));
 
 // APIモックの設定
