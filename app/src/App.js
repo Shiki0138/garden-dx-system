@@ -11,6 +11,7 @@ import LoginPage from './components/auth/LoginPage';
 import EstimateCreator from './components/EstimateCreator';
 import EstimateWizardPro from './components/EstimateWizardPro';
 import PDFGenerator from './components/PDFGenerator';
+import GardenDXMain from './components/GardenDXMain';
 import { checkEnvironmentVariables } from './utils/apiErrorHandler';
 import { log } from './utils/logger';
 import { initNotificationSystem } from './utils/notifications';
@@ -114,29 +115,38 @@ const AppContent = () => {
       <div className="App">
         {/* <DebugInfo /> */}
         {isDemoMode && <DemoBanner />}
-        <nav
-          style={{
-            padding: '20px',
-            background: '#4a7c59',
-            marginBottom: '20px',
-            display: 'flex',
-            gap: '20px',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <h2 style={{ color: 'white', margin: 0 }}>🏡 庭想システム</h2>
-          <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-            <Link
-              to="/wizard-pro"
-              style={{
-                color: 'white',
-                textDecoration: 'none',
-                padding: '10px 20px',
-                background: '#2e7d32',
-                borderRadius: '5px',
-                fontWeight: 'bold',
-                fontSize: '16px',
+        <GardenDXMain />
+        {showGuide && <DemoGuide onClose={handleCloseGuide} />}
+      </div>
+    </Router>
+  );
+}
+
+// 以下は既存のコードですが、新しいUIでは使用しません
+const OldNavigation = () => (
+  <nav
+    style={{
+      padding: '20px',
+      background: '#4a7c59',
+      marginBottom: '20px',
+      display: 'flex',
+      gap: '20px',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}
+  >
+    <h2 style={{ color: 'white', margin: 0 }}>🏡 庭想システム</h2>
+    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+      <Link
+        to="/wizard-pro"
+        style={{
+          color: 'white',
+          textDecoration: 'none',
+          padding: '10px 20px',
+          background: '#2e7d32',
+          borderRadius: '5px',
+          fontWeight: 'bold',
+          fontSize: '16px',
               }}
             >
               📝 見積作成
