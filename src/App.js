@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext';
@@ -6,6 +6,8 @@ import { DemoModeProvider, useDemoMode } from './contexts/DemoModeContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LandscapingErrorBoundary } from './components/ui/ErrorBoundary';
 import DemoBanner from './components/DemoBanner';
+import DemoGuide from './components/DemoGuide';
+import LoginPage from './components/auth/LoginPage';
 import EstimateCreator from './components/EstimateCreator';
 import EstimateWizardPro from './components/EstimateWizardPro';
 import PDFGenerator from './components/PDFGenerator';
@@ -18,6 +20,9 @@ import DebugInfo from './components/DebugInfo';
 // アプリケーションコンテンツ
 const AppContent = () => {
   const { isDemoMode } = useDemoMode();
+  const [user, setUser] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   // デモモード時にbodyクラス設定
   useEffect(() => {
@@ -56,6 +61,54 @@ const AppContent = () => {
     }
   }, []);
 
+  // ログイン処理
+  const handleLogin = (userData) => {
+    setUser(userData);
+    setShowLogin(false);
+    log.info('ユーザーログイン:', userData.name, userData.role);
+  };
+
+  // ログアウト処理
+  const handleLogout = () => {
+    setUser(null);
+    setShowLogin(false);
+    log.info('ユーザーログアウト');
+  };
+
+  // デモモード時は権限チェックをスキップ（テスト用）
+  const shouldShowLogin = !isDemoMode && !user && showLogin;
+
+  // デモモード時は自動的にテスト開始
+  useEffect(() => {
+    if (isDemoMode && !user) {
+      // デモモード時は自動でオーナー権限でログイン
+      const demoUser = {
+        id: 'demo-owner-001',
+        name: 'テストユーザー（オーナー）',
+        email: 'demo@garden-dx.example.com',
+        role: 'owner',
+        permissions: ['view_profit', 'create_invoice', 'manage_staff', 'view_all_projects']
+      };
+      setUser(demoUser);
+      
+      // 初回アクセス時のみガイドを表示
+      const hasSeenGuide = localStorage.getItem('demo-guide-seen');
+      if (!hasSeenGuide) {
+        setTimeout(() => setShowGuide(true), 2000); // 2秒後に表示
+      }
+    }
+  }, [isDemoMode, user]);
+
+  // ガイドを閉じる
+  const handleCloseGuide = () => {
+    setShowGuide(false);
+    localStorage.setItem('demo-guide-seen', 'true');
+  };
+
+  if (shouldShowLogin) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
   return (
     <Router>
       <div className="App">
@@ -73,7 +126,7 @@ const AppContent = () => {
           }}
         >
           <h2 style={{ color: 'white', margin: 0 }}>🏡 庭想システム</h2>
-          <div style={{ display: 'flex', gap: '15px' }}>
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
             <Link
               to="/wizard-pro"
               style={{
@@ -116,13 +169,88 @@ const AppContent = () => {
             >
               🏠 ダッシュボード
             </Link>
+            
+            {/* ユーザー情報とログアウト */}
+            {user && (
+              <>
+                <span style={{ 
+                  color: 'white', 
+                  fontSize: '14px',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  padding: '8px 12px',
+                  borderRadius: '4px'
+                }}>
+                  👤 {user.name} ({user.role === 'owner' ? 'オーナー' : '現場監督'})
+                </span>
+                {!isDemoMode && (
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      color: 'white',
+                      background: '#d32f2f',
+                      border: 'none',
+                      padding: '8px 16px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    ログアウト
+                  </button>
+                )}
+              </>
+            )}
+            
+            {/* 本番環境でのログインボタン */}
+            {!isDemoMode && !user && (
+              <button
+                onClick={() => setShowLogin(true)}
+                style={{
+                  color: 'white',
+                  background: '#1976d2',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: 'bold'
+                }}
+              >
+                🔐 ログイン
+              </button>
+            )}
+            
+            {/* デモガイドボタン */}
+            {isDemoMode && (
+              <button
+                onClick={() => setShowGuide(true)}
+                style={{
+                  color: 'white',
+                  background: '#9c27b0',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}
+              >
+                📖 操作ガイド
+              </button>
+            )}
           </div>
         </nav>
 
+        {/* デモガイドモーダル */}
+        {showGuide && <DemoGuide onClose={handleCloseGuide} />}
+
         <Routes>
+          {/* ログイン画面 */}
+          <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+          
           {/* メインルート - 造園業者向けの実用機能のみ */}
-          <Route path="/wizard-pro" element={<EstimateWizardPro />} />
-          <Route path="/pdf" element={<PDFGenerator />} />
+          <Route path="/wizard-pro" element={<EstimateWizardPro user={user} />} />
+          <Route path="/pdf" element={<PDFGenerator user={user} />} />
           
           {/* ルート（/）は常にダッシュボードへリダイレクト */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -132,7 +260,7 @@ const AppContent = () => {
             path="/dashboard"
             element={
               <LandscapingErrorBoundary>
-                <EstimateCreator />
+                <EstimateCreator user={user} />
               </LandscapingErrorBoundary>
             }
           />
