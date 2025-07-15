@@ -10,13 +10,23 @@
 
 ## 🚨 重要な開発ルール
 
-### 0. 🛡️ デプロイエラー防止（最重要）
+### 0. 🛡️ ビルド・デプロイエラー防止（最重要）
+- **必ず `BUILD_ERROR_REFERENCE.md` を参照し、E01〜E120のエラーパターンを回避すること**
 - **本番環境でのエラーを防ぐ開発を徹底すること**
 - 環境変数の設定ミスを防ぐ（特にSupabase関連）
+  - `.env.example` を常に最新化
+  - Vercel環境変数の事前確認
+- パッケージマネージャは `npm` のみ使用（yarn, pnpm禁止）
+- Node.jsバージョンをVercelと統一
+- 大文字小文字を厳格に区別（ファイル名・ディレクトリ名）
 - CORS設定を事前に確認する
 - ビルド前に必ずローカルでテストする
+  ```bash
+  npm run build
+  npx vercel build  # Vercel互換確認
+  ```
 - エラーハンドリングを全ての処理に実装する
-- 詳細は `DEPLOYMENT_ERROR_PREVENTION_RULES.md` を必読
+- 詳細は `DEPLOYMENT_ERROR_PREVENTION_RULES.md` と `BUILD_ERROR_REFERENCE.md` を必読
 
 ### 1. 🎨 UX/UI デザイン変更ルール
 - **大幅なデザイン変更を行う前には必ずPRESIDENTの確認を取ること**
