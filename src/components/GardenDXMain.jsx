@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { 
   FileText, 
@@ -400,9 +400,11 @@ const ProcessModule = ({ currentProject, onProjectChange }) => {
     if (currentProject?.estimateId) {
       fetchEstimateData();
     }
-  }, [currentProject]);
+  }, [currentProject, fetchEstimateData]);
 
-  const fetchEstimateData = async () => {
+  const fetchEstimateData = useCallback(async () => {
+    if (!currentProject?.estimateId) return;
+    
     try {
       // 見積データを取得
       const response = await fetch(`/api/estimates/${currentProject.estimateId}`);
@@ -415,7 +417,7 @@ const ProcessModule = ({ currentProject, onProjectChange }) => {
     } catch (error) {
       console.error('見積データの取得に失敗:', error);
     }
-  };
+  }, [currentProject]);
 
   const handleGenerateSchedule = async () => {
     if (!estimateData) return;
