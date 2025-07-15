@@ -406,8 +406,8 @@ export const useLoadingDebugger = () => {
 
 // エクスポート
 export {
-  loadingManager,
-  LOADING_TYPES
+  loadingManager
+  // LOADING_TYPESは既に上部でexportされているため、ここでは削除
 };
 
 export default {

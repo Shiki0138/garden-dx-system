@@ -243,6 +243,7 @@ describe('apiErrorHandler', () => {
     });
 
     test('不正な環境変数値の処理', () => {
+      // eslint-disable-next-line no-script-url
       process.env.REACT_APP_API_URL = 'javascript:alert("xss")';
       process.env.REACT_APP_SUPABASE_URL = 'ftp://invalid-protocol.com';
       process.env.REACT_APP_ENVIRONMENT = 'development';

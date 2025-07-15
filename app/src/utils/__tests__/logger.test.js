@@ -127,6 +127,7 @@ describe('logger', () => {
       const message = 'テストデバッグメッセージ';
       const data = { debug: 'detailed debug' };
 
+      // eslint-disable-next-line testing-library/no-debugging-utils
       log.debug(message, data);
 
       expect(mockConsoleLog).toHaveBeenCalledWith(
@@ -143,6 +144,7 @@ describe('logger', () => {
       process.env.REACT_APP_ENVIRONMENT = 'production';
       process.env.NODE_ENV = 'production';
 
+      // eslint-disable-next-line testing-library/no-debugging-utils
       log.debug('本番デバッグ');
 
       expect(mockConsoleLog).not.toHaveBeenCalled();
@@ -154,6 +156,7 @@ describe('logger', () => {
       process.env.REACT_APP_ENVIRONMENT = 'development';
       process.env.NODE_ENV = 'development';
 
+      // eslint-disable-next-line testing-library/no-debugging-utils
       log.debug('デバッグ');
       log.info('情報');
       log.warn('警告');
@@ -169,6 +172,7 @@ describe('logger', () => {
       process.env.REACT_APP_ENVIRONMENT = 'production';
       process.env.NODE_ENV = 'production';
 
+      // eslint-disable-next-line testing-library/no-debugging-utils
       log.debug('デバッグ');
       log.info('情報');
       log.warn('警告');
