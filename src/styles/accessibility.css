@@ -1,0 +1,611 @@
+/* 
+ * 造園業DXシステム アクセシビリティ強化スタイル
+ * WCAG 2.1 AA準拠・企業級品質
+ */
+
+/* =============================================
+   スクリーンリーダー専用要素
+   ============================================= */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* フォーカス時に表示 */
+.sr-only:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0.5rem !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+  background: #007cba !important;
+  color: white !important;
+  text-decoration: none !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  z-index: 9999 !important;
+}
+
+/* =============================================
+   高コントラストモード対応
+   ============================================= */
+@media (prefers-contrast: high) {
+  /* ボタン */
+  button,
+  .btn {
+    border: 2px solid currentColor !important;
+    background: transparent !important;
+    color: inherit !important;
+  }
+
+  /* リンク */
+  a {
+    text-decoration: underline !important;
+    color: inherit !important;
+  }
+
+  /* フォーム要素 */
+  input,
+  select,
+  textarea {
+    border: 2px solid currentColor !important;
+    background: transparent !important;
+    color: inherit !important;
+  }
+
+  /* アイコン */
+  .icon,
+  svg {
+    filter: contrast(2) !important;
+  }
+}
+
+/* =============================================
+   ダークモード対応
+   ============================================= */
+@media (prefers-color-scheme: dark) {
+  /* カスタムプロパティ（CSS変数）の上書き */
+  :root {
+    --primary-color: #4ade80;
+    --secondary-color: #60a5fa;
+    --text-color: #f3f4f6;
+    --background-color: #111827;
+    --surface-color: #1f2937;
+    --border-color: #374151;
+    --accent-color: #fbbf24;
+    --error-color: #f87171;
+    --success-color: #34d399;
+  }
+
+  /* 背景とテキスト */
+  body {
+    background-color: var(--background-color) !important;
+    color: var(--text-color) !important;
+  }
+
+  /* サーフェス要素 */
+  .form-section,
+  .card,
+  .modal {
+    background-color: var(--surface-color) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  /* 入力要素 */
+  input,
+  select,
+  textarea {
+    background-color: var(--surface-color) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  input::placeholder {
+    color: #9ca3af !important;
+  }
+}
+
+/* =============================================
+   フォーカス管理
+   ============================================= */
+/* キーボードフォーカス表示 */
+*:focus {
+  outline: 3px solid #007cba !important;
+  outline-offset: 2px !important;
+  border-radius: 4px !important;
+}
+
+/* マウスフォーカス時は非表示 */
+*:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
+/* 特別なフォーカスインジケーター */
+.focus-enhanced:focus {
+  outline: 4px solid #007cba !important;
+  outline-offset: 3px !important;
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 6px #007cba !important;
+}
+
+/* =============================================
+   動きの制限設定への対応
+   ============================================= */
+@media (prefers-reduced-motion: reduce) {
+  /* すべてのアニメーションを無効化 */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* パララックス効果の無効化 */
+  [data-parallax] {
+    transform: none !important;
+  }
+
+  /* 自動再生の停止 */
+  video,
+  audio {
+    autoplay: false !important;
+  }
+}
+
+/* =============================================
+   タッチ・モバイル対応
+   ============================================= */
+/* タッチターゲットサイズの最小化保証 */
+button,
+a,
+input,
+select,
+textarea,
+[role='button'],
+[role='link'] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  padding: 0.5rem !important;
+}
+
+/* タッチデバイス向けホバー効果の調整 */
+@media (hover: none) and (pointer: coarse) {
+  /* ホバー効果を無効化 */
+  *:hover {
+    background-color: inherit !important;
+    color: inherit !important;
+    transform: none !important;
+  }
+
+  /* タップハイライトのカスタマイズ */
+  * {
+    -webkit-tap-highlight-color: rgba(0, 124, 186, 0.3) !important;
+  }
+}
+
+/* =============================================
+   文字サイズ・ズーム対応
+   ============================================= */
+/* 200%ズーム時の調整 */
+@media (min-resolution: 192dpi) {
+  body {
+    font-size: 1.2rem !important;
+    line-height: 1.6 !important;
+  }
+
+  /* アイコンサイズの調整 */
+  .icon {
+    width: 1.5em !important;
+    height: 1.5em !important;
+  }
+}
+
+/* =============================================
+   エラー・成功メッセージ
+   ============================================= */
+/* エラーメッセージ */
+.error-message,
+[role='alert'] {
+  color: #dc2626 !important;
+  background-color: #fef2f2 !important;
+  border: 2px solid #fecaca !important;
+  border-radius: 6px !important;
+  padding: 0.75rem !important;
+  margin: 0.5rem 0 !important;
+  font-weight: 600 !important;
+}
+
+.error-message::before {
+  content: '⚠️ ' !important;
+  font-weight: bold !important;
+}
+
+/* 成功メッセージ */
+.success-message,
+[role='status'] {
+  color: #065f46 !important;
+  background-color: #ecfdf5 !important;
+  border: 2px solid #a7f3d0 !important;
+  border-radius: 6px !important;
+  padding: 0.75rem !important;
+  margin: 0.5rem 0 !important;
+  font-weight: 600 !important;
+}
+
+.success-message::before {
+  content: '✅ ' !important;
+  font-weight: bold !important;
+}
+
+/* 情報メッセージ */
+.info-message,
+[role='note'] {
+  color: #1e40af !important;
+  background-color: #eff6ff !important;
+  border: 2px solid #bfdbfe !important;
+  border-radius: 6px !important;
+  padding: 0.75rem !important;
+  margin: 0.5rem 0 !important;
+  font-weight: 600 !important;
+}
+
+.info-message::before {
+  content: 'ℹ️ ' !important;
+  font-weight: bold !important;
+}
+
+/* =============================================
+   スキップリンク
+   ============================================= */
+.skip-links {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 10000 !important;
+}
+
+.skip-link {
+  position: absolute !important;
+  top: -40px !important;
+  left: 6px !important;
+  background: #007cba !important;
+  color: white !important;
+  padding: 8px 16px !important;
+  text-decoration: none !important;
+  border-radius: 0 0 4px 4px !important;
+  font-weight: 600 !important;
+  z-index: 10001 !important;
+}
+
+.skip-link:focus {
+  top: 0 !important;
+}
+
+/* =============================================
+   ライブリージョン
+   ============================================= */
+/* ARIAライブリージョンのスタイリング */
+[aria-live='polite'],
+[aria-live='assertive'] {
+  position: absolute !important;
+  left: -10000px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+
+/* 視覚的なライブリージョン */
+.live-region-visual {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  background: #1f2937 !important;
+  color: white !important;
+  padding: 1rem !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  max-width: 300px !important;
+  z-index: 9999 !important;
+  animation: slideInUp 0.3s ease-out !important;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%) !important;
+    opacity: 0 !important;
+  }
+  to {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+  }
+}
+
+/* =============================================
+   プリント対応
+   ============================================= */
+@media print {
+  /* 印刷時の調整 */
+  .no-print {
+    display: none !important;
+  }
+
+  /* リンクURLの表示 */
+  a[href]:after {
+    content: ' (' attr(href) ')' !important;
+    font-size: 0.8em !important;
+    color: #666 !important;
+  }
+
+  /* ページ区切りの制御 */
+  .page-break-before {
+    page-break-before: always !important;
+  }
+
+  .page-break-after {
+    page-break-after: always !important;
+  }
+
+  .no-page-break {
+    page-break-inside: avoid !important;
+  }
+
+  /* 印刷時の色とコントラスト */
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+
+  /* 重要な枠線は残す */
+  .print-border {
+    border: 1px solid black !important;
+  }
+}
+
+/* =============================================
+   ユーティリティクラス
+   ============================================= */
+/* アクセシビリティヘルパー */
+.aria-hidden {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.keyboard-only {
+  position: absolute !important;
+  left: -10000px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+
+.keyboard-only:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* フォーカス管理 */
+.focus-trap {
+  /* フォーカストラップコンテナ */
+  position: relative !important;
+}
+
+.focus-trap-active {
+  /* フォーカストラップが有効な状態 */
+  overflow: hidden !important;
+}
+
+/* カラーコントラスト最適化 */
+.high-contrast {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+
+.high-contrast-reverse {
+  color: #ffffff !important;
+  background-color: #000000 !important;
+  border: 2px solid #ffffff !important;
+}
+
+/* 読みやすさの向上 */
+.readable-text {
+  font-family: 'Helvetica Neue', Arial, sans-serif !important;
+  line-height: 1.6 !important;
+  letter-spacing: 0.02em !important;
+  word-spacing: 0.1em !important;
+}
+
+/* アニメーション制御 */
+.animation-paused {
+  animation-play-state: paused !important;
+}
+
+.animation-running {
+  animation-play-state: running !important;
+}
+
+/* =============================================
+   WAI-ARIA 状態表示
+   ============================================= */
+/* 選択状態 */
+[aria-selected='true'] {
+  background-color: #007cba !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+/* 展開状態 */
+[aria-expanded='true'] .expand-icon {
+  transform: rotate(180deg) !important;
+}
+
+/* 無効状態 */
+[aria-disabled='true'] {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+/* 必須フィールド */
+[aria-required='true'],
+[required] {
+  border-left: 4px solid #dc2626 !important;
+}
+
+[aria-required='true']::after,
+[required]::after {
+  content: ' *' !important;
+  color: #dc2626 !important;
+  font-weight: bold !important;
+}
+
+/* エラー状態 */
+[aria-invalid='true'] {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+/* ローディング状態 */
+[aria-busy='true'] {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+[aria-busy='true']::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent) !important;
+  animation: loading-shimmer 1.5s infinite !important;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* =============================================
+   レスポンシブアクセシビリティ
+   ============================================= */
+/* モバイル最適化 */
+@media (max-width: 768px) {
+  /* タッチターゲットの拡大 */
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role='button'] {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 0.75rem !important;
+  }
+
+  /* フォントサイズの調整 */
+  body {
+    font-size: 16px !important; /* iOS Safariのズーム防止 */
+  }
+
+  /* フォーカス範囲の拡大 */
+  *:focus {
+    outline-width: 4px !important;
+    outline-offset: 3px !important;
+  }
+}
+
+/* タブレット最適化 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* 中間サイズのタッチターゲット */
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role='button'] {
+    min-height: 46px !important;
+    min-width: 46px !important;
+  }
+}
+
+/* =============================================
+   パフォーマンス最適化
+   ============================================= */
+/* GPU加速の有効化 */
+.gpu-accelerated {
+  transform: translateZ(0) !important;
+  will-change: transform, opacity !important;
+}
+
+/* レンダリング最適化 */
+.contain-layout {
+  contain: layout !important;
+}
+
+.contain-paint {
+  contain: paint !important;
+}
+
+.contain-strict {
+  contain: strict !important;
+}
+
+/* =============================================
+   デバッグ・開発支援
+   ============================================= */
+/* アクセシビリティデバッグモード */
+.debug-accessibility * {
+  outline: 1px solid red !important;
+}
+
+.debug-accessibility [role] {
+  outline: 2px solid blue !important;
+}
+
+.debug-accessibility [aria-label],
+.debug-accessibility [aria-labelledby],
+.debug-accessibility [aria-describedby] {
+  outline: 2px solid green !important;
+}
+
+/* フォーカス順序の可視化 */
+.debug-focus-order [tabindex] {
+  position: relative !important;
+}
+
+.debug-focus-order [tabindex]::before {
+  content: attr(tabindex) !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  background: red !important;
+  color: white !important;
+  font-size: 12px !important;
+  padding: 2px 4px !important;
+  border-radius: 2px !important;
+  z-index: 9999 !important;
+}

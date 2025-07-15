@@ -1,0 +1,35 @@
+# ===================================
+# Local Development Configuration
+# ===================================
+
+# Supabase Configuration
+REACT_APP_SUPABASE_URL=https://ppplfluvazaufassdkra.supabase.co
+REACT_APP_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwcGxmbHV2YXphdWZhc3Nka3JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTk5NjczOTYsImV4cCI6MjAzNTU0MzM5Nn0.IWHrTSjfE-fKKgJOVXHECtWo8DGOLGe0Nx0z-vbpyWQ
+
+# API Configuration
+REACT_APP_API_BASE_URL=https://ppplfluvazaufassdkra.supabase.co
+
+# Environment
+REACT_APP_ENVIRONMENT=production
+
+# Demo Mode Configuration
+REACT_APP_DEMO_MODE=true
+
+# Build Configuration
+GENERATE_SOURCEMAP=false
+CI=false
+
+# PWA Configuration
+REACT_APP_PWA_ENABLED=false
+
+# Analytics & Monitoring
+REACT_APP_ANALYTICS_ENABLED=false
+REACT_APP_SENTRY_DSN=""
+
+# Feature Flags
+REACT_APP_ENABLE_REALTIME=true
+REACT_APP_ENABLE_PDF_GENERATION=true
+REACT_APP_ENABLE_NOTIFICATIONS=true
+
+# Security
+REACT_APP_ENCRYPTION_KEY=local-dev-key
