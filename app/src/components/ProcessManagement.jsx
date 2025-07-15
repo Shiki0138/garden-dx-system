@@ -189,14 +189,14 @@ const ProcessManagement = ({ estimateId, projectId, onUpdateProgress }) => {
                   min="0"
                   max="100"
                   value={process.progress}
-                  onChange={(e) => updateProcessProgress(process.id, parseInt(e.target.value))}
+                  onChange={(e) => updateProcessProgress(process.id, parseInt(e.target.value, 10))}
                 />
                 <ProgressInput
                   type="number"
                   min="0"
                   max="100"
                   value={process.progress}
-                  onChange={(e) => updateProcessProgress(process.id, parseInt(e.target.value))}
+                  onChange={(e) => updateProcessProgress(process.id, parseInt(e.target.value, 10))}
                 />
               </ProgressControls>
             </ProcessItem>

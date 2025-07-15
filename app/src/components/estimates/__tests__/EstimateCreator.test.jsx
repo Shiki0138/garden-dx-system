@@ -109,6 +109,9 @@ describe('EstimateCreator', () => {
       // デモモードのデータが表示されることを確認
       await waitFor(() => {
         expect(screen.getByDisplayValue('デモ見積書')).toBeInTheDocument();
+      });
+      
+      await waitFor(() => {
         expect(screen.getByDisplayValue('山田花子')).toBeInTheDocument();
       });
       
@@ -129,6 +132,9 @@ describe('EstimateCreator', () => {
       // データが表示されることを確認
       await waitFor(() => {
         expect(screen.getByDisplayValue('テスト見積')).toBeInTheDocument();
+      });
+      
+      await waitFor(() => {
         expect(screen.getByDisplayValue('テスト顧客')).toBeInTheDocument();
       });
     });

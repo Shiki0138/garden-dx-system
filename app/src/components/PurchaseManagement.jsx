@@ -488,7 +488,7 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
                 type="number"
                 min="1"
                 value={formData.quantity}
-                onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 1})}
+                onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value, 10) || 1})}
               />
             </FormGroup>
 

@@ -3,6 +3,8 @@
  * 動的インポートとコード分割でバンドルサイズを削減
  */
 
+import React from 'react';
+
 // 動的インポートを使用したコンポーネント読み込み
 export const loadComponent = (componentPath) => {
   return import(componentPath);

@@ -9,7 +9,10 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import LoginPage from '../LoginPage';
+import { useAuth } from '../../contexts/SupabaseAuthContext';
+
 // モック設定
+jest.mock('../../contexts/SupabaseAuthContext');
 jest.mock('../../utils/notifications', () => ({
   showError: jest.fn(),
   showSuccess: jest.fn(),
@@ -201,6 +204,9 @@ describe('LoginPage', () => {
       // バリデーションエラーの表示確認
       await waitFor(() => {
         expect(screen.getByText('メールアドレスを入力してください')).toBeInTheDocument();
+      });
+      
+      await waitFor(() => {
         expect(screen.getByText('パスワードを入力してください')).toBeInTheDocument();
       });
 

@@ -231,7 +231,7 @@ export class ProcessPDFGenerator {
       currentY += 10;
       
       // カレンダーグリッドを描画
-      this.drawMonthCalendar(x, currentY, parseInt(year), parseInt(month), monthProcesses);
+      this.drawMonthCalendar(x, currentY, parseInt(year, 10), parseInt(month, 10), monthProcesses);
       currentY += 50;
       
       // ページ分割チェック
