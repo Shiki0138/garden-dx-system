@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Package, Truck, Calculator, TrendingUp, Plus, Search, Filter, Download } from 'lucide-react';
-import { useAuth } from '../contexts/SupabaseAuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 
 const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [purchases, setPurchases] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [categories, setCategories] = useState([]);

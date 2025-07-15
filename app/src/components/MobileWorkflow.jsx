@@ -16,10 +16,10 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { useAuth } from '../contexts/SupabaseAuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 
 const MobileWorkflow = () => {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState('estimate');
   const [showMenu, setShowMenu] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);

@@ -1,5 +1,5 @@
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 // 日本語フォントの設定
 const setupJapaneseFont = (doc) => {
@@ -313,7 +313,7 @@ export class ProcessPDFGenerator {
       status: this.getStatusText(process.status)
     }));
     
-    this.doc.autoTable({
+    autoTable(this.doc, {
       startY: y,
       head: [tableColumns.map(col => col.header)],
       body: tableData.map(row => tableColumns.map(col => row[col.dataKey])),

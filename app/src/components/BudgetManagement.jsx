@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { DollarSign, TrendingUp, TrendingDown, Plus, Edit2, Save, X, Calculator } from 'lucide-react';
-import { useAuth } from '../contexts/SupabaseAuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 
 const BudgetManagement = ({ projectId, estimateId, onBudgetUpdate }) => {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [budgetItems, setBudgetItems] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
