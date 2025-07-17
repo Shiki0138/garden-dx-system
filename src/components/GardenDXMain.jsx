@@ -24,7 +24,7 @@ import BudgetManagement from './BudgetManagement';
 import PurchaseManagement from './PurchaseManagement';
 import MobileWorkflow from './MobileWorkflow';
 import EstimateCreator from './EstimateCreator';
-import EstimateWizardPro from './EstimateWizardPro';
+import EstimateWizard from './EstimateWizard';
 import InvoiceForm from './invoices/InvoiceForm';
 import DashboardTop from './DashboardTop';
 import { generateProcessPDF } from '../utils/processPDFGenerator';
@@ -469,7 +469,7 @@ const EstimateModule = ({ currentProject, onProjectChange }) => {
       </EstimateHeader>
 
       {estimateMode === 'wizard' ? (
-        <EstimateWizardPro
+        <EstimateWizard
           onComplete={handleEstimateComplete}
           initialData={estimateData}
         />

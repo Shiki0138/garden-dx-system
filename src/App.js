@@ -131,13 +131,15 @@ const AppContent = () => {
 // メインアプリコンポーネント
 function App() {
   return (
-    <DemoModeProvider>
-      <SupabaseAuthProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-      </SupabaseAuthProvider>
-    </DemoModeProvider>
+    <ErrorBoundary>
+      <DemoModeProvider>
+        <SupabaseAuthProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </SupabaseAuthProvider>
+      </DemoModeProvider>
+    </ErrorBoundary>
   );
 }
 

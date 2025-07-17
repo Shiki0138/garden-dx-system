@@ -899,8 +899,8 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
   const isAuthenticated = isDemoMode ? true : authIsAuthenticated;
 
   // パフォーマンス監視（開発環境のみ）
-  const { performanceData, logPerformanceReport, markRenderStart, markRenderEnd } =
-    usePerformanceMonitor('EstimateWizardPro');
+  const performanceMonitor = usePerformanceMonitor('EstimateWizardPro');
+  const { performanceData, logPerformanceReport, markRenderStart, markRenderEnd } = performanceMonitor || {};
 
   // ウィザード状態管理
   const [currentStep, setCurrentStep] = useState(1);
