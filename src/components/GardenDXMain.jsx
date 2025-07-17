@@ -13,11 +13,12 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
+import { useSafeSupabaseAuth } from './AuthContextWrapper';
 import { useDemoMode } from '../contexts/DemoModeContext';
 
 // 新しく作成したコンポーネントをインポート
 import ProcessManagement from './ProcessManagement';
+import ProcessScheduleManager from './ProcessScheduleManager';
 import BudgetManagement from './BudgetManagement';
 import PurchaseManagement from './PurchaseManagement';
 import MobileWorkflow from './MobileWorkflow';
@@ -28,8 +29,23 @@ import { generateProcessPDF } from '../utils/processPDFGenerator';
 import { generateProcessSchedule } from '../utils/processGenerator';
 
 const GardenDXMain = () => {
-  const { user, isAuthenticated } = useSupabaseAuth();
+  const authContext = useSafeSupabaseAuth();
+  const { user, isAuthenticated: isAuthenticatedFn, loading: authLoading } = authContext;
+  const isAuthenticated = typeof isAuthenticatedFn === 'function' ? isAuthenticatedFn() : false;
   const { isDemoMode } = useDemoMode();
+  
+  // デバッグログ（開発環境のみ）
+  useEffect(() => {
+    if (process.env.REACT_APP_ENVIRONMENT === 'development') {
+      console.log('GardenDXMain Auth State:', {
+        isDemoMode,
+        isAuthenticated,
+        authLoading,
+        user: user ? 'Present' : 'Null',
+        authContext: authContext ? 'Available' : 'Missing'
+      });
+    }
+  }, [isDemoMode, isAuthenticated, authLoading, user, authContext]);
   const [activeModule, setActiveModule] = useState('estimate');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -98,13 +114,22 @@ const GardenDXMain = () => {
     { id: 'invoice', label: '請求書作成', icon: Package, description: '請求書の作成・発行' }
   ];
 
+  // 認証情報ローディング中（デモモードは除外）
+  if (!isDemoMode && authLoading) {
+    return (
+      <LoadingContainer>
+        <div className="spinner">読み込み中...</div>
+      </LoadingContainer>
+    );
+  }
+
   // モバイル表示の場合は専用コンポーネントを使用
   if (isMobile) {
     return <MobileWorkflow />;
   }
 
-  // ログインしていない場合はリダイレクト
-  if (!isAuthenticated) {
+  // ログインしていない場合はリダイレクト（デモモードは除外）
+  if (!isDemoMode && !isAuthenticated) {
     return (
       <LoginPrompt>
         <h2>ログインが必要です</h2>
@@ -113,9 +138,25 @@ const GardenDXMain = () => {
     );
   }
 
+  // モバイル判定でUIを切り替え
+  if (isMobile) {
+    return (
+      <MobileWorkflow 
+        activeModule={activeModule}
+        setActiveModule={setActiveModule}
+        currentProject={currentProject}
+        onProjectChange={setCurrentProject}
+        user={user}
+        isDemoMode={isDemoMode}
+        notifications={notifications}
+        dashboardData={dashboardData}
+      />
+    );
+  }
+
   return (
     <Container>
-      <Sidebar expanded={!showMobileMenu}>
+      <Sidebar $expanded={!showMobileMenu}>
         <SidebarHeader>
           <Logo>
             <h2>Garden DX</h2>
@@ -130,10 +171,10 @@ const GardenDXMain = () => {
           {navigationItems.map(item => (
             <NavItem
               key={item.id}
-              active={activeModule === item.id}
+              $active={activeModule === item.id}
               onClick={() => setActiveModule(item.id)}
             >
-              <NavItemIcon active={activeModule === item.id}>
+              <NavItemIcon $active={activeModule === item.id}>
                 <item.icon size={24} />
               </NavItemIcon>
               <NavItemContent>
@@ -285,7 +326,7 @@ const DashboardView = ({ data, onModuleChange, currentProject, onProjectChange }
               <ProjectCard
                 key={project.id}
                 onClick={() => onProjectChange(project)}
-                active={currentProject?.id === project.id}
+                $active={currentProject?.id === project.id}
               >
                 <ProjectTitle>{project.name}</ProjectTitle>
                 <ProjectDetails>
@@ -362,13 +403,13 @@ const EstimateModule = ({ currentProject, onProjectChange }) => {
       <EstimateHeader>
         <ModeToggle>
           <ModeButton
-            active={estimateMode === 'wizard'}
+            $active={estimateMode === 'wizard'}
             onClick={() => setEstimateMode('wizard')}
           >
             ウィザード形式
           </ModeButton>
           <ModeButton
-            active={estimateMode === 'advanced'}
+            $active={estimateMode === 'advanced'}
             onClick={() => setEstimateMode('advanced')}
           >
             詳細入力
@@ -396,28 +437,82 @@ const ProcessModule = ({ currentProject, onProjectChange }) => {
   const [processData, setProcessData] = useState(null);
   const [estimateData, setEstimateData] = useState(null);
 
-  useEffect(() => {
-    if (currentProject?.estimateId) {
-      fetchEstimateData();
-    }
-  }, [currentProject, fetchEstimateData]);
-
   const fetchEstimateData = useCallback(async () => {
-    if (!currentProject?.estimateId) return;
+    if (!currentProject?.estimateId) {
+      // デモデータを設定（見積IDがない場合）
+      const demoEstimateData = {
+        id: 'demo_estimate_001',
+        customerName: '田中造園株式会社',
+        projectName: 'オフィスビル前庭園リニューアル工事',
+        items: [
+          {
+            name: '既存植栽撤去・整地',
+            description: '既存の植栽を撤去し、土壌を整備',
+            category: '土工事',
+            quantity: 1,
+            unit: '式'
+          },
+          {
+            name: '新規植栽工事',
+            description: '中高木・低木・地被類の植栽',
+            category: '植栽工事', 
+            quantity: 1,
+            unit: '式'
+          },
+          {
+            name: 'ガーデンライト設置',
+            description: 'LED照明器具の設置・配線工事',
+            category: '設備工事',
+            quantity: 6,
+            unit: '基'
+          },
+          {
+            name: '散水設備工事',
+            description: '自動散水システムの設置',
+            category: '設備工事',
+            quantity: 1,
+            unit: '式'
+          },
+          {
+            name: '園路・小径整備',
+            description: '石材による園路の整備',
+            category: '土工事',
+            quantity: 20,
+            unit: 'm'
+          }
+        ],
+        totalAmount: 850000
+      };
+      setEstimateData(demoEstimateData);
+      return;
+    }
     
     try {
-      // 見積データを取得
+      // 実際のAPIからデータを取得（本番環境用）
       const response = await fetch(`/api/estimates/${currentProject.estimateId}`);
       const data = await response.json();
       setEstimateData(data);
-      
-      // 工程表を自動生成
-      const processSchedule = generateProcessSchedule(data);
-      setProcessData(processSchedule);
     } catch (error) {
       console.error('見積データの取得に失敗:', error);
+      // エラー時もデモデータにフォールバック
+      const fallbackData = {
+        id: currentProject.estimateId,
+        customerName: '見積書データ',
+        projectName: '工程表作成プロジェクト',
+        items: [
+          { name: '準備作業', category: '一般作業', quantity: 1, unit: '式' },
+          { name: 'メイン作業', category: '一般作業', quantity: 1, unit: '式' },
+          { name: '仕上げ作業', category: '一般作業', quantity: 1, unit: '式' }
+        ],
+        totalAmount: 100000
+      };
+      setEstimateData(fallbackData);
     }
   }, [currentProject]);
+
+  useEffect(() => {
+    fetchEstimateData();
+  }, [currentProject, fetchEstimateData]);
 
   const handleGenerateSchedule = async () => {
     if (!estimateData) return;
@@ -448,13 +543,12 @@ const ProcessModule = ({ currentProject, onProjectChange }) => {
       </ModuleHeader>
       
       <ModuleContent>
-        {processData ? (
-          <ProcessManagement
-            projectId={currentProject?.id}
-            estimateId={currentProject?.estimateId}
-            initialProcessData={processData}
-            onUpdateProgress={(processId, progress) => {
-              console.log('Progress updated:', processId, progress);
+        {estimateData ? (
+          <ProcessScheduleManager
+            estimateData={estimateData}
+            onScheduleUpdate={(schedule) => {
+              setProcessData(schedule);
+              console.log('工程表が更新されました:', schedule);
             }}
           />
         ) : (
@@ -462,10 +556,8 @@ const ProcessModule = ({ currentProject, onProjectChange }) => {
             <EmptyStateIcon>📅</EmptyStateIcon>
             <EmptyStateTitle>工程表を作成しましょう</EmptyStateTitle>
             <EmptyStateDescription>
-              {estimateData 
-                ? '「工程表を自動生成」ボタンをクリックして、見積書から工程表を作成してください。'
-                : '工程表を作成するには、まず見積書を作成してください。'
-              }
+              工程表を作成するには、まず見積書を作成してください。
+              見積書が完成すると、各工程の期間を入力して工程表を生成できます。
             </EmptyStateDescription>
           </EmptyState>
         )}
@@ -590,6 +682,19 @@ const SettingsView = () => {
 };
 
 // スタイル定義
+const LoadingContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #f8fafc;
+  
+  .spinner {
+    font-size: 1.5rem;
+    color: #1a472a;
+  }
+`;
+
 const Container = styled.div`
   display: flex;
   height: 100vh;
@@ -597,7 +702,7 @@ const Container = styled.div`
 `;
 
 const Sidebar = styled.nav`
-  width: ${props => props.expanded ? '260px' : '60px'};
+  width: ${props => props.$expanded ? '260px' : '60px'};
   background: #1f2937;
   color: white;
   transition: width 0.3s ease;
@@ -605,7 +710,7 @@ const Sidebar = styled.nav`
   flex-direction: column;
   
   @media (max-width: 768px) {
-    width: ${props => props.expanded ? '100%' : '0'};
+    width: ${props => props.$expanded ? '100%' : '0'};
     position: fixed;
     top: 0;
     left: 0;
@@ -665,8 +770,8 @@ const NavItem = styled.div`
   gap: 16px;
   padding: 16px 20px;
   cursor: pointer;
-  background: ${props => props.active ? '#374151' : 'transparent'};
-  border-right: ${props => props.active ? '4px solid #3b82f6' : 'none'};
+  background: ${props => props.$active ? '#374151' : 'transparent'};
+  border-right: ${props => props.$active ? '4px solid #3b82f6' : 'none'};
   border-radius: 8px;
   margin: 4px 12px;
   transition: all 0.2s ease;
@@ -684,8 +789,8 @@ const NavItemIcon = styled.div`
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: ${props => props.active ? '#3b82f6' : 'rgba(59, 130, 246, 0.1)'};
-  color: ${props => props.active ? 'white' : '#3b82f6'};
+  background: ${props => props.$active ? '#3b82f6' : 'rgba(59, 130, 246, 0.1)'};
+  color: ${props => props.$active ? 'white' : '#3b82f6'};
 `;
 
 const NavItemContent = styled.div`
@@ -907,10 +1012,10 @@ const ProjectsList = styled.div`
 
 const ProjectCard = styled.div`
   padding: 16px;
-  border: 1px solid ${props => props.active ? '#3b82f6' : '#e5e7eb'};
+  border: 1px solid ${props => props.$active ? '#3b82f6' : '#e5e7eb'};
   border-radius: 8px;
   cursor: pointer;
-  background: ${props => props.active ? '#f0f9ff' : 'white'};
+  background: ${props => props.$active ? '#f0f9ff' : 'white'};
   
   &:hover {
     border-color: #3b82f6;
@@ -1004,15 +1109,15 @@ const ModeToggle = styled.div`
 
 const ModeButton = styled.button`
   padding: 8px 16px;
-  background: ${props => props.active ? '#3b82f6' : 'white'};
-  color: ${props => props.active ? 'white' : '#374151'};
+  background: ${props => props.$active ? '#3b82f6' : 'white'};
+  color: ${props => props.$active ? 'white' : '#374151'};
   border: none;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
   
   &:hover {
-    background: ${props => props.active ? '#2563eb' : '#f3f4f6'};
+    background: ${props => props.$active ? '#2563eb' : '#f3f4f6'};
   }
 `;
 

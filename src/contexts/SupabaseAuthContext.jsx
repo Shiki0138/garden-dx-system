@@ -12,7 +12,7 @@ import {
 } from '../lib/supabase';
 
 // 認証コンテキスト作成
-const SupabaseAuthContext = createContext({});
+export const SupabaseAuthContext = createContext({});
 
 // 認証フック
 export const useSupabaseAuth = () => {
