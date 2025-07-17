@@ -47,7 +47,7 @@ const GardenDXMain = () => {
       });
     }
   }, [isDemoMode, isAuthenticated, authLoading, user, authContext]);
-  const [activeModule, setActiveModule] = useState('estimate');
+  const [activeModule, setActiveModule] = useState('dashboard');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -79,7 +79,7 @@ const GardenDXMain = () => {
     }
   }, [isAuthenticated, isDemoMode]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       // デモモードの場合はダミーデータを使用
       if (isDemoMode) {
@@ -114,9 +114,9 @@ const GardenDXMain = () => {
         completedProcesses: 0
       });
     }
-  };
+  }, [isDemoMode]);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       // デモモードの場合はダミー通知を使用
       if (isDemoMode) {
@@ -144,18 +144,19 @@ const GardenDXMain = () => {
       // エラー時は空の配列を設定
       setNotifications([]);
     }
-  };
+  }, [isDemoMode]);
 
-  // メインナビゲーション - 4つの主要機能
+  // メインナビゲーション - 5つの主要機能（ダッシュボードを追加）
   const navigationItems = [
+    { id: 'dashboard', label: 'ダッシュボード', icon: BarChart3, description: 'システム概要と統計' },
     { id: 'estimate', label: '見積作成', icon: FileText, description: '新規見積の作成・編集' },
     { id: 'process', label: '工程表作成', icon: Calendar, description: '見積から工程表を自動生成' },
     { id: 'budget', label: '予算管理', icon: DollarSign, description: '予算と実績の管理' },
     { id: 'invoice', label: '請求書作成', icon: Package, description: '請求書の作成・発行' }
   ];
 
-  // 認証情報ローディング中（デモモードは除外）
-  if (!isDemoMode && authLoading) {
+  // 認証情報ローディング中（開発環境では無効）
+  if (process.env.REACT_APP_ENVIRONMENT === 'production' && !isDemoMode && authLoading) {
     return (
       <LoadingContainer>
         <div className="spinner">読み込み中...</div>
@@ -168,8 +169,8 @@ const GardenDXMain = () => {
     return <MobileWorkflow />;
   }
 
-  // ログインしていない場合はリダイレクト（デモモードは除外）
-  if (!isDemoMode && !isAuthenticated) {
+  // ログインしていない場合はリダイレクト（開発環境では無効）
+  if (process.env.REACT_APP_ENVIRONMENT === 'production' && !isDemoMode && !isAuthenticated) {
     return (
       <LoginPrompt>
         <h2>ログインが必要です</h2>
@@ -255,6 +256,14 @@ const GardenDXMain = () => {
         </TopBar>
 
         <ContentArea>
+          {activeModule === 'dashboard' && (
+            <DashboardView
+              data={dashboardData}
+              onModuleChange={setActiveModule}
+              currentProject={currentProject}
+              onProjectChange={setCurrentProject}
+            />
+          )}
           {activeModule === 'estimate' && (
             <EstimateModule
               currentProject={currentProject}
