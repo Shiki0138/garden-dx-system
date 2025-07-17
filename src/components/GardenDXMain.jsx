@@ -26,6 +26,7 @@ import MobileWorkflow from './MobileWorkflow';
 import EstimateCreator from './EstimateCreator';
 import EstimateWizardPro from './EstimateWizardPro';
 import InvoiceForm from './invoices/InvoiceForm';
+import DashboardTop from './DashboardTop';
 import { generateProcessPDF } from '../utils/processPDFGenerator';
 import { generateProcessSchedule } from '../utils/processGenerator';
 
@@ -257,11 +258,10 @@ const GardenDXMain = () => {
 
         <ContentArea>
           {activeModule === 'dashboard' && (
-            <DashboardView
+            <DashboardTop
               data={dashboardData}
               onModuleChange={setActiveModule}
-              currentProject={currentProject}
-              onProjectChange={setCurrentProject}
+              user={user}
             />
           )}
           {activeModule === 'estimate' && (
