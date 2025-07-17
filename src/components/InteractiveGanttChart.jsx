@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { Calendar, Download, Edit3, ChevronUp, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { Calendar, Download, Edit3, ChevronUp, ChevronDown, ArrowUpDown, GripVertical } from 'lucide-react';
 import { generateProcessPDF } from '../utils/processPDFGenerator';
 
 /**
@@ -15,6 +15,7 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
   const [scheduleData, setScheduleData] = useState([]);
   const [sortOrder, setSortOrder] = useState('default'); // default, name, duration, startDate
   const [draggedItem, setDraggedItem] = useState(null);
+  const [draggedOverItem, setDraggedOverItem] = useState(null);
   const [resizeItem, setResizeItem] = useState(null);
   const [resizeType, setResizeType] = useState(null); // 'start' or 'end'
   const chartRef = useRef(null);
@@ -23,7 +24,13 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
   // 初期データから日付を設定
   useEffect(() => {
     if (initialData.length > 0) {
-      const dataWithDates = calculateScheduleDates(initialData, startDate);
+      const dataWithOrder = initialData.map((item, index) => ({
+        ...item,
+        order: item.order !== undefined ? item.order : index + 1,
+        startTime: item.startTime || 'AM',
+        endTime: item.endTime || 'PM'
+      }));
+      const dataWithDates = calculateScheduleDates(dataWithOrder, startDate);
       setScheduleData(dataWithDates);
     }
   }, [initialData, startDate]);
@@ -53,9 +60,12 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
       return {
         ...item,
         id: item.id || index,
+        order: item.order || index + 1,
         startDate: startDate.toISOString().split('T')[0],
         endDate: endDate.toISOString().split('T')[0],
         startDay: Math.ceil((startDate - new Date(baseStartDate)) / (1000 * 60 * 60 * 24)),
+        startTime: item.startTime || 'AM',
+        endTime: item.endTime || 'PM'
       };
     });
   };
@@ -85,10 +95,58 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
     setScheduleData(sorted);
   };
 
-  // ドラッグ開始
-  const handleDragStart = (e, item) => {
+  // ドラッグ開始（バーのドラッグ）
+  const handleBarDragStart = (e, item) => {
     setDraggedItem(item);
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('dragType', 'bar');
+  };
+
+  // ドラッグ開始（行の並び替え）
+  const handleRowDragStart = (e, item) => {
+    setDraggedItem(item);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('dragType', 'row');
+  };
+
+  // 行のドラッグオーバー
+  const handleRowDragOver = (e, item) => {
+    e.preventDefault();
+    if (draggedItem && draggedItem.id !== item.id) {
+      setDraggedOverItem(item);
+    }
+  };
+
+  // 行のドラッグ終了
+  const handleRowDragLeave = () => {
+    setDraggedOverItem(null);
+  };
+
+  // 行のドロップ処理
+  const handleRowDrop = (e, targetItem) => {
+    e.preventDefault();
+    const dragType = e.dataTransfer.getData('dragType');
+    
+    if (dragType === 'row' && draggedItem && targetItem.id !== draggedItem.id) {
+      const newData = [...scheduleData];
+      const draggedIndex = newData.findIndex(item => item.id === draggedItem.id);
+      const targetIndex = newData.findIndex(item => item.id === targetItem.id);
+      
+      // 要素を削除して挿入
+      const [removed] = newData.splice(draggedIndex, 1);
+      newData.splice(targetIndex, 0, removed);
+      
+      // order番号を更新
+      const updatedData = newData.map((item, index) => ({
+        ...item,
+        order: index + 1
+      }));
+      
+      setScheduleData(updatedData);
+    }
+    
+    setDraggedItem(null);
+    setDraggedOverItem(null);
   };
 
   // ドラッグオーバー
@@ -97,10 +155,12 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
     e.dataTransfer.dropEffect = 'move';
   };
 
-  // ドロップ処理
-  const handleDrop = (e) => {
+  // ドロップ処理（チャートエリア）
+  const handleChartDrop = (e) => {
     e.preventDefault();
-    if (!draggedItem || !chartRef.current) return;
+    const dragType = e.dataTransfer.getData('dragType');
+    
+    if (dragType === 'bar' && draggedItem && chartRef.current) {
 
     const rect = chartRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -125,9 +185,11 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
       }
       return item;
     });
+      setScheduleData(updatedData);
+    }
     
-    setScheduleData(updatedData);
     setDraggedItem(null);
+    setDraggedOverItem(null);
   };
 
   // リサイズ開始
@@ -203,6 +265,69 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
     }
   }, [resizeItem, resizeType]);
 
+  // 並び替え機能の更新
+  const updateItemOrder = (itemId, newOrder) => {
+    const parsedOrder = parseInt(newOrder, 10);
+    if (isNaN(parsedOrder) || parsedOrder < 1) return;
+    
+    const updatedData = [...scheduleData];
+    const itemIndex = updatedData.findIndex(item => item.id === itemId);
+    
+    if (itemIndex === -1) return;
+    
+    // 現在のアイテムを削除
+    const [movedItem] = updatedData.splice(itemIndex, 1);
+    
+    // 新しい位置に挿入
+    const newIndex = Math.min(parsedOrder - 1, updatedData.length);
+    updatedData.splice(newIndex, 0, movedItem);
+    
+    // order番号を更新
+    const reorderedData = updatedData.map((item, index) => ({
+      ...item,
+      order: index + 1
+    }));
+    
+    setScheduleData(reorderedData);
+  };
+
+  // 日付と時間の更新
+  const updateItemDateTime = (itemId, field, value) => {
+    const updatedData = scheduleData.map(item => {
+      if (item.id === itemId) {
+        const updated = { ...item };
+        
+        if (field === 'startDate' || field === 'startTime') {
+          updated[field] = value;
+          // 開始日が変更された場合、終了日も再計算
+          if (field === 'startDate') {
+            const newStartDate = new Date(value);
+            const newEndDate = new Date(newStartDate);
+            newEndDate.setDate(newEndDate.getDate() + item.duration - 1);
+            updated.endDate = newEndDate.toISOString().split('T')[0];
+            
+            // startDayも更新
+            updated.startDay = Math.ceil((newStartDate - new Date(startDate)) / (1000 * 60 * 60 * 24));
+          }
+        } else if (field === 'endDate' || field === 'endTime') {
+          updated[field] = value;
+          // 終了日が変更された場合、期間を再計算
+          if (field === 'endDate') {
+            const start = new Date(item.startDate);
+            const end = new Date(value);
+            const newDuration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+            updated.duration = Math.max(1, newDuration);
+          }
+        }
+        
+        return updated;
+      }
+      return item;
+    });
+    
+    setScheduleData(updatedData);
+  };
+
   // PDF出力
   const handlePDFExport = async () => {
     try {
@@ -219,12 +344,16 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + totalDuration);
     
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const currentDate = new Date(startDate);
+    const endTime = endDate.getTime();
+    
+    while (currentDate.getTime() <= endTime) {
       headers.push({
-        date: new Date(d),
-        day: d.getDate(),
-        month: d.getMonth() + 1
+        date: new Date(currentDate),
+        day: currentDate.getDate(),
+        month: currentDate.getMonth() + 1
       });
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     
     return headers;
@@ -240,14 +369,14 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
           インタラクティブ工程ガントチャート
         </Title>
         <Controls>
-          <DateInput>
+          <DateInputWrapper>
             <label>開始日：</label>
             <input 
               type="date" 
               value={startDate} 
               onChange={(e) => setStartDate(e.target.value)}
             />
-          </DateInput>
+          </DateInputWrapper>
           
           <SortDropdown>
             <label>並び替え：</label>
@@ -269,14 +398,70 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
       <ChartContainer>
         <TaskList>
           <TaskHeader>
-            <TaskHeaderCell>作業項目</TaskHeaderCell>
-            <TaskHeaderCell>期間</TaskHeaderCell>
+            <TaskHeaderCell style={{ width: '40%' }}>作業項目</TaskHeaderCell>
+            <TaskHeaderCell style={{ width: '60%' }}>期間</TaskHeaderCell>
           </TaskHeader>
           {scheduleData.map((item, index) => (
-            <TaskRow key={item.id}>
-              <TaskIndex>{index + 1}</TaskIndex>
+            <TaskRow 
+              key={item.id}
+              draggable
+              onDragStart={(e) => handleRowDragStart(e, item)}
+              onDragOver={(e) => handleRowDragOver(e, item)}
+              onDragLeave={handleRowDragLeave}
+              onDrop={(e) => handleRowDrop(e, item)}
+              isDragging={draggedItem?.id === item.id}
+              isDraggedOver={draggedOverItem?.id === item.id}
+            >
+              <DragHandle>
+                <GripVertical size={14} />
+              </DragHandle>
+              <TaskIndex>
+                <OrderInput
+                  type="number"
+                  min="1"
+                  value={item.order || index + 1}
+                  onChange={(e) => updateItemOrder(item.id, e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </TaskIndex>
               <TaskName>{item.name}</TaskName>
-              <TaskDuration>{item.duration}日</TaskDuration>
+              <TaskDateTimeContainer>
+                <DateTimeGroup>
+                  <DateTimeLabel>開始:</DateTimeLabel>
+                  <DateInput
+                    type="date"
+                    value={item.startDate}
+                    onChange={(e) => updateItemDateTime(item.id, 'startDate', e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <TimeSelect
+                    value={item.startTime}
+                    onChange={(e) => updateItemDateTime(item.id, 'startTime', e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <option value="AM">午前</option>
+                    <option value="PM">午後</option>
+                  </TimeSelect>
+                </DateTimeGroup>
+                <DateTimeGroup>
+                  <DateTimeLabel>終了:</DateTimeLabel>
+                  <DateInput
+                    type="date"
+                    value={item.endDate}
+                    onChange={(e) => updateItemDateTime(item.id, 'endDate', e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <TimeSelect
+                    value={item.endTime}
+                    onChange={(e) => updateItemDateTime(item.id, 'endTime', e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <option value="AM">午前</option>
+                    <option value="PM">午後</option>
+                  </TimeSelect>
+                </DateTimeGroup>
+                <DurationDisplay>{item.duration}日間</DurationDisplay>
+              </TaskDateTimeContainer>
             </TaskRow>
           ))}
         </TaskList>
@@ -294,7 +479,7 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
           <ChartArea
             ref={chartRef}
             onDragOver={handleDragOver}
-            onDrop={handleDrop}
+            onDrop={handleChartDrop}
           >
             {scheduleData.map((item, index) => {
               const leftPercent = (item.startDay / totalDuration) * 100;
@@ -305,7 +490,7 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
                   key={item.id}
                   index={index}
                   draggable
-                  onDragStart={(e) => handleDragStart(e, item)}
+                  onDragStart={(e) => handleBarDragStart(e, item)}
                   style={{
                     left: `${leftPercent}%`,
                     width: `${widthPercent}%`,
@@ -370,7 +555,7 @@ const Controls = styled.div`
   gap: 16px;
 `;
 
-const DateInput = styled.div`
+const DateInputWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -445,7 +630,7 @@ const ChartContainer = styled.div`
 `;
 
 const TaskList = styled.div`
-  width: 300px;
+  width: 500px;
   background: #f8f9fa;
   border-right: 1px solid #e0e0e0;
 `;
@@ -466,9 +651,21 @@ const TaskHeaderCell = styled.div`
 const TaskRow = styled.div`
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: 12px;
   border-bottom: 1px solid #e0e0e0;
   background: white;
+  cursor: move;
+  transition: all 0.2s;
+  min-height: 80px;
+  
+  ${props => props.isDragging && `
+    opacity: 0.5;
+    background: #f0f0f0;
+  `}
+  
+  ${props => props.isDraggedOver && `
+    border-top: 2px solid #2d5016;
+  `}
   
   &:hover {
     background: #f8f9fa;
@@ -490,13 +687,64 @@ const TaskIndex = styled.div`
 `;
 
 const TaskName = styled.div`
-  flex: 1;
+  flex: 0 0 140px;
   font-weight: 500;
+  padding-right: 12px;
 `;
 
-const TaskDuration = styled.div`
+const TaskDateTimeContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+`;
+
+const DateTimeGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const DateTimeLabel = styled.span`
+  font-size: 12px;
   color: #666;
-  font-size: 14px;
+  min-width: 32px;
+`;
+
+const DateInput = styled.input`
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  width: 110px;
+  
+  &:focus {
+    outline: none;
+    border-color: #2d5016;
+  }
+`;
+
+const TimeSelect = styled.select`
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  width: 60px;
+  background: white;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: #2d5016;
+  }
+`;
+
+const DurationDisplay = styled.div`
+  font-size: 12px;
+  color: #2d5016;
+  font-weight: 600;
+  text-align: right;
+  padding-right: 8px;
 `;
 
 const TimelineContainer = styled.div`
@@ -545,8 +793,9 @@ const GanttBar = styled.div`
   height: 40px;
   border-radius: 6px;
   cursor: move;
-  transition: opacity 0.2s;
+  transition: all 0.15s ease-out;
   user-select: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   
   ${props => props.category === '植栽工事' && `
     background: linear-gradient(135deg, #4caf50, #45a049);
@@ -569,8 +818,9 @@ const GanttBar = styled.div`
   `}
   
   &:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     z-index: 10;
+    transform: translateY(-2px);
   }
 `;
 
@@ -620,6 +870,49 @@ const Summary = styled.div`
   text-align: center;
   font-weight: 600;
   color: #2d5016;
+`;
+
+const DragHandle = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  color: #999;
+  cursor: grab;
+  
+  &:hover {
+    color: #666;
+  }
+  
+  &:active {
+    cursor: grabbing;
+  }
+`;
+
+const OrderInput = styled.input`
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2d5016;
+  
+  &:focus {
+    outline: none;
+    background: white;
+    border: 1px solid #2d5016;
+    border-radius: 2px;
+  }
+  
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 `;
 
 export default InteractiveGanttChart;

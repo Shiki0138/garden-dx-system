@@ -57,7 +57,7 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
     setProcessItems(prev => 
       prev.map(item => 
         item.id === itemId 
-          ? { ...item, estimatedDays: Math.max(1, parseInt(days) || 1) }
+          ? { ...item, estimatedDays: Math.max(1, parseInt(days, 10) || 1) }
           : item
       )
     );
@@ -275,7 +275,7 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
                   min="1"
                   max="15"
                   value={item.duration}
-                  onChange={(e) => adjustScheduleItem(item.id, parseInt(e.target.value))}
+                  onChange={(e) => adjustScheduleItem(item.id, parseInt(e.target.value, 10))}
                 />
                 <SliderValue>{item.duration}日</SliderValue>
               </SliderContainer>
