@@ -14,6 +14,7 @@ import {
   X
 } from 'lucide-react';
 import { useSafeSupabaseAuth } from './AuthContextWrapper';
+import ErrorBoundary from './ErrorBoundary';
 import { useDemoMode } from '../contexts/DemoModeContext';
 
 // 新しく作成したコンポーネントをインポート
@@ -72,37 +73,76 @@ const GardenDXMain = () => {
 
   // ダッシュボードデータの取得
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated || isDemoMode) {
       fetchDashboardData();
       fetchNotifications();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isDemoMode]);
 
   const fetchDashboardData = async () => {
     try {
+      // デモモードの場合はダミーデータを使用
+      if (isDemoMode) {
+        setDashboardData({
+          totalProjects: 5,
+          activeEstimates: 3,
+          monthlyRevenue: 1250000,
+          completedProcesses: 8
+        });
+        return;
+      }
+      
       const response = await fetch('/api/dashboard', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       setDashboardData(data);
     } catch (error) {
       console.error('ダッシュボードデータの取得に失敗:', error);
+      // エラー時はデフォルトデータを設定
+      setDashboardData({
+        totalProjects: 0,
+        activeEstimates: 0,
+        monthlyRevenue: 0,
+        completedProcesses: 0
+      });
     }
   };
 
   const fetchNotifications = async () => {
     try {
+      // デモモードの場合はダミー通知を使用
+      if (isDemoMode) {
+        setNotifications([
+          { id: 1, type: 'info', message: 'デモモードで実行中です' },
+          { id: 2, type: 'success', message: '見積書が作成されました' }
+        ]);
+        return;
+      }
+      
       const response = await fetch('/api/notifications', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       setNotifications(data.notifications || []);
     } catch (error) {
       console.error('通知の取得に失敗:', error);
+      // エラー時は空の配列を設定
+      setNotifications([]);
     }
   };
 
@@ -155,8 +195,9 @@ const GardenDXMain = () => {
   }
 
   return (
-    <Container>
-      <Sidebar $expanded={!showMobileMenu}>
+    <ErrorBoundary>
+      <Container>
+        <Sidebar $expanded={!showMobileMenu}>
         <SidebarHeader>
           <Logo>
             <h2>Garden DX</h2>
@@ -241,6 +282,7 @@ const GardenDXMain = () => {
         </ContentArea>
       </MainContent>
     </Container>
+    </ErrorBoundary>
   );
 };
 
