@@ -18,6 +18,7 @@ import LoadingButton from './ui/LoadingButton';
 import { estimateApi } from '../services/api';
 import authService from '../services/authService';
 import { showSuccess, showError, showConfirmDialog } from '../utils/notifications';
+import { getDemoEstimate } from '../utils/demoData';
 // import { debounce } from '../utils/performance';
 // import { trackUserAction } from '../utils/analytics';
 
@@ -161,7 +162,6 @@ const EstimateCreator = ({ estimateId, user }) => {
     // デモモード時またはestimateIdがない場合は充実したサンプルデータを設定
     if (!estimateId || process.env.REACT_APP_DEMO_MODE === 'true') {
       // インポートしたデモデータを使用
-      const { getDemoEstimate } = await import('../utils/demoData');
       const demoEstimate = getDemoEstimate('demo-est-001');
       
       setEstimate(demoEstimate);
