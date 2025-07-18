@@ -6,8 +6,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // 環境変数から設定値を取得
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 // 環境変数デバッグ出力（開発環境のみ）
 // if (process.env.REACT_APP_ENVIRONMENT === 'development') {

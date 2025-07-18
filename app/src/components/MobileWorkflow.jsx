@@ -17,16 +17,48 @@ import {
   X
 } from 'lucide-react';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
+import { 
+  FONT_SIZES, 
+  TOUCH_SIZES, 
+  SPACING, 
+  MOBILE_STYLES, 
+  COLORS, 
+  Z_INDEX,
+  mediaQuery 
+} from '../styles/mobileConstants';
 
-const MobileWorkflow = () => {
-  const { user } = useSupabaseAuth();
-  const [activeTab, setActiveTab] = useState('estimate');
+const MobileWorkflow = ({ 
+  activeModule, 
+  setActiveModule, 
+  currentProject, 
+  onProjectChange, 
+  user, 
+  isDemoMode, 
+  notifications, 
+  dashboardData 
+}) => {
+  const [activeTab, setActiveTab] = useState(activeModule || 'estimate');
   const [showMenu, setShowMenu] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [cameraStream, setCameraStream] = useState(null);
   const [showCamera, setShowCamera] = useState(false);
   const [projects, setProjects] = useState([]);
   const [quickActions, setQuickActions] = useState([]);
+
+  // 親コンポーネントのactiveModuleと同期
+  useEffect(() => {
+    if (activeModule !== activeTab) {
+      setActiveTab(activeModule);
+    }
+  }, [activeModule, activeTab]);
+
+  // タブ変更時に親のsetActiveModuleを呼び出し
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (setActiveModule) {
+      setActiveModule(tab);
+    }
+  };
 
   // 位置情報取得
   useEffect(() => {
@@ -140,39 +172,39 @@ const MobileWorkflow = () => {
       <TabNavigation>
         <TabButton 
           active={activeTab === 'estimate'} 
-          onClick={() => setActiveTab('estimate')}
+          onClick={() => handleTabChange('estimate')}
         >
           <FileText size={16} />
           <span>見積</span>
         </TabButton>
         <TabButton 
-          active={activeTab === 'schedule'} 
-          onClick={() => setActiveTab('schedule')}
+          active={activeTab === 'process'} 
+          onClick={() => handleTabChange('process')}
         >
           <Calendar size={16} />
           <span>工程</span>
         </TabButton>
         <TabButton 
           active={activeTab === 'budget'} 
-          onClick={() => setActiveTab('budget')}
+          onClick={() => handleTabChange('budget')}
         >
           <DollarSign size={16} />
           <span>予算</span>
         </TabButton>
         <TabButton 
-          active={activeTab === 'purchase'} 
-          onClick={() => setActiveTab('purchase')}
+          active={activeTab === 'invoice'} 
+          onClick={() => handleTabChange('invoice')}
         >
           <Package size={16} />
-          <span>仕入</span>
+          <span>請求</span>
         </TabButton>
       </TabNavigation>
 
       <TabContent>
         {activeTab === 'estimate' && <EstimateTab />}
-        {activeTab === 'schedule' && <ScheduleTab />}
+        {activeTab === 'process' && <ProcessTab />}
         {activeTab === 'budget' && <BudgetTab />}
-        {activeTab === 'purchase' && <PurchaseTab />}
+        {activeTab === 'invoice' && <InvoiceTab />}
       </TabContent>
 
       <FloatingActionButton onClick={() => handleQuickAction('new-estimate')}>
@@ -289,7 +321,7 @@ const EstimateTab = () => {
 };
 
 // 工程タブ
-const ScheduleTab = () => {
+const ProcessTab = () => {
   const [processes, setProcesses] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -421,8 +453,8 @@ const BudgetTab = () => {
   );
 };
 
-// 仕入タブ
-const PurchaseTab = () => {
+// 請求タブ
+const InvoiceTab = () => {
   const [purchases, setPurchases] = useState([]);
   const [showScanner, setShowScanner] = useState(false);
 
@@ -644,18 +676,21 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #f8fafc;
+  background: ${COLORS.gray[50]};
   overflow: hidden;
+  ${MOBILE_STYLES.safeArea}
 `;
 
 const MobileHeader = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background: #3b82f6;
-  color: white;
+  padding: ${SPACING.md} ${SPACING.base};
+  padding-top: max(${SPACING.md}, env(safe-area-inset-top));
+  background: ${COLORS.primary};
+  color: ${COLORS.white};
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: ${Z_INDEX.sticky};
 `;
 
 const HeaderLeft = styled.div`
@@ -673,67 +708,109 @@ const HeaderRight = styled.div`
 const MenuButton = styled.button`
   background: none;
   border: none;
-  color: white;
-  padding: 4px;
+  color: ${COLORS.white};
+  padding: ${SPACING.sm};
+  min-width: ${TOUCH_SIZES.small};
+  min-height: ${TOUCH_SIZES.small};
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  ${MOBILE_STYLES.touchOptimized}
 `;
 
 const HeaderTitle = styled.h1`
-  font-size: 18px;
+  font-size: ${FONT_SIZES.md};
   font-weight: 600;
   margin: 0;
+  ${MOBILE_STYLES.preventZoom}
 `;
 
 const LocationButton = styled.button`
   background: rgba(255, 255, 255, 0.2);
   border: none;
-  color: white;
-  padding: 6px;
-  border-radius: 6px;
+  color: ${COLORS.white};
+  min-width: ${TOUCH_SIZES.small};
+  min-height: ${TOUCH_SIZES.small};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
   cursor: pointer;
+  ${MOBILE_STYLES.touchOptimized}
+  
+  &:active {
+    background: rgba(255, 255, 255, 0.3);
+  }
 `;
 
 const CameraButton = styled.button`
   background: rgba(255, 255, 255, 0.2);
   border: none;
-  color: white;
-  padding: 6px;
-  border-radius: 6px;
+  color: ${COLORS.white};
+  min-width: ${TOUCH_SIZES.small};
+  min-height: ${TOUCH_SIZES.small};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
   cursor: pointer;
+  ${MOBILE_STYLES.touchOptimized}
+  
+  &:active {
+    background: rgba(255, 255, 255, 0.3);
+  }
 `;
 
 const QuickActionBar = styled.div`
   display: flex;
-  padding: 12px 16px;
-  gap: 8px;
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
+  padding: ${SPACING.md} ${SPACING.base};
+  gap: ${SPACING.sm};
+  background: ${COLORS.white};
+  border-bottom: 1px solid ${COLORS.gray[200]};
+  overflow-x: auto;
+  ${MOBILE_STYLES.smoothScroll}
+  
+  /* スクロールバーを隠す */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 `;
 
 const QuickActionButton = styled.button`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 12px;
+  gap: ${SPACING.xs};
+  padding: ${SPACING.sm} ${SPACING.md};
+  min-height: ${TOUCH_SIZES.medium};
+  min-width: 80px;
   background: ${props => {
     if (props.priority === 'high') return '#dbeafe';
     if (props.priority === 'emergency') return '#fee2e2';
-    return '#f3f4f6';
+    return COLORS.gray[100];
   }};
   color: ${props => {
     if (props.priority === 'high') return '#1e40af';
-    if (props.priority === 'emergency') return '#dc2626';
-    return '#374151';
+    if (props.priority === 'emergency') return COLORS.error;
+    return COLORS.gray[700];
   }};
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 12px;
-  flex: 1;
+  font-size: ${FONT_SIZES.sm};
+  flex-shrink: 0;
+  ${MOBILE_STYLES.touchOptimized}
   
-  &:hover {
-    opacity: 0.8;
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+  
+  span {
+    white-space: nowrap;
   }
 `;
 
@@ -748,18 +825,24 @@ const TabButton = styled.button`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 12px 8px;
+  gap: ${SPACING.xs};
+  padding: ${SPACING.md} ${SPACING.sm};
+  min-height: ${TOUCH_SIZES.medium};
   background: none;
   border: none;
-  border-bottom: 2px solid ${props => props.active ? '#3b82f6' : 'transparent'};
-  color: ${props => props.active ? '#3b82f6' : '#6b7280'};
+  border-bottom: 2px solid ${props => props.active ? COLORS.primary : 'transparent'};
+  color: ${props => props.active ? COLORS.primary : COLORS.gray[500]};
   cursor: pointer;
-  font-size: 12px;
+  font-size: ${FONT_SIZES.sm};
   font-weight: 500;
+  ${MOBILE_STYLES.touchOptimized}
   
-  &:hover {
-    background: #f9fafb;
+  &:active {
+    background: ${COLORS.gray[50]};
+  }
+  
+  span {
+    white-space: nowrap;
   }
 `;
 
@@ -784,26 +867,41 @@ const SearchInput = styled.div`
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: white;
-  border: 1px solid #d1d5db;
+  gap: ${SPACING.sm};
+  background: ${COLORS.white};
+  border: 1px solid ${COLORS.gray[300]};
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: ${SPACING.sm} ${SPACING.md};
+  min-height: ${TOUCH_SIZES.medium};
   
   input {
     flex: 1;
     border: none;
     outline: none;
-    font-size: 14px;
+    font-size: ${FONT_SIZES.base};
+    ${MOBILE_STYLES.preventZoom}
+    
+    &::placeholder {
+      color: ${COLORS.gray[400]};
+    }
   }
 `;
 
 const FilterButton = styled.button`
-  background: white;
-  border: 1px solid #d1d5db;
+  background: ${COLORS.white};
+  border: 1px solid ${COLORS.gray[300]};
   border-radius: 8px;
-  padding: 8px;
+  min-width: ${TOUCH_SIZES.medium};
+  min-height: ${TOUCH_SIZES.medium};
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  ${MOBILE_STYLES.touchOptimized}
+  
+  &:active {
+    background: ${COLORS.gray[50]};
+  }
 `;
 
 const CardList = styled.div`
@@ -813,10 +911,15 @@ const CardList = styled.div`
 `;
 
 const EstimateCard = styled.div`
-  background: white;
+  background: ${COLORS.white};
   border-radius: 12px;
-  padding: 16px;
+  padding: ${SPACING.base};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  ${MOBILE_STYLES.touchOptimized}
+  
+  &:active {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
 `;
 
 const CardHeader = styled.div`
@@ -827,10 +930,11 @@ const CardHeader = styled.div`
 `;
 
 const CardTitle = styled.h3`
-  font-size: 16px;
+  font-size: ${FONT_SIZES.base};
   font-weight: 600;
-  color: #1f2937;
+  color: ${COLORS.gray[800]};
   margin: 0;
+  ${MOBILE_STYLES.preventZoom}
 `;
 
 const CardStatus = styled.span`
@@ -873,17 +977,21 @@ const CardActions = styled.div`
 `;
 
 const ActionButton = styled.button`
-  padding: ${props => props.size === 'small' ? '6px 12px' : '8px 16px'};
-  background: ${props => props.primary ? '#3b82f6' : '#f3f4f6'};
-  color: ${props => props.primary ? 'white' : '#374151'};
+  padding: ${props => props.size === 'small' ? `${SPACING.sm} ${SPACING.md}` : `${SPACING.md} ${SPACING.base}`};
+  min-height: ${props => props.size === 'small' ? TOUCH_SIZES.small : TOUCH_SIZES.medium};
+  background: ${props => props.primary ? COLORS.primary : COLORS.gray[100]};
+  color: ${props => props.primary ? COLORS.white : COLORS.gray[700]};
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: ${FONT_SIZES.sm};
   font-weight: 500;
+  ${MOBILE_STYLES.touchOptimized}
+  ${MOBILE_STYLES.buttonOptimized}
   
-  &:hover {
-    opacity: 0.8;
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
   }
 `;
 
@@ -893,10 +1001,14 @@ const DateSelector = styled.div`
 
 const DateInput = styled.input`
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 16px;
+  ${MOBILE_STYLES.inputOptimized}
+  border: 1px solid ${COLORS.gray[300]};
+  
+  &:focus {
+    outline: none;
+    border-color: ${COLORS.primary};
+    box-shadow: 0 0 0 2px ${COLORS.primary}20;
+  }
 `;
 
 const TimelineContainer = styled.div`
@@ -1176,22 +1288,25 @@ const PurchaseDetail = styled.div`
 
 const FloatingActionButton = styled.button`
   position: fixed;
-  bottom: 80px;
-  right: 20px;
-  width: 56px;
-  height: 56px;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  right: ${SPACING.lg};
+  width: ${TOUCH_SIZES.large};
+  height: ${TOUCH_SIZES.large};
   border-radius: 50%;
-  background: #3b82f6;
-  color: white;
+  background: ${COLORS.primary};
+  color: ${COLORS.white};
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: ${Z_INDEX.fixed};
+  ${MOBILE_STYLES.touchOptimized}
   
-  &:hover {
-    background: #2563eb;
+  &:active {
+    background: ${COLORS.primaryDark};
+    transform: scale(0.95);
   }
 `;
 
@@ -1202,7 +1317,8 @@ const MenuOverlay = styled.div`
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  z-index: ${Z_INDEX.modalBackdrop};
+  ${MOBILE_STYLES.touchOptimized}
 `;
 
 const MenuContainer = styled.div`
@@ -1245,19 +1361,21 @@ const MenuList = styled.div`
 const MenuItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: ${SPACING.md};
+  padding: ${SPACING.base};
+  min-height: ${TOUCH_SIZES.medium};
   border-radius: 8px;
   cursor: pointer;
+  ${MOBILE_STYLES.touchOptimized}
   
-  &:hover {
-    background: #f3f4f6;
+  &:active {
+    background: ${COLORS.gray[100]};
   }
   
   span {
     flex: 1;
-    font-size: 16px;
-    color: #374151;
+    font-size: ${FONT_SIZES.base};
+    color: ${COLORS.gray[700]};
   }
 `;
 
@@ -1379,30 +1497,32 @@ const Label = styled.label`
 
 const AmountInput = styled.input`
   width: 100%;
-  padding: 12px;
-  border: 2px solid #d1d5db;
+  padding: ${SPACING.base};
+  border: 2px solid ${COLORS.gray[300]};
   border-radius: 8px;
-  font-size: 24px;
+  font-size: ${FONT_SIZES.xl};
   font-weight: 600;
   text-align: center;
-  color: #1f2937;
+  color: ${COLORS.gray[800]};
+  min-height: ${TOUCH_SIZES.large};
+  ${MOBILE_STYLES.preventZoom}
   
   &:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: ${COLORS.primary};
+    box-shadow: 0 0 0 3px ${COLORS.primary}20;
   }
 `;
 
 const TextInput = styled.input`
   width: 100%;
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 16px;
+  ${MOBILE_STYLES.inputOptimized}
+  border: 1px solid ${COLORS.gray[300]};
   
   &:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: ${COLORS.primary};
+    box-shadow: 0 0 0 2px ${COLORS.primary}20;
   }
 `;
 
@@ -1415,23 +1535,23 @@ const ModalActions = styled.div`
 
 const ModalButton = styled.button`
   flex: 1;
-  padding: 12px;
+  ${MOBILE_STYLES.buttonOptimized}
   border: none;
   border-radius: 8px;
-  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   
   ${props => props.primary ? `
-    background: #3b82f6;
-    color: white;
+    background: ${COLORS.primary};
+    color: ${COLORS.white};
   ` : `
-    background: #f3f4f6;
-    color: #374151;
+    background: ${COLORS.gray[100]};
+    color: ${COLORS.gray[700]};
   `}
   
-  &:hover {
+  &:active {
     opacity: 0.9;
+    transform: scale(0.98);
   }
 `;
 

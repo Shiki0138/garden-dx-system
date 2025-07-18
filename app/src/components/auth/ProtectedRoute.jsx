@@ -77,7 +77,9 @@ const BackButton = styled.button`
 
 const ProtectedRoute = ({ children, requireRole = null, requirePermission = null }) => {
   const location = useLocation();
-  const { loading, isAuthenticated, hasRole, user, isConnected } = useSupabaseAuth();
+  const authContext = useSupabaseAuth();
+  const { loading, isAuthenticated: isAuthenticatedFn, hasRole, user, isConnected } = authContext || {};
+  const isAuthenticated = typeof isAuthenticatedFn === 'function' ? isAuthenticatedFn : () => false;
   const { isDemoMode, demoUser } = useDemoMode();
 
   // 本番リリース前はデモモードとして扱う

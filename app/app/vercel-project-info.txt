@@ -1,0 +1,6 @@
+# Vercel Project Configuration
+
+VERCEL_ORG_ID=team_CxYuNDI2LPUdzABJOsjF35QQ
+VERCEL_PROJECT_ID=prj_tbVcf0y8Q6J5DbDYWj8RQgHpvMpV
+
+Set these values as GitHub Secrets

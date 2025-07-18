@@ -5,6 +5,16 @@
 
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import styled, { css } from 'styled-components';
+import { 
+  FONT_SIZES, 
+  TOUCH_SIZES, 
+  SPACING, 
+  MOBILE_STYLES, 
+  COLORS, 
+  Z_INDEX,
+  mediaQuery,
+  BREAKPOINTS 
+} from '../styles/mobileConstants';
 
 // デバイス検出フック
 const useDeviceDetection = () => {
@@ -340,8 +350,6 @@ const ResponsiveGrid = memo(({ children, columns = { mobile: 1, tablet: 2, deskt
 });
 
 // スタイルコンポーネント
-const mobileBreakpoint = '768px';
-const tabletBreakpoint = '1024px';
 
 const MobileButton = styled.button`
   /* 基本スタイル */
@@ -358,24 +366,21 @@ const MobileButton = styled.button`
   outline: none;
   
   /* タッチ最適化 */
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  user-select: none;
+  ${MOBILE_STYLES.touchOptimized}
   
   /* サイズ設定 */
   ${props => {
-    const baseSize = props.$size === 'small' ? '36px' : 
-                    props.$size === 'large' ? '56px' : '48px';
-    const mobileSize = props.$isMobile ? 
-                      (props.$size === 'small' ? '44px' : 
-                       props.$size === 'large' ? '60px' : '52px') : baseSize;
+    const sizeMap = {
+      small: { height: TOUCH_SIZES.small, fontSize: FONT_SIZES.sm, padding: `${SPACING.sm} ${SPACING.base}` },
+      medium: { height: TOUCH_SIZES.medium, fontSize: FONT_SIZES.base, padding: `${SPACING.md} ${SPACING.lg}` },
+      large: { height: TOUCH_SIZES.large, fontSize: FONT_SIZES.md, padding: `${SPACING.base} ${SPACING['2xl']}` }
+    };
+    const size = sizeMap[props.$size] || sizeMap.medium;
     
     return `
-      min-height: ${mobileSize};
-      padding: ${props.$size === 'small' ? '8px 16px' : 
-                 props.$size === 'large' ? '16px 32px' : '12px 24px'};
-      font-size: ${props.$size === 'small' ? '14px' : 
-                   props.$size === 'large' ? '18px' : '16px'};
+      min-height: ${size.height};
+      padding: ${size.padding};
+      font-size: ${size.fontSize};
     `;
   }}
   
@@ -386,22 +391,22 @@ const MobileButton = styled.button`
     switch (props.$variant) {
       case 'secondary':
         return `
-          background: #f8fafc;
-          color: #374151;
-          border: 1px solid #d1d5db;
-          &:hover:not(:disabled) { background: #f1f5f9; }
+          background: ${COLORS.gray[50]};
+          color: ${COLORS.gray[700]};
+          border: 1px solid ${COLORS.gray[300]};
+          &:active:not(:disabled) { background: ${COLORS.gray[100]}; }
         `;
       case 'danger':
         return `
-          background: #dc2626;
-          color: white;
-          &:hover:not(:disabled) { background: #b91c1c; }
+          background: ${COLORS.error};
+          color: ${COLORS.white};
+          &:active:not(:disabled) { background: ${COLORS.errorDark}; }
         `;
       default:
         return `
-          background: #3b82f6;
-          color: white;
-          &:hover:not(:disabled) { background: #2563eb; }
+          background: ${COLORS.primary};
+          color: ${COLORS.white};
+          &:active:not(:disabled) { background: ${COLORS.primaryDark}; }
         `;
     }
   }}
@@ -417,122 +422,117 @@ const MobileButton = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
+  
+  /* フォーカス状態 */
+  &:focus-visible {
+    outline: 2px solid ${COLORS.primary};
+    outline-offset: 2px;
+  }
 `;
 
 const MobileListContainer = styled.div`
   width: 100%;
   ${props => props.$isMobile && `
-    padding: 0 16px;
+    padding: 0 ${SPACING.base};
   `}
 `;
 
 const SearchInput = styled.input`
   width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 16px;
-  margin-bottom: 16px;
-  
-  ${props => props.$isMobile && `
-    font-size: 16px; /* iOSでズームを防ぐ */
-    -webkit-appearance: none;
-  `}
+  ${MOBILE_STYLES.inputOptimized}
+  border: 1px solid ${COLORS.gray[300]};
+  margin-bottom: ${SPACING.base};
   
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    border-color: ${COLORS.primary};
+    box-shadow: 0 0 0 2px ${COLORS.primary}20;
+  }
+  
+  &::placeholder {
+    color: ${COLORS.gray[400]};
   }
 `;
 
 const ListContainer = styled.div`
   ${props => props.$isMobile && `
-    margin: 0 -16px;
+    margin: 0 -${SPACING.base};
   `}
 `;
 
 const ListItem = styled.div`
-  padding: 16px;
-  border-bottom: 1px solid #f3f4f6;
+  padding: ${SPACING.base};
+  border-bottom: 1px solid ${COLORS.gray[100]};
   cursor: pointer;
   transition: background 0.15s ease;
+  ${MOBILE_STYLES.touchOptimized}
   
   ${props => props.$isMobile && `
-    padding: 20px 16px;
-    min-height: 60px;
+    padding: ${SPACING.lg} ${SPACING.base};
+    min-height: ${TOUCH_SIZES.large};
     display: flex;
     align-items: center;
   `}
   
-  &:hover {
-    background: #f9fafb;
+  &:active {
+    background: ${COLORS.gray[50]};
   }
   
-  &:active {
-    background: #f3f4f6;
+  ${mediaQuery.notMobile} {
+    &:hover {
+      background: ${COLORS.gray[50]};
+    }
   }
 `;
 
 const MobileForm = styled.form`
   ${props => props.$isMobile && `
-    padding: 16px;
+    padding: ${SPACING.base};
   `}
 `;
 
 const InputContainer = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: ${SPACING.lg};
   
   ${props => props.$isMobile && `
-    margin-bottom: 24px;
+    margin-bottom: ${SPACING.xl};
   `}
 `;
 
 const InputLabel = styled.label`
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: ${SPACING.sm};
   font-weight: 500;
-  color: #374151;
-  
-  ${props => props.$isMobile && `
-    font-size: 16px;
-  `}
+  color: ${COLORS.gray[700]};
+  font-size: ${FONT_SIZES.base};
 `;
 
 const RequiredMark = styled.span`
-  color: #dc2626;
-  margin-left: 4px;
+  color: ${COLORS.error};
+  margin-left: ${SPACING.xs};
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 12px 16px;
-  border: 1px solid ${props => props.$hasError ? '#dc2626' : '#d1d5db'};
-  border-radius: 8px;
-  font-size: 16px;
+  ${MOBILE_STYLES.inputOptimized}
+  border: 1px solid ${props => props.$hasError ? COLORS.error : COLORS.gray[300]};
   transition: border-color 0.15s ease;
-  
-  ${props => props.$isMobile && `
-    min-height: 48px;
-    -webkit-appearance: none;
-    -webkit-border-radius: 8px;
-  `}
   
   &:focus {
     outline: none;
-    border-color: ${props => props.$hasError ? '#dc2626' : '#3b82f6'};
-    box-shadow: 0 0 0 2px ${props => props.$hasError ? 'rgba(220, 38, 38, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
+    border-color: ${props => props.$hasError ? COLORS.error : COLORS.primary};
+    box-shadow: 0 0 0 2px ${props => props.$hasError ? `${COLORS.error}20` : `${COLORS.primary}20`};
+  }
+  
+  &::placeholder {
+    color: ${COLORS.gray[400]};
   }
 `;
 
 const ErrorMessage = styled.div`
-  margin-top: 8px;
-  color: #dc2626;
-  font-size: 14px;
-  
-  ${props => props.$isMobile && `
-    font-size: 15px;
-  `}
+  margin-top: ${SPACING.sm};
+  color: ${COLORS.error};
+  font-size: ${FONT_SIZES.sm};
 `;
 
 const MobileNav = styled.nav`
@@ -540,12 +540,13 @@ const MobileNav = styled.nav`
   bottom: 0;
   left: 0;
   right: 0;
-  background: white;
-  border-top: 1px solid #e5e7eb;
+  background: ${COLORS.white};
+  border-top: 1px solid ${COLORS.gray[200]};
   display: flex;
-  padding: 8px 0;
-  z-index: 1000;
-  safe-area-inset-bottom: env(safe-area-inset-bottom);
+  padding: ${SPACING.sm} 0;
+  padding-bottom: max(${SPACING.sm}, env(safe-area-inset-bottom));
+  z-index: ${Z_INDEX.sticky};
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
 `;
 
 const NavItem = styled.button`
@@ -553,22 +554,28 @@ const NavItem = styled.button`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px 4px;
+  padding: ${SPACING.sm} ${SPACING.xs};
+  min-height: ${TOUCH_SIZES.medium};
   border: none;
   background: none;
   cursor: pointer;
   transition: color 0.15s ease;
+  ${MOBILE_STYLES.touchOptimized}
   
-  color: ${props => props.$active ? '#3b82f6' : '#6b7280'};
+  color: ${props => props.$active ? COLORS.primary : COLORS.gray[500]};
+  
+  &:active {
+    background: ${COLORS.gray[50]};
+  }
 `;
 
 const NavIcon = styled.div`
-  font-size: 20px;
-  margin-bottom: 4px;
+  font-size: ${FONT_SIZES.lg};
+  margin-bottom: ${SPACING.xs};
 `;
 
 const NavLabel = styled.span`
-  font-size: 11px;
+  font-size: ${FONT_SIZES.xs};
   font-weight: 500;
 `;
 
@@ -587,8 +594,8 @@ const PullRefreshIndicator = styled.div`
 `;
 
 const PullRefreshIcon = styled.div`
-  font-size: 24px;
-  color: #6b7280;
+  font-size: ${FONT_SIZES.xl};
+  color: ${COLORS.gray[500]};
   animation: ${props => props.$spinning ? 'spin 1s linear infinite' : 'none'};
   
   @keyframes spin {
@@ -598,18 +605,18 @@ const PullRefreshIcon = styled.div`
 `;
 
 const PullRefreshText = styled.div`
-  margin-top: 8px;
-  font-size: 14px;
-  color: #6b7280;
+  margin-top: ${SPACING.sm};
+  font-size: ${FONT_SIZES.sm};
+  color: ${COLORS.gray[500]};
 `;
 
 const GridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(${props => props.$columns}, 1fr);
-  gap: 16px;
+  gap: ${SPACING.base};
   
-  @media (max-width: ${mobileBreakpoint}) {
-    gap: 12px;
+  ${mediaQuery.mobile} {
+    gap: ${SPACING.md};
   }
 `;
 
