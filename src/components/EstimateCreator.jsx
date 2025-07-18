@@ -50,9 +50,11 @@ const MainContent = styled.div`
   display: flex;
   flex: 1;
   overflow: hidden;
+  height: calc(100vh - 200px); /* ヘッダーとツールバーの高さを引いた値 */
 
   @media (max-width: 768px) {
     flex-direction: column;
+    height: auto;
   }
 `;
 
@@ -62,6 +64,7 @@ const LeftPanel = styled.div`
   flex-direction: column;
   padding: 20px;
   overflow: hidden;
+  min-width: 0; /* flexboxのオーバーフロー防止 */
 
   @media (max-width: 768px) {
     padding: 15px;
@@ -70,11 +73,12 @@ const LeftPanel = styled.div`
 `;
 
 const RightPanel = styled.div`
-  width: 400px;
+  width: 350px; /* 400pxから350pxに縮小 */
   background-color: white;
   border-left: 1px solid #dee2e6;
   padding: 20px;
   overflow-y: auto;
+  flex-shrink: 0; /* 縮小を防ぐ */
 
   @media (max-width: 768px) {
     width: 100%;
@@ -172,13 +176,7 @@ const EstimateCreator = ({ estimateId, user }) => {
         total_amount: demoEstimate.total_amount 
       });
 
-      // デモモードでの初期化完了をアクセシビリティで通知
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(`デモモードで見積作成画面を開きました。${user?.name || 'ユーザー'}としてログイン中です。`);
-        utterance.volume = 0.1;
-        utterance.rate = 1.5;
-        window.speechSynthesis.speak(utterance);
-      }
+      // 音声読み上げ機能は削除（ユーザーリクエストによる）
 
       return;
     }
