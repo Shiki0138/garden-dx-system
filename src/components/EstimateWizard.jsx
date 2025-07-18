@@ -29,6 +29,14 @@ import {
   FiInfo,
 } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
+import { 
+  FONT_SIZES, 
+  TOUCH_SIZES, 
+  SPACING, 
+  MOBILE_STYLES, 
+  COLORS, 
+  mediaQuery 
+} from '../styles/mobileConstants';
 
 // アニメーション定義
 const fadeInUp = keyframes`
@@ -62,21 +70,23 @@ const progressAnimation = keyframes`
 const WizardContainer = styled.div`
   min-height: 100vh;
   background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 50%, #e8f5e8 100%);
-  padding: 20px;
+  padding: ${SPACING.lg};
   animation: ${fadeInUp} 0.8s ease-out;
+  ${MOBILE_STYLES.safeArea}
 
-  @media (max-width: 768px) {
-    padding: 10px;
+  ${mediaQuery.mobile} {
+    padding: ${SPACING.base};
+    padding-top: max(${SPACING.base}, env(safe-area-inset-top));
   }
 `;
 
 const WizardHeader = styled.div`
   max-width: 1200px;
-  margin: 0 auto 30px auto;
+  margin: 0 auto ${SPACING['2xl']} auto;
   background: linear-gradient(135deg, #2d5a2d 0%, #4a7c4a 100%);
   border-radius: 16px;
-  padding: 30px;
-  color: white;
+  padding: ${SPACING['2xl']};
+  color: ${COLORS.white};
   box-shadow: 0 10px 30px rgba(45, 90, 45, 0.3);
   position: relative;
   overflow: hidden;
@@ -84,60 +94,75 @@ const WizardHeader = styled.div`
   &::before {
     content: '🌿';
     position: absolute;
-    top: 20px;
-    right: 30px;
+    top: ${SPACING.lg};
+    right: ${SPACING['2xl']};
     font-size: 48px;
     opacity: 0.3;
   }
 
-  @media (max-width: 768px) {
-    padding: 20px;
-    margin-bottom: 20px;
+  ${mediaQuery.mobile} {
+    padding: ${SPACING.lg};
+    margin-bottom: ${SPACING.lg};
+    
+    &::before {
+      font-size: 36px;
+      right: ${SPACING.lg};
+    }
   }
 `;
 
 const WizardTitle = styled.h1`
-  margin: 0 0 15px 0;
-  font-size: 32px;
+  margin: 0 0 ${SPACING.base} 0;
+  font-size: ${FONT_SIZES['3xl']};
+  ${MOBILE_STYLES.preventZoom}
+  
+  ${mediaQuery.mobile} {
+    font-size: ${FONT_SIZES['2xl']};
+  }
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: ${SPACING.base};
 
-  @media (max-width: 768px) {
-    font-size: 24px;
-    gap: 10px;
+  ${mediaQuery.mobile} {
+    gap: ${SPACING.sm};
   }
 `;
 
 const WizardSubtitle = styled.p`
   margin: 0;
-  font-size: 18px;
+  font-size: ${FONT_SIZES.md};
   opacity: 0.9;
+  ${MOBILE_STYLES.preventZoom}
 
-  @media (max-width: 768px) {
-    font-size: 16px;
+  ${mediaQuery.mobile} {
+    font-size: ${FONT_SIZES.base};
   }
 `;
 
 const ProgressContainer = styled.div`
   max-width: 1200px;
-  margin: 0 auto 40px auto;
-  background: white;
+  margin: 0 auto ${SPACING['3xl']} auto;
+  background: ${COLORS.white};
   border-radius: 12px;
-  padding: 25px;
+  padding: ${SPACING.xl};
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  
+  ${mediaQuery.mobile} {
+    padding: ${SPACING.base};
+    margin-bottom: ${SPACING.xl};
+  }
 `;
 
 const StepsIndicator = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: ${SPACING.lg};
   position: relative;
 
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     flex-direction: column;
-    gap: 15px;
+    gap: ${SPACING.base};
   }
 `;
 
@@ -148,48 +173,55 @@ const StepItem = styled.div`
   flex: 1;
   position: relative;
   z-index: 2;
+  ${MOBILE_STYLES.touchOptimized}
 
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     flex-direction: row;
     justify-content: flex-start;
     text-align: left;
+    min-height: ${TOUCH_SIZES.medium};
+    padding: ${SPACING.sm};
   }
 `;
 
 const StepNumber = styled.div`
-  width: 50px;
-  height: 50px;
+  width: ${TOUCH_SIZES.medium};
+  height: ${TOUCH_SIZES.medium};
   border-radius: 50%;
   background: ${props => {
     if (props.completed) return 'linear-gradient(135deg, #4a7c4a, #2d5a2d)';
     if (props.active) return 'linear-gradient(135deg, #7cb342, #4a7c4a)';
-    return '#e0e0e0';
+    return COLORS.gray[200];
   }};
-  color: ${props => (props.completed || props.active ? 'white' : '#666')};
+  color: ${props => (props.completed || props.active ? COLORS.white : COLORS.gray[600])};
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 16px;
+  font-size: ${FONT_SIZES.base};
   transition: all 0.3s ease;
   box-shadow: ${props =>
     props.completed || props.active ? '0 4px 15px rgba(74, 124, 74, 0.3)' : 'none'};
 
-  @media (max-width: 768px) {
-    margin-right: 15px;
+  ${mediaQuery.mobile} {
+    margin-right: ${SPACING.base};
+    width: ${TOUCH_SIZES.small};
+    height: ${TOUCH_SIZES.small};
   }
 `;
 
 const StepLabel = styled.span`
-  margin-top: 10px;
-  font-size: 14px;
+  margin-top: ${SPACING.sm};
+  font-size: ${FONT_SIZES.sm};
   font-weight: 600;
-  color: ${props => (props.completed || props.active ? '#2d5a2d' : '#666')};
+  color: ${props => (props.completed || props.active ? '#2d5a2d' : COLORS.gray[600])};
   text-align: center;
+  ${MOBILE_STYLES.preventZoom}
 
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     margin-top: 0;
     text-align: left;
+    font-size: ${FONT_SIZES.base};
   }
 `;
 
@@ -199,11 +231,11 @@ const ProgressBar = styled.div`
   left: 0;
   right: 0;
   height: 3px;
-  background: #e0e0e0;
+  background: ${COLORS.gray[200]};
   border-radius: 3px;
   z-index: 1;
 
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     display: none;
   }
 `;
@@ -221,14 +253,14 @@ const ProgressFill = styled.div`
 const WizardContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  background: white;
+  background: ${COLORS.white};
   border-radius: 16px;
-  padding: 40px;
+  padding: ${SPACING['3xl']};
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   animation: ${slideInFromRight} 0.6s ease-out;
 
-  @media (max-width: 768px) {
-    padding: 25px;
+  ${mediaQuery.mobile} {
+    padding: ${SPACING.lg};
     border-radius: 12px;
   }
 `;
@@ -236,34 +268,35 @@ const WizardContent = styled.div`
 const StepContent = styled.div`
   min-height: 400px;
 
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     min-height: 300px;
   }
 `;
 
 const SectionTitle = styled.h2`
   color: #2d5a2d;
-  font-size: 24px;
-  margin-bottom: 25px;
+  font-size: ${FONT_SIZES.xl};
+  margin-bottom: ${SPACING.xl};
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: ${SPACING.md};
+  ${MOBILE_STYLES.preventZoom}
 
-  @media (max-width: 768px) {
-    font-size: 20px;
-    margin-bottom: 20px;
+  ${mediaQuery.mobile} {
+    font-size: ${FONT_SIZES.lg};
+    margin-bottom: ${SPACING.lg};
   }
 `;
 
 const FormGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 25px;
-  margin-bottom: 30px;
+  gap: ${SPACING.xl};
+  margin-bottom: ${SPACING['2xl']};
 
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: ${SPACING.lg};
   }
 `;
 
@@ -275,25 +308,24 @@ const FormGroup = styled.div`
 const Label = styled.label`
   font-weight: 600;
   color: #2d5a2d;
-  margin-bottom: 8px;
-  font-size: 14px;
+  margin-bottom: ${SPACING.sm};
+  font-size: ${FONT_SIZES.base};
+  ${MOBILE_STYLES.preventZoom}
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: ${SPACING.sm};
 `;
 
 const Input = styled.input`
-  padding: 14px 16px;
-  border: 2px solid #e1e8ed;
-  border-radius: 10px;
-  font-size: 16px;
-  background: #fafafa;
+  ${MOBILE_STYLES.inputOptimized}
+  border: 2px solid ${COLORS.gray[200]};
+  background: ${COLORS.gray[50]};
   transition: all 0.3s ease;
 
   &:focus {
     outline: none;
     border-color: #4a7c4a;
-    background: white;
+    background: ${COLORS.white};
     box-shadow: 0 0 0 3px rgba(74, 124, 74, 0.1);
     transform: translateY(-1px);
   }
@@ -303,17 +335,15 @@ const Input = styled.input`
   }
 
   &.error {
-    border-color: #e74c3c;
-    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+    border-color: ${COLORS.error};
+    box-shadow: 0 0 0 3px ${COLORS.error}20;
   }
 `;
 
 const TextArea = styled.textarea`
-  padding: 14px 16px;
-  border: 2px solid #e1e8ed;
-  border-radius: 10px;
-  font-size: 16px;
-  background: #fafafa;
+  ${MOBILE_STYLES.inputOptimized}
+  border: 2px solid ${COLORS.gray[200]};
+  background: ${COLORS.gray[50]};
   min-height: 120px;
   resize: vertical;
   font-family: inherit;
@@ -322,24 +352,23 @@ const TextArea = styled.textarea`
   &:focus {
     outline: none;
     border-color: #4a7c4a;
-    background: white;
+    background: ${COLORS.white};
     box-shadow: 0 0 0 3px rgba(74, 124, 74, 0.1);
   }
 `;
 
 const Select = styled.select`
-  padding: 14px 16px;
-  border: 2px solid #e1e8ed;
-  border-radius: 10px;
-  font-size: 16px;
-  background: #fafafa;
+  ${MOBILE_STYLES.inputOptimized}
+  border: 2px solid ${COLORS.gray[200]};
+  background: ${COLORS.gray[50]};
   transition: all 0.3s ease;
   cursor: pointer;
+  ${MOBILE_STYLES.touchOptimized}
 
   &:focus {
     outline: none;
     border-color: #4a7c4a;
-    background: white;
+    background: ${COLORS.white};
     box-shadow: 0 0 0 3px rgba(74, 124, 74, 0.1);
   }
 `;
@@ -348,56 +377,57 @@ const ItemsContainer = styled.div`
   background: #f8fdf8;
   border: 2px solid #e8f5e8;
   border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 25px;
+  padding: ${SPACING.xl};
+  margin-bottom: ${SPACING.xl};
+  
+  ${mediaQuery.mobile} {
+    padding: ${SPACING.base};
+  }
 `;
 
 const ItemRow = styled.div`
   display: grid;
   grid-template-columns: 2fr 1fr 80px 120px 120px 140px 60px;
-  gap: 15px;
+  gap: ${SPACING.base};
   align-items: center;
-  padding: 15px;
-  background: white;
+  padding: ${SPACING.base};
+  background: ${COLORS.white};
   border-radius: 8px;
-  margin-bottom: 15px;
+  margin-bottom: ${SPACING.base};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     grid-template-columns: 1fr;
-    gap: 15px;
-    padding: 20px;
+    gap: ${SPACING.base};
+    padding: ${SPACING.lg};
   }
 `;
 
 const ItemInput = styled(Input)`
   margin: 0;
-  padding: 12px 14px;
-  font-size: 16px;
-  min-height: 44px;
-  touch-action: manipulation;
+  min-height: ${TOUCH_SIZES.small};
+  ${MOBILE_STYLES.touchOptimized}
 
-  @media (max-width: 768px) {
-    padding: 16px 18px;
-    font-size: 18px;
-    min-height: 48px;
+  ${mediaQuery.mobile} {
+    min-height: ${TOUCH_SIZES.medium};
   }
 `;
 
 const AddItemButton = styled.button`
   background: linear-gradient(135deg, #7cb342, #4a7c4a);
-  color: white;
+  color: ${COLORS.white};
   border: none;
-  padding: 12px 20px;
+  padding: ${SPACING.md} ${SPACING.lg};
   border-radius: 8px;
   font-weight: 600;
+  font-size: ${FONT_SIZES.base};
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: ${SPACING.sm};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 44px;
-  touch-action: manipulation;
+  min-height: ${TOUCH_SIZES.medium};
+  ${MOBILE_STYLES.touchOptimized}
 
   &:hover:not(:disabled) {
     background: linear-gradient(135deg, #689f38, #2d5a2d);
@@ -406,13 +436,13 @@ const AddItemButton = styled.button`
   }
 
   &:active:not(:disabled) {
-    transform: translateY(-1px);
+    transform: translateY(-1px) scale(0.98);
     box-shadow: 0 2px 8px rgba(74, 124, 74, 0.3);
   }
 
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.25);
+  &:focus-visible {
+    outline: 2px solid #4a7c4a;
+    outline-offset: 2px;
   }
 
   &:disabled {
@@ -422,44 +452,42 @@ const AddItemButton = styled.button`
     box-shadow: none;
   }
 
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     width: 100%;
     justify-content: center;
-    padding: 16px 20px;
-    min-height: 52px;
-    font-size: 16px;
+    min-height: ${TOUCH_SIZES.large};
   }
 `;
 
 const RemoveButton = styled.button`
-  background: #ff6b6b;
-  color: white;
+  background: ${COLORS.error};
+  color: ${COLORS.white};
   border: none;
-  padding: 8px;
+  padding: ${SPACING.sm};
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 32px;
-  min-height: 32px;
-  touch-action: manipulation;
+  min-width: ${TOUCH_SIZES.small};
+  min-height: ${TOUCH_SIZES.small};
+  ${MOBILE_STYLES.touchOptimized}
 
   &:hover:not(:disabled) {
-    background: #e55555;
+    background: ${COLORS.errorDark};
     transform: scale(1.1);
     box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
   }
 
   &:active:not(:disabled) {
-    transform: scale(1.05);
+    transform: scale(0.95);
     box-shadow: 0 1px 4px rgba(255, 107, 107, 0.3);
   }
 
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.25);
+  &:focus-visible {
+    outline: 2px solid ${COLORS.error};
+    outline-offset: 2px;
   }
 
   &:disabled {
@@ -704,11 +732,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
     },
   ];
 
-  // 初期データ読み込み
-  useEffect(() => {
-    loadInitialData();
-  }, [estimateId, loadInitialData]);
-
+  // 初期データ読み込み関数
   const loadInitialData = useCallback(async () => {
     try {
       // 単価マスタデータ取得
@@ -742,6 +766,11 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
       console.error('初期データの読み込みに失敗:', error);
     }
   }, [estimateId]);
+
+  // 初期データ読み込み
+  useEffect(() => {
+    loadInitialData();
+  }, [estimateId, loadInitialData]);
 
   // リアルタイム金額計算
   const calculatedAmounts = useMemo(() => {

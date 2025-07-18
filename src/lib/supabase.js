@@ -4,10 +4,16 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_CONFIG, PROJECT_ID } from '../config/supabase.config';
 
 // 環境変数から設定値を取得
+<<<<<<< HEAD
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+=======
+const supabaseUrl = SUPABASE_CONFIG.url || process.env.REACT_APP_SUPABASE_URL;
+const supabaseAnonKey = SUPABASE_CONFIG.anonKey || process.env.REACT_APP_SUPABASE_ANON_KEY;
+>>>>>>> ba63ce0682cec08ed47488a144ebc219343e1074
 
 // 環境変数デバッグ出力（開発環境のみ）
 // if (process.env.REACT_APP_ENVIRONMENT === 'development') {
@@ -35,7 +41,7 @@ const supabaseOptions = {
     detectSessionInUrl: true,
     // セッション保存設定
     storage: window.localStorage,
-    storageKey: 'garden-dx-auth-token',
+    storageKey: `${PROJECT_ID}-auth-token`,
     // セキュリティ設定
     flowType: 'pkce',
   },

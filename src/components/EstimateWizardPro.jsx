@@ -899,8 +899,8 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
   const isAuthenticated = isDemoMode ? true : authIsAuthenticated;
 
   // パフォーマンス監視（開発環境のみ）
-  const { performanceData, logPerformanceReport, markRenderStart, markRenderEnd } =
-    usePerformanceMonitor('EstimateWizardPro');
+  const performanceMonitor = usePerformanceMonitor('EstimateWizardPro');
+  const { performanceData, logPerformanceReport, markRenderStart, markRenderEnd } = performanceMonitor || {};
 
   // ウィザード状態管理
   const [currentStep, setCurrentStep] = useState(1);
@@ -984,42 +984,81 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
     },
   ];
 
+
   // 初期データ読み込み
   useEffect(() => {
-    loadInitialData();
-    loadSavedEstimates();
-  }, [estimateId, isDemoMode, loadInitialData, loadSavedEstimates]);
-
-  const loadInitialData = useCallback(async () => {
-    try {
-      // localStorage存在チェック（SSR対応）
-      if (typeof window !== 'undefined' && window.localStorage) {
-        // 編集モードの場合は既存データ読み込み（セキュア・Demo対応）
-        if (estimateId) {
-          const storageKey = isDemoMode ? `demo_estimate_${estimateId}` : `estimate_${estimateId}`;
-          const savedData = secureLocalStorage.getItem(storageKey);
-          if (savedData && savedData.formData) {
-            securityLogger.log('estimate_data_loaded', { estimateId, isDemoMode });
-            setFormData(savedData.formData);
-            setItemSelections(savedData.itemSelections || {});
+    const initData = async () => {
+      try {
+        // localStorage存在チェック（SSR対応）
+        if (typeof window !== 'undefined' && window.localStorage) {
+          // 編集モードの場合は既存データ読み込み（セキュア・Demo対応）
+          if (estimateId) {
+            const storageKey = isDemoMode ? `demo_estimate_${estimateId}` : `estimate_${estimateId}`;
+            const savedData = secureLocalStorage.getItem(storageKey);
+            if (savedData && savedData.formData) {
+              securityLogger.log('estimate_data_loaded', { estimateId, isDemoMode });
+              setFormData(savedData.formData);
+              setItemSelections(savedData.itemSelections || {});
+              return; // 既存データがある場合は有効期限設定をスキップ
+            }
           }
         }
-      }
 
-      // 見積有効期限を30日後に設定
-      const validUntil = new Date();
-      validUntil.setDate(validUntil.getDate() + 30);
-      setFormData(prev => ({
-        ...prev,
-        valid_until: validUntil.toISOString().split('T')[0],
-      }));
-    } catch (error) {
-      console.error('初期データの読み込みに失敗:', error);
-      // エラーが発生してもアプリケーションは継続動作する
-    }
+        // 新規作成時のみ見積有効期限を30日後に設定
+        const validUntil = new Date();
+        validUntil.setDate(validUntil.getDate() + 30);
+        setFormData(prev => ({
+          ...prev,
+          valid_until: validUntil.toISOString().split('T')[0],
+        }));
+      } catch (error) {
+        console.error('初期データ読み込みエラー:', error);
+      }
+    };
+
+    const loadSaved = () => {
+      try {
+        // localStorage存在チェック（SSR対応）
+        if (typeof window === 'undefined' || !window.localStorage) {
+          console.warn('localStorage is not available');
+          setSavedEstimates([]);
+          return;
+        }
+
+        const saved = [];
+        const keyPrefix = isDemoMode ? 'demo_estimate_' : 'estimate_';
+
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(keyPrefix)) {
+            try {
+              const data = JSON.parse(localStorage.getItem(key) || '{}');
+              if (data.formData) {
+                saved.push({
+                  id: key.replace(keyPrefix, ''),
+                  ...data.formData,
+                  savedAt: data.savedAt || new Date().toISOString(),
+                  isDemoData: isDemoMode,
+                });
+              }
+            } catch (parseError) {
+              console.error(`Failed to parse saved estimate ${key}:`, parseError);
+              // 破損したデータはスキップして続行
+            }
+          }
+        }
+        setSavedEstimates(saved.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt)));
+      } catch (error) {
+        console.error('保存データの読み込みに失敗:', error);
+        setSavedEstimates([]);
+      }
+    };
+
+    initData();
+    loadSaved();
   }, [estimateId, isDemoMode]);
 
-  // 保存された見積一覧の読み込み（デプロイエラー防止対策適用）
+  // 保存された見積一覧の再読み込み関数
   const loadSavedEstimates = useCallback(() => {
     try {
       // localStorage存在チェック（SSR対応）
@@ -1075,7 +1114,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
       return sum + item.quantity * purchase_price;
     }, 0);
 
-    const total_amount = subtotal + (formData.adjustment_amount || 0);
+    const total_amount = subtotal + (parseFloat(formData.adjustment_amount) || 0);
     const gross_profit = total_amount - total_cost;
     const gross_margin_rate = total_amount > 0 ? (gross_profit / total_amount) * 100 : 0;
 
@@ -1179,13 +1218,20 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
   const handleItemSelection = useCallback((itemId, field, value) => {
     setItemSelections(prev => {
       const currentItem = prev[itemId] || {};
+      
+      // 数値フィールドの場合は適切に変換
+      let processedValue = value;
+      if (field === 'quantity' || field === 'purchase_price' || field === 'markup_rate') {
+        processedValue = parseFloat(value) || 0;
+      }
+      
       const updatedItem = {
         ...currentItem,
-        [field]: value,
+        [field]: processedValue,
         selected:
           field === 'selected'
             ? value
-            : field === 'quantity' && value > 0
+            : field === 'quantity' && processedValue > 0
               ? true
               : currentItem.selected,
       };
@@ -1392,11 +1438,12 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
 
   // 通貨フォーマット
   const formatCurrency = useCallback(amount => {
+    const numericAmount = parseFloat(amount) || 0;
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY',
       minimumFractionDigits: 0,
-    }).format(amount || 0);
+    }).format(numericAmount);
   }, []);
 
   // プログレス計算
@@ -1584,7 +1631,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
         </FormGrid>
       </StepContent>
     ),
-    [formData, errors, handleInputChange]
+    [formData, errors, handleInputChange, savedEstimates, formatCurrency, loadSavedEstimate]
   );
 
   // ステップ2: 要望詳細（useMemoでパフォーマンス最適化）
@@ -1896,7 +1943,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
         )}
       </StepContent>
     ),
-    [itemSelections, handleItemSelection, calculatedAmounts]
+    [itemSelections, handleItemSelection, calculatedAmounts, formatCurrency]
   );
 
   // ステップ4: 金額確認（useMemoでパフォーマンス最適化）
@@ -2084,10 +2131,10 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
       </ProgressContainer>
 
       <WizardContent>
-        {currentStep === 1 && renderStep1()}
-        {currentStep === 2 && renderStep2()}
-        {currentStep === 3 && renderStep3()}
-        {currentStep === 4 && renderStep4()}
+        {currentStep === 1 && renderStep1}
+        {currentStep === 2 && renderStep2}
+        {currentStep === 3 && renderStep3}
+        {currentStep === 4 && renderStep4}
 
         <NavigationButtons>
           <div>

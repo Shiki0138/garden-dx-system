@@ -17,6 +17,7 @@ import { log } from './utils/logger';
 import { initNotificationSystem } from './utils/notifications';
 import { initMonitoring } from './utils/monitoring';
 import DebugInfo from './components/DebugInfo';
+import { initAuthDebug } from './utils/debugAuth';
 
 // アプリケーションコンテンツ
 const AppContent = () => {
@@ -40,6 +41,9 @@ const AppContent = () => {
 
   // システム初期化（通知、監視、環境変数チェック）
   useEffect(() => {
+    // 認証デバッグ情報の出力
+    initAuthDebug();
+    
     // 通知システムの初期化
     initNotificationSystem();
 
@@ -127,15 +131,13 @@ const AppContent = () => {
 // メインアプリコンポーネント
 function App() {
   return (
-    <ErrorBoundary>
-      <DemoModeProvider>
-        <SupabaseAuthProvider>
-          <AuthProvider>
-            <AppContent />
-          </AuthProvider>
-        </SupabaseAuthProvider>
-      </DemoModeProvider>
-    </ErrorBoundary>
+    <DemoModeProvider>
+      <SupabaseAuthProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </SupabaseAuthProvider>
+    </DemoModeProvider>
   );
 }
 

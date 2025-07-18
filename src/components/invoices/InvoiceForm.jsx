@@ -11,6 +11,14 @@ import {
 import { log } from '../../utils/logger';
 import { showError, showSuccess, showWarning, showConfirmDialog } from '../../utils/notifications';
 import { useErrorHandler, withErrorHandling } from '../../utils/errorHandler';
+import { 
+  FONT_SIZES, 
+  TOUCH_SIZES, 
+  SPACING, 
+  MOBILE_STYLES, 
+  COLORS, 
+  mediaQuery 
+} from '../../styles/mobileConstants';
 
 // アニメーション定義（UX向上）
 const fadeInUp = keyframes`
@@ -42,14 +50,16 @@ const pulse = keyframes`
 `;
 
 const Container = styled.div`
-  padding: 20px;
+  padding: ${SPACING.lg};
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
   animation: ${fadeInUp} 0.6s ease-out;
+  ${MOBILE_STYLES.safeArea}
 
   /* レスポンシブ対応 */
-  @media (max-width: 768px) {
-    padding: 10px;
+  ${mediaQuery.mobile} {
+    padding: ${SPACING.base};
+    padding-top: max(${SPACING.base}, env(safe-area-inset-top));
   }
 
   /* アクセシビリティ: 動きを制限したユーザー向け */
@@ -62,9 +72,9 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  padding: 20px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  margin-bottom: ${SPACING['2xl']};
+  padding: ${SPACING.lg};
+  background: linear-gradient(135deg, ${COLORS.white} 0%, ${COLORS.gray[50]} 100%);
   border-radius: 12px;
   box-shadow:
     0 4px 6px rgba(0, 0, 0, 0.1),
@@ -73,10 +83,10 @@ const Header = styled.div`
   animation: ${slideIn} 0.5s ease-out;
 
   /* レスポンシブ対応 */
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     flex-direction: column;
-    gap: 15px;
-    padding: 15px;
+    gap: ${SPACING.base};
+    padding: ${SPACING.base};
   }
 
   /* ホバー効果 */
@@ -89,96 +99,93 @@ const Header = styled.div`
 `;
 
 const Title = styled.h1`
-  color: #2c3e50;
+  color: ${COLORS.gray[800]};
   margin: 0;
-  font-size: 24px;
+  font-size: ${FONT_SIZES['2xl']};
   font-weight: 600;
+  ${MOBILE_STYLES.preventZoom}
+  
+  ${mediaQuery.mobile} {
+    font-size: ${FONT_SIZES.xl};
+  }
 `;
 
 const BackButton = styled.button`
-  background: #95a5a6;
-  color: white;
+  background: ${COLORS.gray[500]};
+  color: ${COLORS.white};
+  min-height: ${TOUCH_SIZES.medium};
+  min-width: ${TOUCH_SIZES.medium};
+  padding: ${SPACING.md} ${SPACING.lg};
+  ${MOBILE_STYLES.touchOptimized}
+  ${MOBILE_STYLES.buttonOptimized}
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-right: 15px;
-  font-size: 14px;
+  margin-right: ${SPACING.base};
   font-weight: 600;
   transition: all 0.3s ease;
-  min-height: 44px; /* タッチ操作のための最小サイズ */
 
-  &:hover {
-    background: #7f8c8d;
-    transform: translateY(-1px);
+  &:active {
+    background: ${COLORS.gray[600]};
+    transform: scale(0.98);
   }
 
   /* レスポンシブ対応 */
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     width: 100%;
     margin-right: 0;
-    margin-bottom: 10px;
-    padding: 12px 20px;
-    font-size: 16px;
+    margin-bottom: ${SPACING.sm};
   }
 `;
 
 const SaveButton = styled.button`
-  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-  color: white;
+  background: linear-gradient(135deg, ${COLORS.success} 0%, ${COLORS.successDark} 100%);
+  color: ${COLORS.white};
   border: none;
-  padding: 12px 24px;
+  ${MOBILE_STYLES.buttonOptimized}
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  font-size: 14px;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(39, 174, 96, 0.3);
+  ${MOBILE_STYLES.touchOptimized}
 
   /* フォーカス状態（アクセシビリティ）*/
-  &:focus {
-    outline: 3px solid #a7f3d0;
+  &:focus-visible {
+    outline: 2px solid ${COLORS.success};
     outline-offset: 2px;
-  }
-
-  /* ホバー状態 */
-  &:hover {
-    background: linear-gradient(135deg, #219a52 0%, #27ae60 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.4);
   }
 
   /* アクティブ状態 */
   &:active {
-    transform: translateY(0);
+    transform: scale(0.98);
     animation: ${pulse} 0.2s ease;
   }
 
   /* 無効状態 */
   &:disabled {
-    background: #bdc3c7;
+    background: ${COLORS.gray[400]};
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
   }
 
   /* レスポンシブ対応 */
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     width: 100%;
-    padding: 14px 24px;
-    font-size: 16px;
+    min-height: ${TOUCH_SIZES.large};
   }
 `;
 
 const FormSection = styled.div`
-  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  background: linear-gradient(135deg, ${COLORS.white} 0%, ${COLORS.gray[50]} 100%);
   border-radius: 12px;
   box-shadow:
     0 4px 6px rgba(0, 0, 0, 0.07),
     0 1px 3px rgba(0, 0, 0, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  margin-bottom: 20px;
-  padding: 24px;
+  margin-bottom: ${SPACING.lg};
+  padding: ${SPACING.xl};
   animation: ${fadeInUp} 0.6s ease-out;
   transition: all 0.3s ease;
 
@@ -191,9 +198,9 @@ const FormSection = styled.div`
   }
 
   /* レスポンシブ対応 */
-  @media (max-width: 768px) {
-    padding: 16px;
-    margin-bottom: 16px;
+  ${mediaQuery.mobile} {
+    padding: ${SPACING.base};
+    margin-bottom: ${SPACING.base};
   }
 
   /* 動きを制限したユーザー向け */
@@ -206,23 +213,24 @@ const FormSection = styled.div`
 `;
 
 const SectionTitle = styled.h2`
-  color: #2c3e50;
-  font-size: 18px;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #3498db;
-  padding-bottom: 10px;
+  color: ${COLORS.gray[800]};
+  font-size: ${FONT_SIZES.md};
+  margin-bottom: ${SPACING.lg};
+  border-bottom: 2px solid ${COLORS.primary};
+  padding-bottom: ${SPACING.sm};
+  ${MOBILE_STYLES.preventZoom}
 `;
 
 const FormGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: ${SPACING.lg};
+  margin-bottom: ${SPACING.lg};
 
   /* レスポンシブ対応 */
-  @media (max-width: 768px) {
+  ${mediaQuery.mobile} {
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: ${SPACING.base};
   }
 `;
 
@@ -233,49 +241,47 @@ const FormGroup = styled.div`
 
 const Label = styled.label`
   font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 5px;
-  font-size: 14px;
+  color: ${COLORS.gray[800]};
+  margin-bottom: ${SPACING.xs};
+  font-size: ${FONT_SIZES.base};
+  ${MOBILE_STYLES.preventZoom}
 `;
 
 const Input = styled.input`
-  padding: 12px 16px;
-  border: 2px solid #e1e8ed;
-  border-radius: 8px;
-  font-size: 14px;
-  background: #ffffff;
+  ${MOBILE_STYLES.inputOptimized}
+  border: 2px solid ${COLORS.gray[300]};
+  background: ${COLORS.white};
   transition: all 0.3s ease;
 
   /* フォーカス状態（アクセシビリティ強化）*/
   &:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
-    background: #fafbfc;
-    transform: scale(1.02);
+    border-color: ${COLORS.primary};
+    box-shadow: 0 0 0 3px ${COLORS.primary}20;
+    background: ${COLORS.gray[50]};
   }
 
   /* ホバー状態 */
   &:hover {
-    border-color: #bdc3c7;
+    border-color: ${COLORS.gray[400]};
   }
 
   /* エラー状態 */
   &.error {
-    border-color: #e74c3c;
-    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+    border-color: ${COLORS.error};
+    box-shadow: 0 0 0 3px ${COLORS.error}20;
   }
 
   /* 無効状態 */
   &:disabled {
-    background: #f8f9fa;
-    color: #6c757d;
+    background: ${COLORS.gray[100]};
+    color: ${COLORS.gray[500]};
     cursor: not-allowed;
   }
 
   /* 必須フィールド */
   &[required] {
-    border-left: 4px solid #f39c12;
+    border-left: 4px solid ${COLORS.warning};
   }
 
   /* レスポンシブ対応 */
@@ -540,16 +546,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
     };
   }, [items]);
 
-  useEffect(() => {
-    // TODO: 顧客・プロジェクト・見積データの取得
-    loadInitialData();
-  }, [invoiceId, estimateId]);
-
-  // 計算値の更新（最適化）
-  useEffect(() => {
-    setTotals(calculatedTotals);
-  }, [calculatedTotals]);
-
+  // 初期データ読み込み関数
   const loadInitialData = useCallback(async () => {
     try {
       // 仮データ
@@ -581,6 +578,16 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
       handleError(error, { context: 'loadInitialData' });
     }
   }, [estimateId, invoiceId]);
+
+  useEffect(() => {
+    // TODO: 顧客・プロジェクト・見積データの取得
+    loadInitialData();
+  }, [invoiceId, estimateId, loadInitialData]);
+
+  // 計算値の更新（最適化）
+  useEffect(() => {
+    setTotals(calculatedTotals);
+  }, [calculatedTotals]);
 
   const generateInvoiceNumber = () => {
     const date = new Date();
