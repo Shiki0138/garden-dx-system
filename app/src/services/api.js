@@ -229,9 +229,7 @@ export const estimateApi = {
     if (!estimateId || !operation) {
       throw new Error('見積IDまたは操作データが指定されていません');
     }
-    return apiWrapper(() =>
-      apiClient.post(`/api/estimates/${estimateId}/items/bulk`, operation)
-    );
+    return apiWrapper(() => apiClient.post(`/api/estimates/${estimateId}/items/bulk`, operation));
   },
 };
 

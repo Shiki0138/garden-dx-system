@@ -29,8 +29,8 @@ class EnhancedApiClient {
       timeout: API_CONFIG.timeout,
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
+        Accept: 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
       },
       maxRedirects: 5,
       maxContentLength: API_CONFIG.maxContentLength,
@@ -43,10 +43,10 @@ class EnhancedApiClient {
         timeout: API_CONFIG.timeout,
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-        }
+          Accept: 'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
       });
     }
 
@@ -67,7 +67,7 @@ class EnhancedApiClient {
 
         // リクエストID生成（重複防止用）
         config.requestId = this.generateRequestId(config);
-        
+
         // 重複リクエスト防止
         if (this.requestQueue.has(config.requestId)) {
           const controller = new AbortController();
@@ -77,7 +77,7 @@ class EnhancedApiClient {
         }
 
         this.requestQueue.set(config.requestId, config);
-        
+
         return config;
       },
       error => {
@@ -103,7 +103,7 @@ class EnhancedApiClient {
       },
       async error => {
         const { config } = error;
-        
+
         // リクエストキューから削除
         if (config?.requestId) {
           this.requestQueue.delete(config.requestId);
@@ -127,8 +127,9 @@ class EnhancedApiClient {
   // 認証トークン取得
   getAuthToken() {
     try {
-      return localStorage.getItem('garden_auth_token') || 
-             localStorage.getItem('supabase.auth.token');
+      return (
+        localStorage.getItem('garden_auth_token') || localStorage.getItem('supabase.auth.token')
+      );
     } catch (error) {
       log.warn('Failed to get auth token:', error);
       return null;
@@ -145,16 +146,16 @@ class EnhancedApiClient {
   // リトライ判定
   shouldRetry(error) {
     const { response, code } = error;
-    
+
     // ネットワークエラーの場合はリトライ
     if (!response) return true;
-    
+
     // 5xx エラー（サーバーエラー）の場合はリトライ
     if (response.status >= 500) return true;
-    
+
     // レート制限の場合はリトライ
     if (response.status === 429) return true;
-    
+
     return false;
   }
 
@@ -165,12 +166,14 @@ class EnhancedApiClient {
     config._retryCount = (config._retryCount || 0) + 1;
 
     if (config._retryCount <= API_CONFIG.retryAttempts) {
-      log.info(`API Request retry ${config._retryCount}/${API_CONFIG.retryAttempts} for ${config.url}`);
-      
+      log.info(
+        `API Request retry ${config._retryCount}/${API_CONFIG.retryAttempts} for ${config.url}`
+      );
+
       // 指数バックオフでリトライ
       const delay = API_CONFIG.retryDelay * Math.pow(2, config._retryCount - 1);
       await new Promise(resolve => setTimeout(resolve, delay));
-      
+
       return this.fastApiClient(config);
     }
 
@@ -183,7 +186,7 @@ class EnhancedApiClient {
 
     if (response) {
       const errorMessage = this.getErrorMessage(response.status, response.data);
-      
+
       if (response.status >= 500) {
         showError(errorMessage);
       } else if (response.status === 401) {
@@ -200,7 +203,7 @@ class EnhancedApiClient {
         url: response.config?.url,
         method: response.config?.method,
         data: response.data,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } else if (request) {
       const networkErrorMessage = this.getNetworkErrorMessage(message);
@@ -210,7 +213,7 @@ class EnhancedApiClient {
         message,
         url: request.responseURL || 'unknown',
         readyState: request.readyState,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } else {
       showError('予期しないエラーが発生しました。');
@@ -230,11 +233,15 @@ class EnhancedApiClient {
       500: 'サーバーエラーが発生しました。管理者にお問い合わせください。',
       502: 'サービスが一時的に利用できません。しばらく時間をおいてから再度お試しください。',
       503: 'サービスが一時的に利用できません。しばらく時間をおいてから再度お試しください。',
-      504: 'サービスが一時的に利用できません。しばらく時間をおいてから再度お試しください。'
+      504: 'サービスが一時的に利用できません。しばらく時間をおいてから再度お試しください。',
     };
-    
-    return data?.message || data?.detail || defaultMessages[status] || 
-           `予期しないエラーが発生しました（エラーコード: ${status}）`;
+
+    return (
+      data?.message ||
+      data?.detail ||
+      defaultMessages[status] ||
+      `予期しないエラーが発生しました（エラーコード: ${status}）`
+    );
   }
 
   // ネットワークエラーメッセージ統一
@@ -253,11 +260,13 @@ class EnhancedApiClient {
     try {
       localStorage.removeItem('garden_auth_token');
       localStorage.removeItem('supabase.auth.token');
-      
+
       // カスタムイベント発火（React ルーターと連携）
-      window.dispatchEvent(new CustomEvent('auth-error', {
-        detail: { message: 'Authentication failed', timestamp: Date.now() }
-      }));
+      window.dispatchEvent(
+        new CustomEvent('auth-error', {
+          detail: { message: 'Authentication failed', timestamp: Date.now() },
+        })
+      );
     } catch (error) {
       log.error('Auth error handling failed:', error);
     }
@@ -287,7 +296,7 @@ class EnhancedApiClient {
       showSuccessMessage = false,
       successMessage = '処理が完了しました',
       silentError = false,
-      useSupabase = false
+      useSupabase = false,
     } = options;
 
     const loadingKey = `api_${Date.now()}`;
@@ -316,9 +325,8 @@ class EnhancedApiClient {
         success: true,
         data: response.data,
         error: null,
-        response
+        response,
       };
-
     } catch (error) {
       // ローディング終了
       if (showLoading) {
@@ -330,16 +338,19 @@ class EnhancedApiClient {
         url: error.config?.url,
         method: error.config?.method,
         status: error.response?.status,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       return {
         success: false,
         data: fallbackData,
-        error: error.response?.data?.message || error.response?.data?.detail || 
-               error.message || '通信エラーが発生しました',
+        error:
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          error.message ||
+          '通信エラーが発生しました',
         statusCode: error.response?.status,
-        response: error.response
+        response: error.response,
       };
     }
   }
@@ -356,7 +367,7 @@ class EnhancedApiClient {
     return {
       pendingRequests: this.requestQueue.size,
       activeLoadings: this.loadingStates.size,
-      loadingStates: Array.from(this.loadingStates.entries())
+      loadingStates: Array.from(this.loadingStates.entries()),
     };
   }
 }
@@ -367,108 +378,114 @@ const enhancedApiClient = new EnhancedApiClient();
 // エクスポート用API
 export const api = {
   // 基本メソッド
-  get: (url, options = {}) => enhancedApiClient.callApi(
-    client => client.get(url), options
-  ),
-  
-  post: (url, data, options = {}) => enhancedApiClient.callApi(
-    client => client.post(url, data), options
-  ),
-  
-  put: (url, data, options = {}) => enhancedApiClient.callApi(
-    client => client.put(url, data), options
-  ),
-  
-  delete: (url, options = {}) => enhancedApiClient.callApi(
-    client => client.delete(url), options
-  ),
-  
-  patch: (url, data, options = {}) => enhancedApiClient.callApi(
-    client => client.patch(url, data), options
-  ),
+  get: (url, options = {}) => enhancedApiClient.callApi(client => client.get(url), options),
+
+  post: (url, data, options = {}) =>
+    enhancedApiClient.callApi(client => client.post(url, data), options),
+
+  put: (url, data, options = {}) =>
+    enhancedApiClient.callApi(client => client.put(url, data), options),
+
+  delete: (url, options = {}) => enhancedApiClient.callApi(client => client.delete(url), options),
+
+  patch: (url, data, options = {}) =>
+    enhancedApiClient.callApi(client => client.patch(url, data), options),
 
   // ファイルアップロード
-  upload: (url, formData, options = {}) => enhancedApiClient.callApi(
-    client => client.post(url, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 120000, // 2分
-      ...options
-    }), 
-    { showLoading: true, loadingMessage: 'アップロード中...', ...options }
-  ),
+  upload: (url, formData, options = {}) =>
+    enhancedApiClient.callApi(
+      client =>
+        client.post(url, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 120000, // 2分
+          ...options,
+        }),
+      { showLoading: true, loadingMessage: 'アップロード中...', ...options }
+    ),
 
   // ファイルダウンロード
-  download: (url, options = {}) => enhancedApiClient.callApi(
-    client => client.get(url, { 
-      responseType: 'blob',
-      timeout: 120000, // 2分
-      ...options 
-    }),
-    { showLoading: true, loadingMessage: 'ダウンロード中...', ...options }
-  ),
+  download: (url, options = {}) =>
+    enhancedApiClient.callApi(
+      client =>
+        client.get(url, {
+          responseType: 'blob',
+          timeout: 120000, // 2分
+          ...options,
+        }),
+      { showLoading: true, loadingMessage: 'ダウンロード中...', ...options }
+    ),
 
   // ユーティリティ
   cancelAll: () => enhancedApiClient.cancelAllRequests(),
   getStats: () => enhancedApiClient.getStats(),
-  client: enhancedApiClient
+  client: enhancedApiClient,
 };
 
 // 特化API群
 export const estimateApi = {
-  getList: (params = {}) => api.get('/api/estimates', {
-    showLoading: true,
-    loadingMessage: '見積一覧を取得しています...',
-    fallbackData: []
-  }),
+  getList: (params = {}) =>
+    api.get('/api/estimates', {
+      showLoading: true,
+      loadingMessage: '見積一覧を取得しています...',
+      fallbackData: [],
+    }),
 
-  getById: (id) => api.get(`/api/estimates/${id}`, {
-    showLoading: true,
-    loadingMessage: '見積詳細を取得しています...'
-  }),
+  getById: id =>
+    api.get(`/api/estimates/${id}`, {
+      showLoading: true,
+      loadingMessage: '見積詳細を取得しています...',
+    }),
 
-  create: (data) => api.post('/api/estimates', data, {
-    showLoading: true,
-    loadingMessage: '見積を作成しています...',
-    showSuccessMessage: true,
-    successMessage: '見積を正常に作成しました'
-  }),
+  create: data =>
+    api.post('/api/estimates', data, {
+      showLoading: true,
+      loadingMessage: '見積を作成しています...',
+      showSuccessMessage: true,
+      successMessage: '見積を正常に作成しました',
+    }),
 
-  update: (id, data) => api.put(`/api/estimates/${id}`, data, {
-    showLoading: true,
-    loadingMessage: '見積を更新しています...',
-    showSuccessMessage: true,
-    successMessage: '見積を正常に更新しました'
-  }),
+  update: (id, data) =>
+    api.put(`/api/estimates/${id}`, data, {
+      showLoading: true,
+      loadingMessage: '見積を更新しています...',
+      showSuccessMessage: true,
+      successMessage: '見積を正常に更新しました',
+    }),
 
-  delete: (id) => api.delete(`/api/estimates/${id}`, {
-    showLoading: true,
-    loadingMessage: '見積を削除しています...',
-    showSuccessMessage: true,
-    successMessage: '見積を正常に削除しました'
-  }),
+  delete: id =>
+    api.delete(`/api/estimates/${id}`, {
+      showLoading: true,
+      loadingMessage: '見積を削除しています...',
+      showSuccessMessage: true,
+      successMessage: '見積を正常に削除しました',
+    }),
 
-  generatePDF: (id) => api.download(`/api/estimates/${id}/pdf`, {
-    loadingMessage: 'PDF を生成しています...'
-  })
+  generatePDF: id =>
+    api.download(`/api/estimates/${id}/pdf`, {
+      loadingMessage: 'PDF を生成しています...',
+    }),
 };
 
 export const priceMasterApi = {
-  getCategories: () => api.get('/api/price-master/categories', {
-    fallbackData: {},
-    silentError: true
-  }),
+  getCategories: () =>
+    api.get('/api/price-master/categories', {
+      fallbackData: {},
+      silentError: true,
+    }),
 
-  getItems: (params = {}) => api.get('/api/price-master', {
-    showLoading: true,
-    loadingMessage: '単価マスタを取得しています...',
-    fallbackData: []
-  }),
+  getItems: (params = {}) =>
+    api.get('/api/price-master', {
+      showLoading: true,
+      loadingMessage: '単価マスタを取得しています...',
+      fallbackData: [],
+    }),
 
-  create: (data) => api.post('/api/price-master', data, {
-    showLoading: true,
-    showSuccessMessage: true,
-    successMessage: '単価マスタを正常に追加しました'
-  })
+  create: data =>
+    api.post('/api/price-master', data, {
+      showLoading: true,
+      showSuccessMessage: true,
+      successMessage: '単価マスタを正常に追加しました',
+    }),
 };
 
 export default api;

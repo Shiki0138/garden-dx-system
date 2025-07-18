@@ -163,18 +163,20 @@ const EstimateCreator = ({ estimateId, user }) => {
     if (!estimateId || process.env.REACT_APP_DEMO_MODE === 'true') {
       // インポートしたデモデータを使用
       const demoEstimate = getDemoEstimate('demo-est-001');
-      
+
       setEstimate(demoEstimate);
       setItems(demoEstimate.items || []);
-      setProfitability({ 
-        margin_rate: 20, 
+      setProfitability({
+        margin_rate: 20,
         profit_amount: demoEstimate.total_amount * 0.2,
-        total_amount: demoEstimate.total_amount 
+        total_amount: demoEstimate.total_amount,
       });
 
       // デモモードでの初期化完了をアクセシビリティで通知
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(`デモモードで見積作成画面を開きました。${user?.name || 'ユーザー'}としてログイン中です。`);
+        const utterance = new SpeechSynthesisUtterance(
+          `デモモードで見積作成画面を開きました。${user?.name || 'ユーザー'}としてログイン中です。`
+        );
         utterance.volume = 0.1;
         utterance.rate = 1.5;
         window.speechSynthesis.speak(utterance);
@@ -232,7 +234,7 @@ const EstimateCreator = ({ estimateId, user }) => {
     } finally {
       setLoading(false);
     }
-  }, [estimateId]);
+  }, [estimateId, user?.name]);
 
   // 初期読み込み
   useEffect(() => {
@@ -240,7 +242,7 @@ const EstimateCreator = ({ estimateId, user }) => {
   }, [loadEstimate]);
 
   // 見積保存
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!estimate) return;
 
     // デモモード時は実際の保存をスキップ
@@ -273,7 +275,7 @@ const EstimateCreator = ({ estimateId, user }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [estimate]);
 
   // 明細追加
   const handleAddItem = async itemData => {
@@ -436,7 +438,7 @@ const EstimateCreator = ({ estimateId, user }) => {
   };
 
   // PDF出力
-  const handleGeneratePDF = async () => {
+  const handleGeneratePDF = useCallback(async () => {
     if (!estimate) return;
 
     // デモモード時は通知のみ
@@ -464,7 +466,7 @@ const EstimateCreator = ({ estimateId, user }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [estimate]);
 
   // キーボードショートカット対応
   useEffect(() => {
@@ -497,7 +499,7 @@ const EstimateCreator = ({ estimateId, user }) => {
 
     window.addEventListener('keydown', handleKeyboardShortcuts);
     return () => window.removeEventListener('keydown', handleKeyboardShortcuts);
-  }, [isDirty, loading]);
+  }, [isDirty, loading, handleGeneratePDF, handleSave]);
 
   if (!estimate) {
     return (

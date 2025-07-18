@@ -43,7 +43,7 @@ const AppContent = () => {
   useEffect(() => {
     // 認証デバッグ情報の出力
     initAuthDebug();
-    
+
     // 通知システムの初期化
     initNotificationSystem();
 
@@ -67,7 +67,7 @@ const AppContent = () => {
   }, []);
 
   // ログイン処理
-  const handleLogin = (userData) => {
+  const handleLogin = userData => {
     setUser(userData);
     setShowLogin(false);
     log.info('ユーザーログイン:', userData.name, userData.role);
@@ -92,10 +92,10 @@ const AppContent = () => {
         name: 'テストユーザー（オーナー）',
         email: 'demo@garden-dx.example.com',
         role: 'owner',
-        permissions: ['view_profit', 'create_invoice', 'manage_staff', 'view_all_projects']
+        permissions: ['view_profit', 'create_invoice', 'manage_staff', 'view_all_projects'],
       };
       setUser(demoUser);
-      
+
       // 初回アクセス時のみガイドを表示
       const hasSeenGuide = localStorage.getItem('demo-guide-seen');
       if (!hasSeenGuide) {
@@ -119,12 +119,14 @@ const AppContent = () => {
       <div className="App">
         {/* <DebugInfo /> */}
         {isDemoMode && <DemoBanner />}
-        <GardenDXMain />
+        <ErrorBoundary>
+          <GardenDXMain />
+        </ErrorBoundary>
         {showGuide && <DemoGuide onClose={handleCloseGuide} />}
       </div>
     </Router>
   );
-}
+};
 
 // OldNavigationコンポーネントは新しいUIでは使用されていないため削除
 

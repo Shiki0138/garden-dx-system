@@ -412,14 +412,14 @@ const LoginPage = ({ onLogin }) => {
       email: 'owner@garden-dx.example.com',
       password: 'demo2024',
       name: '田中社長',
-      role: 'owner'
+      role: 'owner',
     },
     supervisor: {
-      email: 'supervisor@garden-dx.example.com', 
+      email: 'supervisor@garden-dx.example.com',
       password: 'demo2024',
       name: '佐藤現場監督',
-      role: 'supervisor'
-    }
+      role: 'supervisor',
+    },
   };
 
   // ログイン済みの場合はリダイレクト
@@ -462,13 +462,14 @@ const LoginPage = ({ onLogin }) => {
           const userData = {
             ...creds,
             id: `demo-${selectedRole}-001`,
-            permissions: selectedRole === 'owner' 
-              ? ['view_profit', 'create_invoice', 'manage_staff', 'view_all_projects']
-              : ['create_estimate', 'manage_project', 'view_schedule']
+            permissions:
+              selectedRole === 'owner'
+                ? ['view_profit', 'create_invoice', 'manage_staff', 'view_all_projects']
+                : ['create_estimate', 'manage_project', 'view_schedule'],
           };
-          
+
           await new Promise(resolve => setTimeout(resolve, 1000)); // ロード時間シミュレート
-          
+
           if (onLogin) {
             onLogin(userData);
           } else {
@@ -519,11 +520,12 @@ const LoginPage = ({ onLogin }) => {
     const userData = {
       ...demoCredentials[selectedRole],
       id: `demo-${selectedRole}-001`,
-      permissions: selectedRole === 'owner' 
-        ? ['view_profit', 'create_invoice', 'manage_staff', 'view_all_projects']
-        : ['create_estimate', 'manage_project', 'view_schedule']
+      permissions:
+        selectedRole === 'owner'
+          ? ['view_profit', 'create_invoice', 'manage_staff', 'view_all_projects']
+          : ['create_estimate', 'manage_project', 'view_schedule'],
     };
-    
+
     if (onLogin) {
       onLogin(userData);
     } else {
@@ -539,7 +541,7 @@ const LoginPage = ({ onLogin }) => {
       setEmail(creds.email);
       setPassword(creds.password);
     }
-  }, [selectedRole, isDemoMode]);
+  }, [selectedRole, isDemoMode, demoCredentials]);
 
   // 開発モード用自動ログイン
   const handleDevLogin = () => {
@@ -563,8 +565,23 @@ const LoginPage = ({ onLogin }) => {
         </Logo>
 
         {/* 役割選択セクション */}
-        <div style={{ marginBottom: '20px', padding: '16px', background: 'rgba(26, 71, 42, 0.05)', borderRadius: '8px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1a472a', margin: '0 0 15px 0', textAlign: 'center' }}>
+        <div
+          style={{
+            marginBottom: '20px',
+            padding: '16px',
+            background: 'rgba(26, 71, 42, 0.05)',
+            borderRadius: '8px',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#1a472a',
+              margin: '0 0 15px 0',
+              textAlign: 'center',
+            }}
+          >
             ログイン権限を選択
           </h3>
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -585,7 +602,7 @@ const LoginPage = ({ onLogin }) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px'
+                gap: '8px',
               }}
             >
               <UserCheck size={16} />
@@ -608,7 +625,7 @@ const LoginPage = ({ onLogin }) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px'
+                gap: '8px',
               }}
             >
               <User size={16} />
@@ -711,15 +728,21 @@ const LoginPage = ({ onLogin }) => {
           )}
 
           <Button type="submit" disabled={isLoading || loading}>
-            {(isLoading || loading) && <div style={{ 
-              width: '16px', 
-              height: '16px', 
-              border: '2px solid transparent',
-              borderTop: '2px solid white',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
-            }} />}
-            {(isLoading || loading) ? 'ログイン中...' : (
+            {(isLoading || loading) && (
+              <div
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  border: '2px solid transparent',
+                  borderTop: '2px solid white',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                }}
+              />
+            )}
+            {isLoading || loading ? (
+              'ログイン中...'
+            ) : (
               <>
                 <LogIn size={20} />
                 {mode === 'login' ? 'ログイン' : 'アカウント作成'}

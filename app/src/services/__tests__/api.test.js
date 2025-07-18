@@ -523,7 +523,7 @@ describe('API Service Tests', () => {
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Authorization': `Bearer ${mockToken}`,
+            Authorization: `Bearer ${mockToken}`,
           }),
         })
       );
@@ -532,10 +532,8 @@ describe('API Service Tests', () => {
     test('リクエストタイムアウトの処理', async () => {
       // タイムアウトのシミュレート
       jest.setTimeout(100);
-      
-      fetch.mockImplementation(() => 
-        new Promise(resolve => setTimeout(resolve, 200))
-      );
+
+      fetch.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 200)));
 
       await expect(estimateApi.getEstimate('test-001')).rejects.toThrow();
     });
@@ -618,9 +616,7 @@ describe('API Service Tests', () => {
 
   describe('パフォーマンステスト', () => {
     test('並列リクエストの処理', async () => {
-      const promises = Array.from({ length: 10 }, (_, i) =>
-        estimateApi.getEstimate(`test-${i}`)
-      );
+      const promises = Array.from({ length: 10 }, (_, i) => estimateApi.getEstimate(`test-${i}`));
 
       const results = await Promise.all(promises);
 

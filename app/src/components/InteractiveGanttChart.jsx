@@ -1,6 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
-import { Calendar, Download, Edit3, ChevronUp, ChevronDown, ArrowUpDown, GripVertical } from 'lucide-react';
+import {
+  Calendar,
+  Download,
+  Edit3,
+  ChevronUp,
+  ChevronDown,
+  ArrowUpDown,
+  GripVertical,
+} from 'lucide-react';
 import { generateProcessPDF } from '../utils/processPDFGenerator';
 
 /**
@@ -28,7 +36,7 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
         ...item,
         order: item.order !== undefined ? item.order : index + 1,
         startTime: item.startTime || 'AM',
-        endTime: item.endTime || 'PM'
+        endTime: item.endTime || 'PM',
       }));
       const dataWithDates = calculateScheduleDates(dataWithOrder, startDate);
       setScheduleData(dataWithDates);
@@ -42,7 +50,7 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
         setChartWidth(chartRef.current.offsetWidth);
       }
     };
-    
+
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -56,7 +64,7 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
       const endDate = new Date(currentDate);
       endDate.setDate(endDate.getDate() + item.duration - 1);
       currentDate.setDate(currentDate.getDate() + item.duration);
-      
+
       return {
         ...item,
         id: item.id || index,
@@ -65,7 +73,7 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
         endDate: endDate.toISOString().split('T')[0],
         startDay: Math.ceil((startDate - new Date(baseStartDate)) / (1000 * 60 * 60 * 24)),
         startTime: item.startTime || 'AM',
-        endTime: item.endTime || 'PM'
+        endTime: item.endTime || 'PM',
       };
     });
   };
@@ -74,10 +82,10 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
   const totalDuration = scheduleData.reduce((sum, item) => sum + item.duration, 0);
 
   // ソート処理
-  const handleSort = (type) => {
+  const handleSort = type => {
     setSortOrder(type);
     const sorted = [...scheduleData];
-    
+
     switch (type) {
       case 'name':
         sorted.sort((a, b) => a.name.localeCompare(b.name));
@@ -91,7 +99,7 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
       default:
         return;
     }
-    
+
     setScheduleData(sorted);
   };
 
@@ -126,68 +134,67 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
   const handleRowDrop = (e, targetItem) => {
     e.preventDefault();
     const dragType = e.dataTransfer.getData('dragType');
-    
+
     if (dragType === 'row' && draggedItem && targetItem.id !== draggedItem.id) {
       const newData = [...scheduleData];
       const draggedIndex = newData.findIndex(item => item.id === draggedItem.id);
       const targetIndex = newData.findIndex(item => item.id === targetItem.id);
-      
+
       // 要素を削除して挿入
       const [removed] = newData.splice(draggedIndex, 1);
       newData.splice(targetIndex, 0, removed);
-      
+
       // order番号を更新
       const updatedData = newData.map((item, index) => ({
         ...item,
-        order: index + 1
+        order: index + 1,
       }));
-      
+
       setScheduleData(updatedData);
     }
-    
+
     setDraggedItem(null);
     setDraggedOverItem(null);
   };
 
   // ドラッグオーバー
-  const handleDragOver = (e) => {
+  const handleDragOver = e => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
 
   // ドロップ処理（チャートエリア）
-  const handleChartDrop = (e) => {
+  const handleChartDrop = e => {
     e.preventDefault();
     const dragType = e.dataTransfer.getData('dragType');
-    
-    if (dragType === 'bar' && draggedItem && chartRef.current) {
 
-    const rect = chartRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const dayWidth = chartWidth / totalDuration;
-    const newStartDay = Math.round(x / dayWidth);
-    
-    // 新しい開始日を計算
-    const newStartDate = new Date(startDate);
-    newStartDate.setDate(newStartDate.getDate() + newStartDay);
-    
-    const updatedData = scheduleData.map(item => {
-      if (item.id === draggedItem.id) {
-        const endDate = new Date(newStartDate);
-        endDate.setDate(endDate.getDate() + item.duration - 1);
-        
-        return {
-          ...item,
-          startDate: newStartDate.toISOString().split('T')[0],
-          endDate: endDate.toISOString().split('T')[0],
-          startDay: newStartDay
-        };
-      }
-      return item;
-    });
+    if (dragType === 'bar' && draggedItem && chartRef.current) {
+      const rect = chartRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const dayWidth = chartWidth / totalDuration;
+      const newStartDay = Math.round(x / dayWidth);
+
+      // 新しい開始日を計算
+      const newStartDate = new Date(startDate);
+      newStartDate.setDate(newStartDate.getDate() + newStartDay);
+
+      const updatedData = scheduleData.map(item => {
+        if (item.id === draggedItem.id) {
+          const endDate = new Date(newStartDate);
+          endDate.setDate(endDate.getDate() + item.duration - 1);
+
+          return {
+            ...item,
+            startDate: newStartDate.toISOString().split('T')[0],
+            endDate: endDate.toISOString().split('T')[0],
+            startDay: newStartDay,
+          };
+        }
+        return item;
+      });
       setScheduleData(updatedData);
     }
-    
+
     setDraggedItem(null);
     setDraggedOverItem(null);
   };
@@ -201,50 +208,53 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
   };
 
   // リサイズ処理
-  const handleMouseMove = (e) => {
-    if (!resizeItem || !chartRef.current) return;
+  const handleMouseMove = useCallback(
+    e => {
+      if (!resizeItem || !chartRef.current) return;
 
-    const rect = chartRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const dayWidth = chartWidth / totalDuration;
-    const currentDay = Math.round(x / dayWidth);
+      const rect = chartRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const dayWidth = chartWidth / totalDuration;
+      const currentDay = Math.round(x / dayWidth);
 
-    const updatedData = scheduleData.map(item => {
-      if (item.id === resizeItem.id) {
-        if (resizeType === 'start') {
-          const newStartDay = Math.max(0, currentDay);
-          const newDuration = item.startDay + item.duration - newStartDay;
-          
-          if (newDuration >= 1) {
-            const newStartDate = new Date(startDate);
-            newStartDate.setDate(newStartDate.getDate() + newStartDay);
-            
+      const updatedData = scheduleData.map(item => {
+        if (item.id === resizeItem.id) {
+          if (resizeType === 'start') {
+            const newStartDay = Math.max(0, currentDay);
+            const newDuration = item.startDay + item.duration - newStartDay;
+
+            if (newDuration >= 1) {
+              const newStartDate = new Date(startDate);
+              newStartDate.setDate(newStartDate.getDate() + newStartDay);
+
+              return {
+                ...item,
+                startDate: newStartDate.toISOString().split('T')[0],
+                startDay: newStartDay,
+                duration: newDuration,
+              };
+            }
+          } else if (resizeType === 'end') {
+            const endDay = currentDay;
+            const newDuration = Math.max(1, endDay - item.startDay + 1);
+
+            const endDate = new Date(item.startDate);
+            endDate.setDate(endDate.getDate() + newDuration - 1);
+
             return {
               ...item,
-              startDate: newStartDate.toISOString().split('T')[0],
-              startDay: newStartDay,
-              duration: newDuration
+              duration: newDuration,
+              endDate: endDate.toISOString().split('T')[0],
             };
           }
-        } else if (resizeType === 'end') {
-          const endDay = currentDay;
-          const newDuration = Math.max(1, endDay - item.startDay + 1);
-          
-          const endDate = new Date(item.startDate);
-          endDate.setDate(endDate.getDate() + newDuration - 1);
-          
-          return {
-            ...item,
-            duration: newDuration,
-            endDate: endDate.toISOString().split('T')[0]
-          };
         }
-      }
-      return item;
-    });
+        return item;
+      });
 
-    setScheduleData(updatedData);
-  };
+      setScheduleData(updatedData);
+    },
+    [resizeItem, resizeType, scheduleData, chartWidth, totalDuration, startDate]
+  );
 
   // リサイズ終了
   const handleMouseUp = () => {
@@ -257,37 +267,37 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
     if (resizeItem) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      
+
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [resizeItem, resizeType]);
+  }, [resizeItem, resizeType, handleMouseMove]);
 
   // 並び替え機能の更新
   const updateItemOrder = (itemId, newOrder) => {
     const parsedOrder = parseInt(newOrder, 10);
     if (isNaN(parsedOrder) || parsedOrder < 1) return;
-    
+
     const updatedData = [...scheduleData];
     const itemIndex = updatedData.findIndex(item => item.id === itemId);
-    
+
     if (itemIndex === -1) return;
-    
+
     // 現在のアイテムを削除
     const [movedItem] = updatedData.splice(itemIndex, 1);
-    
+
     // 新しい位置に挿入
     const newIndex = Math.min(parsedOrder - 1, updatedData.length);
     updatedData.splice(newIndex, 0, movedItem);
-    
+
     // order番号を更新
     const reorderedData = updatedData.map((item, index) => ({
       ...item,
-      order: index + 1
+      order: index + 1,
     }));
-    
+
     setScheduleData(reorderedData);
   };
 
@@ -296,7 +306,7 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
     const updatedData = scheduleData.map(item => {
       if (item.id === itemId) {
         const updated = { ...item };
-        
+
         if (field === 'startDate' || field === 'startTime') {
           updated[field] = value;
           // 開始日が変更された場合、終了日も再計算
@@ -305,9 +315,11 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
             const newEndDate = new Date(newStartDate);
             newEndDate.setDate(newEndDate.getDate() + item.duration - 1);
             updated.endDate = newEndDate.toISOString().split('T')[0];
-            
+
             // startDayも更新
-            updated.startDay = Math.ceil((newStartDate - new Date(startDate)) / (1000 * 60 * 60 * 24));
+            updated.startDay = Math.ceil(
+              (newStartDate - new Date(startDate)) / (1000 * 60 * 60 * 24)
+            );
           }
         } else if (field === 'endDate' || field === 'endTime') {
           updated[field] = value;
@@ -319,12 +331,12 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
             updated.duration = Math.max(1, newDuration);
           }
         }
-        
+
         return updated;
       }
       return item;
     });
-    
+
     setScheduleData(updatedData);
   };
 
@@ -343,19 +355,19 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
     const headers = [];
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + totalDuration);
-    
+
     const currentDate = new Date(startDate);
     const endTime = endDate.getTime();
-    
+
     while (currentDate.getTime() <= endTime) {
       headers.push({
         date: new Date(currentDate),
         day: currentDate.getDate(),
-        month: currentDate.getMonth() + 1
+        month: currentDate.getMonth() + 1,
       });
       currentDate.setDate(currentDate.getDate() + 1);
     }
-    
+
     return headers;
   };
 
@@ -371,23 +383,19 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
         <Controls>
           <DateInputWrapper>
             <label>開始日：</label>
-            <input 
-              type="date" 
-              value={startDate} 
-              onChange={(e) => setStartDate(e.target.value)}
-            />
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
           </DateInputWrapper>
-          
+
           <SortDropdown>
             <label>並び替え：</label>
-            <select value={sortOrder} onChange={(e) => handleSort(e.target.value)}>
+            <select value={sortOrder} onChange={e => handleSort(e.target.value)}>
               <option value="default">デフォルト</option>
               <option value="name">作業名順</option>
               <option value="duration">期間順</option>
               <option value="startDate">開始日順</option>
             </select>
           </SortDropdown>
-          
+
           <ActionButton onClick={handlePDFExport}>
             <Download size={16} />
             PDF出力
@@ -402,13 +410,13 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
             <TaskHeaderCell style={{ width: '60%' }}>期間</TaskHeaderCell>
           </TaskHeader>
           {scheduleData.map((item, index) => (
-            <TaskRow 
+            <TaskRow
               key={item.id}
               draggable
-              onDragStart={(e) => handleRowDragStart(e, item)}
-              onDragOver={(e) => handleRowDragOver(e, item)}
+              onDragStart={e => handleRowDragStart(e, item)}
+              onDragOver={e => handleRowDragOver(e, item)}
               onDragLeave={handleRowDragLeave}
-              onDrop={(e) => handleRowDrop(e, item)}
+              onDrop={e => handleRowDrop(e, item)}
               isDragging={draggedItem?.id === item.id}
               isDraggedOver={draggedOverItem?.id === item.id}
             >
@@ -420,8 +428,8 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
                   type="number"
                   min="1"
                   value={item.order || index + 1}
-                  onChange={(e) => updateItemOrder(item.id, e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
+                  onChange={e => updateItemOrder(item.id, e.target.value)}
+                  onClick={e => e.stopPropagation()}
                 />
               </TaskIndex>
               <TaskName>{item.name}</TaskName>
@@ -431,13 +439,13 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
                   <DateInput
                     type="date"
                     value={item.startDate}
-                    onChange={(e) => updateItemDateTime(item.id, 'startDate', e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
+                    onChange={e => updateItemDateTime(item.id, 'startDate', e.target.value)}
+                    onClick={e => e.stopPropagation()}
                   />
                   <TimeSelect
                     value={item.startTime}
-                    onChange={(e) => updateItemDateTime(item.id, 'startTime', e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
+                    onChange={e => updateItemDateTime(item.id, 'startTime', e.target.value)}
+                    onClick={e => e.stopPropagation()}
                   >
                     <option value="AM">午前</option>
                     <option value="PM">午後</option>
@@ -448,13 +456,13 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
                   <DateInput
                     type="date"
                     value={item.endDate}
-                    onChange={(e) => updateItemDateTime(item.id, 'endDate', e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
+                    onChange={e => updateItemDateTime(item.id, 'endDate', e.target.value)}
+                    onClick={e => e.stopPropagation()}
                   />
                   <TimeSelect
                     value={item.endTime}
-                    onChange={(e) => updateItemDateTime(item.id, 'endTime', e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
+                    onChange={e => updateItemDateTime(item.id, 'endTime', e.target.value)}
+                    onClick={e => e.stopPropagation()}
                   >
                     <option value="AM">午前</option>
                     <option value="PM">午後</option>
@@ -475,41 +483,37 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
               </DateCell>
             ))}
           </DateHeader>
-          
-          <ChartArea
-            ref={chartRef}
-            onDragOver={handleDragOver}
-            onDrop={handleChartDrop}
-          >
+
+          <ChartArea ref={chartRef} onDragOver={handleDragOver} onDrop={handleChartDrop}>
             {scheduleData.map((item, index) => {
               const leftPercent = (item.startDay / totalDuration) * 100;
               const widthPercent = (item.duration / totalDuration) * 100;
-              
+
               return (
                 <GanttBar
                   key={item.id}
                   index={index}
                   draggable
-                  onDragStart={(e) => handleBarDragStart(e, item)}
+                  onDragStart={e => handleBarDragStart(e, item)}
                   style={{
                     left: `${leftPercent}%`,
                     width: `${widthPercent}%`,
-                    top: `${index * 56 + 16}px`
+                    top: `${index * 56 + 16}px`,
                   }}
                   category={item.category}
                   isDragging={draggedItem?.id === item.id}
                 >
-                  <ResizeHandle 
+                  <ResizeHandle
                     position="left"
-                    onMouseDown={(e) => handleResizeStart(e, item, 'start')}
+                    onMouseDown={e => handleResizeStart(e, item, 'start')}
                   />
                   <BarContent>
                     <BarLabel>{item.name}</BarLabel>
                     <BarDuration>{item.duration}日</BarDuration>
                   </BarContent>
-                  <ResizeHandle 
+                  <ResizeHandle
                     position="right"
-                    onMouseDown={(e) => handleResizeStart(e, item, 'end')}
+                    onMouseDown={e => handleResizeStart(e, item, 'end')}
                   />
                 </GanttBar>
               );
@@ -519,7 +523,8 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
       </ChartContainer>
 
       <Summary>
-        総工期: {totalDuration}日間 ({startDate} 〜 {scheduleData[scheduleData.length - 1]?.endDate})
+        総工期: {totalDuration}日間 ({startDate} 〜 {scheduleData[scheduleData.length - 1]?.endDate}
+        )
       </Summary>
     </Container>
   );
@@ -559,18 +564,18 @@ const DateInputWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   label {
     font-weight: 600;
     color: #666;
   }
-  
+
   input {
     padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 14px;
-    
+
     &:focus {
       outline: none;
       border-color: #2d5016;
@@ -582,12 +587,12 @@ const SortDropdown = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   label {
     font-weight: 600;
     color: #666;
   }
-  
+
   select {
     padding: 8px 12px;
     border: 1px solid #ddd;
@@ -595,7 +600,7 @@ const SortDropdown = styled.div`
     font-size: 14px;
     background: white;
     cursor: pointer;
-    
+
     &:focus {
       outline: none;
       border-color: #2d5016;
@@ -615,7 +620,7 @@ const ActionButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  
+
   &:hover {
     background: #1e3410;
     transform: translateY(-1px);
@@ -657,13 +662,17 @@ const TaskRow = styled.div`
   cursor: move;
   transition: all 0.2s;
   min-height: 80px;
-  
-  ${props => props.isDragging && `
+
+  ${props =>
+    props.isDragging &&
+    `
     opacity: 0.5;
     background: #f0f0f0;
   `}
-  
-  ${props => props.isDraggedOver && `
+
+  ${props =>
+    props.isDraggedOver &&
+    `
     border-top: 2px solid #2d5016;
   `}
   
@@ -717,7 +726,7 @@ const DateInput = styled.input`
   border-radius: 4px;
   font-size: 12px;
   width: 110px;
-  
+
   &:focus {
     outline: none;
     border-color: #2d5016;
@@ -732,7 +741,7 @@ const TimeSelect = styled.select`
   width: 60px;
   background: white;
   cursor: pointer;
-  
+
   &:focus {
     outline: none;
     border-color: #2d5016;
@@ -796,24 +805,34 @@ const GanttBar = styled.div`
   transition: all 0.15s ease-out;
   user-select: none;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
-  ${props => props.category === '植栽工事' && `
+
+  ${props =>
+    props.category === '植栽工事' &&
+    `
     background: linear-gradient(135deg, #4caf50, #45a049);
   `}
-  
-  ${props => props.category === '土工事' && `
+
+  ${props =>
+    props.category === '土工事' &&
+    `
     background: linear-gradient(135deg, #ff9800, #f57c00);
   `}
   
-  ${props => props.category === '設備工事' && `
+  ${props =>
+    props.category === '設備工事' &&
+    `
     background: linear-gradient(135deg, #2196f3, #1976d2);
   `}
   
-  ${props => props.category === '仕上げ工事' && `
+  ${props =>
+    props.category === '仕上げ工事' &&
+    `
     background: linear-gradient(135deg, #9c27b0, #7b1fa2);
   `}
   
-  ${props => props.isDragging && `
+  ${props =>
+    props.isDragging &&
+    `
     opacity: 0.6;
   `}
   
@@ -831,9 +850,9 @@ const ResizeHandle = styled.div`
   width: 8px;
   cursor: ew-resize;
   background: rgba(255, 255, 255, 0.3);
-  
-  ${props => props.position === 'left' ? 'left: 0;' : 'right: 0;'}
-  
+
+  ${props => (props.position === 'left' ? 'left: 0;' : 'right: 0;')}
+
   &:hover {
     background: rgba(255, 255, 255, 0.5);
   }
@@ -881,11 +900,11 @@ const DragHandle = styled.div`
   margin-right: 8px;
   color: #999;
   cursor: grab;
-  
+
   &:hover {
     color: #666;
   }
-  
+
   &:active {
     cursor: grabbing;
   }
@@ -900,14 +919,14 @@ const OrderInput = styled.input`
   font-size: 12px;
   font-weight: 600;
   color: #2d5016;
-  
+
   &:focus {
     outline: none;
     background: white;
     border: 1px solid #2d5016;
     border-radius: 2px;
   }
-  
+
   &::-webkit-inner-spin-button,
   &::-webkit-outer-spin-button {
     -webkit-appearance: none;

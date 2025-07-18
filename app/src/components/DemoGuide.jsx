@@ -4,18 +4,18 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { 
-  HelpCircle, 
-  Play, 
-  Check, 
-  AlertCircle, 
-  FileText, 
-  Printer, 
-  Users, 
-  BarChart, 
+import {
+  HelpCircle,
+  Play,
+  Check,
+  AlertCircle,
+  FileText,
+  Printer,
+  Users,
+  BarChart,
   X,
   ChevronRight,
-  ChevronDown 
+  ChevronDown,
 } from 'lucide-react';
 
 // 造園業界カラーパレット
@@ -32,7 +32,7 @@ const colors = {
   border: '#e5e7eb',
   text: '#1f2937',
   textLight: '#6b7280',
-  textWhite: '#ffffff'
+  textWhite: '#ffffff',
 };
 
 const GuideContainer = styled.div`
@@ -57,7 +57,7 @@ const GuideModal = styled.div`
   width: 100%;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(26, 71, 42, 0.3);
-  
+
   @media (max-width: 768px) {
     max-width: 95vw;
     max-height: 95vh;
@@ -91,7 +91,7 @@ const CloseButton = styled.button`
   padding: 8px;
   border-radius: 8px;
   transition: background 0.2s ease;
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.2);
   }
@@ -105,7 +105,7 @@ const Content = styled.div`
 
 const Section = styled.div`
   border-bottom: 1px solid ${colors.border};
-  
+
   &:last-child {
     border-bottom: none;
   }
@@ -125,7 +125,7 @@ const SectionHeader = styled.button`
   font-weight: 600;
   color: ${colors.text};
   transition: background 0.2s ease;
-  
+
   &:hover {
     background: rgba(26, 71, 42, 0.05);
   }
@@ -133,7 +133,7 @@ const SectionHeader = styled.button`
 
 const SectionContent = styled.div`
   padding: 0 24px 24px 24px;
-  display: ${props => props.isOpen ? 'block' : 'none'};
+  display: ${props => (props.isOpen ? 'block' : 'none')};
 `;
 
 const StepList = styled.ol`
@@ -149,7 +149,7 @@ const Step = styled.li`
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  
+
   &::before {
     content: counter(step-counter);
     background: ${colors.primary};
@@ -169,21 +169,21 @@ const Step = styled.li`
 
 const StepContent = styled.div`
   flex: 1;
-  
+
   h4 {
     margin: 0 0 8px 0;
     font-size: 16px;
     font-weight: 600;
     color: ${colors.text};
   }
-  
+
   p {
     margin: 0 0 8px 0;
     font-size: 14px;
     line-height: 1.5;
     color: ${colors.textLight};
   }
-  
+
   .highlight {
     background: rgba(26, 71, 42, 0.1);
     padding: 2px 6px;
@@ -205,7 +205,7 @@ const FeatureCard = styled.div`
   border: 1px solid rgba(26, 71, 42, 0.1);
   border-radius: 8px;
   padding: 16px;
-  
+
   h5 {
     margin: 0 0 8px 0;
     font-size: 14px;
@@ -215,7 +215,7 @@ const FeatureCard = styled.div`
     align-items: center;
     gap: 8px;
   }
-  
+
   p {
     margin: 0;
     font-size: 13px;
@@ -230,12 +230,12 @@ const Important = styled.div`
   border-radius: 8px;
   padding: 16px;
   margin: 16px 0;
-  
+
   .icon {
     color: ${colors.warning};
     margin-right: 8px;
   }
-  
+
   h4 {
     margin: 0 0 8px 0;
     font-size: 16px;
@@ -244,7 +244,7 @@ const Important = styled.div`
     display: flex;
     align-items: center;
   }
-  
+
   p {
     margin: 0;
     font-size: 14px;
@@ -258,13 +258,13 @@ const DemoGuide = ({ onClose }) => {
     overview: true,
     features: false,
     testing: false,
-    feedback: false
+    feedback: false,
   });
 
-  const toggleSection = (section) => {
+  const toggleSection = section => {
     setOpenSections(prev => ({
       ...prev,
-      [section]: !prev[section]
+      [section]: !prev[section],
     }));
   };
 
@@ -280,7 +280,7 @@ const DemoGuide = ({ onClose }) => {
             <X size={24} />
           </CloseButton>
         </Header>
-        
+
         <Content>
           <Section>
             <SectionHeader onClick={() => toggleSection('overview')}>
@@ -288,11 +288,18 @@ const DemoGuide = ({ onClose }) => {
               {openSections.overview ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
             </SectionHeader>
             <SectionContent isOpen={openSections.overview}>
-              <p style={{ fontSize: '16px', lineHeight: '1.6', color: colors.text, marginBottom: '20px' }}>
+              <p
+                style={{
+                  fontSize: '16px',
+                  lineHeight: '1.6',
+                  color: colors.text,
+                  marginBottom: '20px',
+                }}
+              >
                 <strong>庭想システム</strong>は造園業者様向けの統合業務管理システムです。
                 見積作成から請求書発行まで、業務フロー全体をデジタル化します。
               </p>
-              
+
               <Important>
                 <h4>
                   <AlertCircle className="icon" size={20} />
@@ -322,7 +329,7 @@ const DemoGuide = ({ onClose }) => {
                     工事項目の追加・編集、階層構造、数量・単価の計算が造園業務に適しているか確認してください。
                   </p>
                 </FeatureCard>
-                
+
                 <FeatureCard>
                   <h5>
                     <Printer size={16} />
@@ -332,7 +339,7 @@ const DemoGuide = ({ onClose }) => {
                     実際の見積書・請求書として顧客に提示できる品質と内容になっているか確認してください。
                   </p>
                 </FeatureCard>
-                
+
                 <FeatureCard>
                   <h5>
                     <Users size={16} />
@@ -342,7 +349,7 @@ const DemoGuide = ({ onClose }) => {
                     オーナーと現場監督で適切に権限分離されているか、利益情報の表示制御を確認してください。
                   </p>
                 </FeatureCard>
-                
+
                 <FeatureCard>
                   <h5>
                     <BarChart size={16} />
@@ -367,12 +374,13 @@ const DemoGuide = ({ onClose }) => {
                   <StepContent>
                     <h4>ログイン権限のテスト</h4>
                     <p>
-                      画面上部の<span className="highlight">オーナー</span>と<span className="highlight">現場監督</span>ボタンを切り替えて、
+                      画面上部の<span className="highlight">オーナー</span>と
+                      <span className="highlight">現場監督</span>ボタンを切り替えて、
                       それぞれの権限で画面表示が適切に変わることを確認してください。
                     </p>
                   </StepContent>
                 </Step>
-                
+
                 <Step>
                   <StepContent>
                     <h4>見積作成画面の確認</h4>
@@ -382,7 +390,7 @@ const DemoGuide = ({ onClose }) => {
                     </p>
                   </StepContent>
                 </Step>
-                
+
                 <Step>
                   <StepContent>
                     <h4>明細項目の編集テスト</h4>
@@ -392,7 +400,7 @@ const DemoGuide = ({ onClose }) => {
                     </p>
                   </StepContent>
                 </Step>
-                
+
                 <Step>
                   <StepContent>
                     <h4>PDF出力テスト</h4>
@@ -402,7 +410,7 @@ const DemoGuide = ({ onClose }) => {
                     </p>
                   </StepContent>
                 </Step>
-                
+
                 <Step>
                   <StepContent>
                     <h4>スマートフォン対応確認</h4>
@@ -422,38 +430,39 @@ const DemoGuide = ({ onClose }) => {
               {openSections.feedback ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
             </SectionHeader>
             <SectionContent isOpen={openSections.feedback}>
-              <p style={{ fontSize: '16px', lineHeight: '1.6', color: colors.text, marginBottom: '20px' }}>
+              <p
+                style={{
+                  fontSize: '16px',
+                  lineHeight: '1.6',
+                  color: colors.text,
+                  marginBottom: '20px',
+                }}
+              >
                 以下の観点でフィードバックをいただけると大変助かります：
               </p>
-              
+
               <StepList>
                 <Step>
                   <StepContent>
                     <h4>業界適合性</h4>
-                    <p>
-                      造園業特有の工事項目、専門用語、単位、計算方法が適切に対応できているか
-                    </p>
+                    <p>造園業特有の工事項目、専門用語、単位、計算方法が適切に対応できているか</p>
                   </StepContent>
                 </Step>
-                
+
                 <Step>
                   <StepContent>
                     <h4>操作性・使いやすさ</h4>
-                    <p>
-                      日常業務で実際に使いたいと思える操作感、画面構成になっているか
-                    </p>
+                    <p>日常業務で実際に使いたいと思える操作感、画面構成になっているか</p>
                   </StepContent>
                 </Step>
-                
+
                 <Step>
                   <StepContent>
                     <h4>追加機能のご要望</h4>
-                    <p>
-                      「こんな機能があったら便利」「この項目も追加してほしい」などのアイデア
-                    </p>
+                    <p>「こんな機能があったら便利」「この項目も追加してほしい」などのアイデア</p>
                   </StepContent>
                 </Step>
-                
+
                 <Step>
                   <StepContent>
                     <h4>改善点・問題点</h4>
@@ -463,7 +472,7 @@ const DemoGuide = ({ onClose }) => {
                   </StepContent>
                 </Step>
               </StepList>
-              
+
               <Important>
                 <h4>
                   <Check className="icon" size={20} />

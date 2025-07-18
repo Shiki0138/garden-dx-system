@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import { 
-  FileText, 
-  Calendar, 
-  DollarSign, 
-  Package, 
-  Users, 
+import {
+  FileText,
+  Calendar,
+  DollarSign,
+  Package,
+  Users,
   Settings,
   BarChart3,
   Download,
   Bell,
   Menu,
-  X
+  X,
 } from 'lucide-react';
 import { useSafeSupabaseAuth } from './AuthContextWrapper';
 import ErrorBoundary from './ErrorBoundary';
@@ -35,7 +35,7 @@ const GardenDXMain = () => {
   const { user, isAuthenticated: isAuthenticatedFn, loading: authLoading } = authContext;
   const isAuthenticated = typeof isAuthenticatedFn === 'function' ? isAuthenticatedFn() : false;
   const { isDemoMode } = useDemoMode();
-  
+
   // デバッグログ（開発環境のみ）
   useEffect(() => {
     if (process.env.REACT_APP_ENVIRONMENT === 'development') {
@@ -44,7 +44,7 @@ const GardenDXMain = () => {
         isAuthenticated,
         authLoading,
         user: user ? 'Present' : 'Null',
-        authContext: authContext ? 'Available' : 'Missing'
+        authContext: authContext ? 'Available' : 'Missing',
       });
     }
   }, [isDemoMode, isAuthenticated, authLoading, user, authContext]);
@@ -57,7 +57,7 @@ const GardenDXMain = () => {
     totalProjects: 0,
     activeEstimates: 0,
     monthlyRevenue: 0,
-    completedProcesses: 0
+    completedProcesses: 0,
   });
 
   // モバイル判定
@@ -65,10 +65,10 @@ const GardenDXMain = () => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -78,6 +78,7 @@ const GardenDXMain = () => {
       fetchDashboardData();
       fetchNotifications();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, isDemoMode]);
 
   const fetchDashboardData = useCallback(async () => {
@@ -88,21 +89,21 @@ const GardenDXMain = () => {
           totalProjects: 5,
           activeEstimates: 3,
           monthlyRevenue: 1250000,
-          completedProcesses: 8
+          completedProcesses: 8,
         });
         return;
       }
-      
+
       const response = await fetch('/api/dashboard', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setDashboardData(data);
     } catch (error) {
@@ -112,7 +113,7 @@ const GardenDXMain = () => {
         totalProjects: 0,
         activeEstimates: 0,
         monthlyRevenue: 0,
-        completedProcesses: 0
+        completedProcesses: 0,
       });
     }
   }, [isDemoMode]);
@@ -123,21 +124,21 @@ const GardenDXMain = () => {
       if (isDemoMode) {
         setNotifications([
           { id: 1, type: 'info', message: 'デモモードで実行中です' },
-          { id: 2, type: 'success', message: '見積書が作成されました' }
+          { id: 2, type: 'success', message: '見積書が作成されました' },
         ]);
         return;
       }
-      
+
       const response = await fetch('/api/notifications', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setNotifications(data.notifications || []);
     } catch (error) {
@@ -149,11 +150,16 @@ const GardenDXMain = () => {
 
   // メインナビゲーション - 5つの主要機能（ダッシュボードを追加）
   const navigationItems = [
-    { id: 'dashboard', label: 'ダッシュボード', icon: BarChart3, description: 'システム概要と統計' },
+    {
+      id: 'dashboard',
+      label: 'ダッシュボード',
+      icon: BarChart3,
+      description: 'システム概要と統計',
+    },
     { id: 'estimate', label: '見積作成', icon: FileText, description: '新規見積の作成・編集' },
     { id: 'process', label: '工程表作成', icon: Calendar, description: '見積から工程表を自動生成' },
     { id: 'budget', label: '予算管理', icon: DollarSign, description: '予算と実績の管理' },
-    { id: 'invoice', label: '請求書作成', icon: Package, description: '請求書の作成・発行' }
+    { id: 'invoice', label: '請求書作成', icon: Package, description: '請求書の作成・発行' },
   ];
 
   // 認証情報ローディング中（開発環境では無効）
@@ -183,7 +189,7 @@ const GardenDXMain = () => {
   // モバイル判定でUIを切り替え
   if (isMobile) {
     return (
-      <MobileWorkflow 
+      <MobileWorkflow
         activeModule={activeModule}
         setActiveModule={setActiveModule}
         currentProject={currentProject}
@@ -198,7 +204,7 @@ const GardenDXMain = () => {
 
   return (
     <Container>
-        <Sidebar $expanded={!showMobileMenu}>
+      <Sidebar $expanded={!showMobileMenu}>
         <SidebarHeader>
           <Logo>
             <h2>Garden DX</h2>
@@ -229,9 +235,7 @@ const GardenDXMain = () => {
 
         <SidebarFooter>
           <UserInfo>
-            <UserAvatar>
-              {user?.user_metadata?.name?.charAt(0) || 'U'}
-            </UserAvatar>
+            <UserAvatar>{user?.user_metadata?.name?.charAt(0) || 'U'}</UserAvatar>
             <UserDetails>
               <UserName>{user?.user_metadata?.name || 'ユーザー'}</UserName>
               <UserRole>{user?.user_metadata?.role || '従業員'}</UserRole>
@@ -257,35 +261,19 @@ const GardenDXMain = () => {
 
         <ContentArea>
           {activeModule === 'dashboard' && (
-            <DashboardTop
-              data={dashboardData}
-              onModuleChange={setActiveModule}
-              user={user}
-            />
+            <DashboardTop data={dashboardData} onModuleChange={setActiveModule} user={user} />
           )}
           {activeModule === 'estimate' && (
-            <EstimateModule
-              currentProject={currentProject}
-              onProjectChange={setCurrentProject}
-            />
+            <EstimateModule currentProject={currentProject} onProjectChange={setCurrentProject} />
           )}
           {activeModule === 'process' && (
-            <ProcessModule
-              currentProject={currentProject}
-              onProjectChange={setCurrentProject}
-            />
+            <ProcessModule currentProject={currentProject} onProjectChange={setCurrentProject} />
           )}
           {activeModule === 'budget' && (
-            <BudgetModule
-              currentProject={currentProject}
-              onProjectChange={setCurrentProject}
-            />
+            <BudgetModule currentProject={currentProject} onProjectChange={setCurrentProject} />
           )}
           {activeModule === 'invoice' && (
-            <InvoiceModule
-              currentProject={currentProject}
-              onProjectChange={setCurrentProject}
-            />
+            <InvoiceModule currentProject={currentProject} onProjectChange={setCurrentProject} />
           )}
         </ContentArea>
       </MainContent>
@@ -307,8 +295,8 @@ const DashboardView = ({ data, onModuleChange, currentProject, onProjectChange }
     try {
       const response = await fetch('/api/projects/recent', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
       const projectsData = await response.json();
       setRecentProjects(projectsData.projects || []);
@@ -321,8 +309,8 @@ const DashboardView = ({ data, onModuleChange, currentProject, onProjectChange }
     try {
       const response = await fetch('/api/dashboard/stats', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
       const stats = await response.json();
       setQuickStats(stats);
@@ -335,31 +323,39 @@ const DashboardView = ({ data, onModuleChange, currentProject, onProjectChange }
     <DashboardContainer>
       <StatsGrid>
         <StatCard>
-          <StatIcon><FileText size={24} color="#3b82f6" /></StatIcon>
+          <StatIcon>
+            <FileText size={24} color="#3b82f6" />
+          </StatIcon>
           <StatContent>
             <StatValue>{data.activeEstimates}</StatValue>
             <StatLabel>進行中の見積</StatLabel>
           </StatContent>
         </StatCard>
-        
+
         <StatCard>
-          <StatIcon><Calendar size={24} color="#10b981" /></StatIcon>
+          <StatIcon>
+            <Calendar size={24} color="#10b981" />
+          </StatIcon>
           <StatContent>
             <StatValue>{data.completedProcesses}</StatValue>
             <StatLabel>完了工程</StatLabel>
           </StatContent>
         </StatCard>
-        
+
         <StatCard>
-          <StatIcon><DollarSign size={24} color="#f59e0b" /></StatIcon>
+          <StatIcon>
+            <DollarSign size={24} color="#f59e0b" />
+          </StatIcon>
           <StatContent>
             <StatValue>¥{data.monthlyRevenue.toLocaleString()}</StatValue>
             <StatLabel>今月の売上</StatLabel>
           </StatContent>
         </StatCard>
-        
+
         <StatCard>
-          <StatIcon><Package size={24} color="#ef4444" /></StatIcon>
+          <StatIcon>
+            <Package size={24} color="#ef4444" />
+          </StatIcon>
           <StatContent>
             <StatValue>{data.totalProjects}</StatValue>
             <StatLabel>総プロジェクト</StatLabel>
@@ -427,19 +423,19 @@ const EstimateModule = ({ currentProject, onProjectChange }) => {
   const [estimateMode, setEstimateMode] = useState('wizard'); // 'wizard' or 'advanced'
   const [estimateData, setEstimateData] = useState(null);
 
-  const handleEstimateComplete = async (data) => {
+  const handleEstimateComplete = async data => {
     setEstimateData(data);
-    
+
     // 見積から工程表を自動生成
     try {
       const processData = generateProcessSchedule(data);
-      
+
       // 工程表PDFを生成
       await generateProcessPDF(processData, {
         format: 'gantt',
-        filename: `${data.customerName}-工程表.pdf`
+        filename: `${data.customerName}-工程表.pdf`,
       });
-      
+
       alert('見積書と工程表が作成されました');
     } catch (error) {
       console.error('工程表の生成に失敗:', error);
@@ -451,10 +447,7 @@ const EstimateModule = ({ currentProject, onProjectChange }) => {
     <EstimateContainer>
       <EstimateHeader>
         <ModeToggle>
-          <ModeButton
-            $active={estimateMode === 'wizard'}
-            onClick={() => setEstimateMode('wizard')}
-          >
+          <ModeButton $active={estimateMode === 'wizard'} onClick={() => setEstimateMode('wizard')}>
             ウィザード形式
           </ModeButton>
           <ModeButton
@@ -467,15 +460,9 @@ const EstimateModule = ({ currentProject, onProjectChange }) => {
       </EstimateHeader>
 
       {estimateMode === 'wizard' ? (
-        <EstimateWizard
-          onComplete={handleEstimateComplete}
-          initialData={estimateData}
-        />
+        <EstimateWizard onComplete={handleEstimateComplete} initialData={estimateData} />
       ) : (
-        <EstimateCreator
-          onComplete={handleEstimateComplete}
-          initialData={estimateData}
-        />
+        <EstimateCreator onComplete={handleEstimateComplete} initialData={estimateData} />
       )}
     </EstimateContainer>
   );
@@ -499,43 +486,43 @@ const ProcessModule = ({ currentProject, onProjectChange }) => {
             description: '既存の植栽を撤去し、土壌を整備',
             category: '土工事',
             quantity: 1,
-            unit: '式'
+            unit: '式',
           },
           {
             name: '新規植栽工事',
             description: '中高木・低木・地被類の植栽',
-            category: '植栽工事', 
+            category: '植栽工事',
             quantity: 1,
-            unit: '式'
+            unit: '式',
           },
           {
             name: 'ガーデンライト設置',
             description: 'LED照明器具の設置・配線工事',
             category: '設備工事',
             quantity: 6,
-            unit: '基'
+            unit: '基',
           },
           {
             name: '散水設備工事',
             description: '自動散水システムの設置',
             category: '設備工事',
             quantity: 1,
-            unit: '式'
+            unit: '式',
           },
           {
             name: '園路・小径整備',
             description: '石材による園路の整備',
             category: '土工事',
             quantity: 20,
-            unit: 'm'
-          }
+            unit: 'm',
+          },
         ],
-        totalAmount: 850000
+        totalAmount: 850000,
       };
       setEstimateData(demoEstimateData);
       return;
     }
-    
+
     try {
       // 実際のAPIからデータを取得（本番環境用）
       const response = await fetch(`/api/estimates/${currentProject.estimateId}`);
@@ -551,9 +538,9 @@ const ProcessModule = ({ currentProject, onProjectChange }) => {
         items: [
           { name: '準備作業', category: '一般作業', quantity: 1, unit: '式' },
           { name: 'メイン作業', category: '一般作業', quantity: 1, unit: '式' },
-          { name: '仕上げ作業', category: '一般作業', quantity: 1, unit: '式' }
+          { name: '仕上げ作業', category: '一般作業', quantity: 1, unit: '式' },
         ],
-        totalAmount: 100000
+        totalAmount: 100000,
       };
       setEstimateData(fallbackData);
     }
@@ -565,15 +552,15 @@ const ProcessModule = ({ currentProject, onProjectChange }) => {
 
   const handleGenerateSchedule = async () => {
     if (!estimateData) return;
-    
+
     try {
       const processSchedule = generateProcessSchedule(estimateData);
       setProcessData(processSchedule);
-      
+
       // 工程表PDFを生成
       await generateProcessPDF(processSchedule, {
         format: 'gantt',
-        filename: `${estimateData.customerName || 'プロジェクト'}-工程表.pdf`
+        filename: `${estimateData.customerName || 'プロジェクト'}-工程表.pdf`,
       });
     } catch (error) {
       console.error('工程表の生成に失敗:', error);
@@ -590,12 +577,12 @@ const ProcessModule = ({ currentProject, onProjectChange }) => {
           </ActionButton>
         </ModuleActions>
       </ModuleHeader>
-      
+
       <ModuleContent>
         {estimateData ? (
           <ProcessScheduleManager
             estimateData={estimateData}
-            onScheduleUpdate={(schedule) => {
+            onScheduleUpdate={schedule => {
               setProcessData(schedule);
               console.log('工程表が更新されました:', schedule);
             }}
@@ -625,7 +612,7 @@ const BudgetModule = ({ currentProject, onProjectChange }) => {
           <ActionButton>予算レポート</ActionButton>
         </ModuleActions>
       </ModuleHeader>
-      
+
       <ModuleContent>
         <BudgetManagement
           projectId={currentProject?.id}
@@ -645,20 +632,20 @@ const InvoiceModule = ({ currentProject, onProjectChange }) => {
 
   const handleCreateInvoice = async () => {
     if (!currentProject?.estimateId) return;
-    
+
     try {
       // 見積データから請求書を作成
       const response = await fetch(`/api/estimates/${currentProject.estimateId}`);
       const estimateData = await response.json();
-      
+
       const invoiceData = {
         customerName: estimateData.customerName,
         items: estimateData.items,
         totalAmount: estimateData.totalAmount,
         issueDate: new Date().toISOString().split('T')[0],
-        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       };
-      
+
       setInvoiceData(invoiceData);
     } catch (error) {
       console.error('請求書の作成に失敗:', error);
@@ -675,12 +662,12 @@ const InvoiceModule = ({ currentProject, onProjectChange }) => {
           </ActionButton>
         </ModuleActions>
       </ModuleHeader>
-      
+
       <ModuleContent>
         {invoiceData ? (
-          <InvoiceForm 
+          <InvoiceForm
             initialData={invoiceData}
-            onSave={(data) => {
+            onSave={data => {
               console.log('Invoice saved:', data);
             }}
           />
@@ -689,10 +676,9 @@ const InvoiceModule = ({ currentProject, onProjectChange }) => {
             <EmptyStateIcon>📋</EmptyStateIcon>
             <EmptyStateTitle>請求書を作成しましょう</EmptyStateTitle>
             <EmptyStateDescription>
-              {currentProject?.estimateId 
+              {currentProject?.estimateId
                 ? '「見積から請求書作成」ボタンをクリックして、見積書から請求書を作成してください。'
-                : '請求書を作成するには、まず見積書を作成してください。'
-              }
+                : '請求書を作成するには、まず見積書を作成してください。'}
             </EmptyStateDescription>
           </EmptyState>
         )}
@@ -737,7 +723,7 @@ const LoadingContainer = styled.div`
   justify-content: center;
   height: 100vh;
   background: #f8fafc;
-  
+
   .spinner {
     font-size: 1.5rem;
     color: #1a472a;
@@ -751,15 +737,15 @@ const Container = styled.div`
 `;
 
 const Sidebar = styled.nav`
-  width: ${props => props.$expanded ? '260px' : '60px'};
+  width: ${props => (props.$expanded ? '260px' : '60px')};
   background: #1f2937;
   color: white;
   transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
-  
+
   @media (max-width: 768px) {
-    width: ${props => props.$expanded ? '100%' : '0'};
+    width: ${props => (props.$expanded ? '100%' : '0')};
     position: fixed;
     top: 0;
     left: 0;
@@ -779,7 +765,7 @@ const Logo = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   h2 {
     margin: 0;
     font-size: 18px;
@@ -802,7 +788,7 @@ const MenuToggle = styled.button`
   color: white;
   cursor: pointer;
   display: none;
-  
+
   @media (max-width: 768px) {
     display: block;
   }
@@ -819,12 +805,12 @@ const NavItem = styled.div`
   gap: 16px;
   padding: 16px 20px;
   cursor: pointer;
-  background: ${props => props.$active ? '#374151' : 'transparent'};
-  border-right: ${props => props.$active ? '4px solid #3b82f6' : 'none'};
+  background: ${props => (props.$active ? '#374151' : 'transparent')};
+  border-right: ${props => (props.$active ? '4px solid #3b82f6' : 'none')};
   border-radius: 8px;
   margin: 4px 12px;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: #374151;
     transform: translateX(4px);
@@ -838,8 +824,8 @@ const NavItemIcon = styled.div`
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: ${props => props.$active ? '#3b82f6' : 'rgba(59, 130, 246, 0.1)'};
-  color: ${props => props.$active ? 'white' : '#3b82f6'};
+  background: ${props => (props.$active ? '#3b82f6' : 'rgba(59, 130, 246, 0.1)')};
+  color: ${props => (props.$active ? 'white' : '#3b82f6')};
 `;
 
 const NavItemContent = styled.div`
@@ -935,7 +921,7 @@ const NotificationButton = styled.button`
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
-  
+
   &:hover {
     background: #f3f4f6;
   }
@@ -971,12 +957,12 @@ const LoginPrompt = styled.div`
   height: 100vh;
   background: #f8fafc;
   text-align: center;
-  
+
   h2 {
     color: #1f2937;
     margin-bottom: 8px;
   }
-  
+
   p {
     color: #6b7280;
   }
@@ -1033,7 +1019,7 @@ const DashboardGrid = styled.div`
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 24px;
-  
+
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
   }
@@ -1061,11 +1047,11 @@ const ProjectsList = styled.div`
 
 const ProjectCard = styled.div`
   padding: 16px;
-  border: 1px solid ${props => props.$active ? '#3b82f6' : '#e5e7eb'};
+  border: 1px solid ${props => (props.$active ? '#3b82f6' : '#e5e7eb')};
   border-radius: 8px;
   cursor: pointer;
-  background: ${props => props.$active ? '#f0f9ff' : 'white'};
-  
+  background: ${props => (props.$active ? '#f0f9ff' : 'white')};
+
   &:hover {
     border-color: #3b82f6;
   }
@@ -1123,12 +1109,12 @@ const QuickActionButton = styled.button`
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
-  
+
   &:hover {
     background: #f1f5f9;
     border-color: #3b82f6;
   }
-  
+
   span {
     font-size: 14px;
     font-weight: 500;
@@ -1158,15 +1144,15 @@ const ModeToggle = styled.div`
 
 const ModeButton = styled.button`
   padding: 8px 16px;
-  background: ${props => props.$active ? '#3b82f6' : 'white'};
-  color: ${props => props.$active ? 'white' : '#374151'};
+  background: ${props => (props.$active ? '#3b82f6' : 'white')};
+  color: ${props => (props.$active ? 'white' : '#374151')};
   border: none;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  
+
   &:hover {
-    background: ${props => props.$active ? '#2563eb' : '#f3f4f6'};
+    background: ${props => (props.$active ? '#2563eb' : '#f3f4f6')};
   }
 `;
 
@@ -1199,18 +1185,18 @@ const SettingsCard = styled.div`
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   cursor: pointer;
-  
+
   &:hover {
     border-color: #3b82f6;
   }
-  
+
   h3 {
     font-size: 16px;
     font-weight: 600;
     color: #1f2937;
     margin: 0 0 8px 0;
   }
-  
+
   p {
     font-size: 14px;
     color: #6b7280;
@@ -1258,12 +1244,12 @@ const ActionButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover:not(:disabled) {
     background: #2563eb;
     transform: translateY(-1px);
   }
-  
+
   &:disabled {
     background: #9ca3af;
     cursor: not-allowed;

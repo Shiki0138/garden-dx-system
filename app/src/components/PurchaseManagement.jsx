@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { Package, Truck, Calculator, TrendingUp, Plus, Search, Filter, Download } from 'lucide-react';
+import {
+  Package,
+  Truck,
+  Calculator,
+  TrendingUp,
+  Plus,
+  Search,
+  Filter,
+  Download,
+} from 'lucide-react';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 
 const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
@@ -23,24 +32,24 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
       setIsLoading(true);
       const [purchasesRes, suppliersRes, categoriesRes, markupRes] = await Promise.all([
         fetch(`/api/projects/${projectId}/purchases`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         }),
         fetch(`/api/suppliers`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         }),
         fetch(`/api/purchase-categories`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         }),
         fetch(`/api/markup-rates`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        })
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        }),
       ]);
 
       const [purchasesData, suppliersData, categoriesData, markupData] = await Promise.all([
         purchasesRes.json(),
         suppliersRes.json(),
         categoriesRes.json(),
-        markupRes.json()
+        markupRes.json(),
       ]);
 
       setPurchases(purchasesData.purchases || []);
@@ -55,10 +64,10 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
   }, [projectId]);
 
   // 仕入れ価格履歴取得
-  const fetchPriceHistory = useCallback(async (itemName) => {
+  const fetchPriceHistory = useCallback(async itemName => {
     try {
       const response = await fetch(`/api/price-history/${encodeURIComponent(itemName)}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       const data = await response.json();
       setPriceHistory(data.history || []);
@@ -68,52 +77,56 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
   }, []);
 
   // 新しい仕入れ記録を追加
-  const addPurchase = useCallback(async (purchaseData) => {
-    try {
-      const response = await fetch(`/api/projects/${projectId}/purchases`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(purchaseData)
-      });
+  const addPurchase = useCallback(
+    async purchaseData => {
+      try {
+        const response = await fetch(`/api/projects/${projectId}/purchases`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify(purchaseData),
+        });
 
-      if (response.ok) {
-        const newPurchase = await response.json();
-        setPurchases(prev => [...prev, newPurchase]);
-        onPurchaseUpdate?.();
-        setShowAddForm(false);
+        if (response.ok) {
+          const newPurchase = await response.json();
+          setPurchases(prev => [...prev, newPurchase]);
+          onPurchaseUpdate?.();
+          setShowAddForm(false);
+        }
+      } catch (error) {
+        console.error('仕入れ記録の追加に失敗しました:', error);
       }
-    } catch (error) {
-      console.error('仕入れ記録の追加に失敗しました:', error);
-    }
-  }, [projectId, onPurchaseUpdate]);
+    },
+    [projectId, onPurchaseUpdate]
+  );
 
   // 仕入れ記録を更新
-  const updatePurchase = useCallback(async (purchaseId, updates) => {
-    try {
-      const response = await fetch(`/api/purchases/${purchaseId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(updates)
-      });
+  const updatePurchase = useCallback(
+    async (purchaseId, updates) => {
+      try {
+        const response = await fetch(`/api/purchases/${purchaseId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify(updates),
+        });
 
-      if (response.ok) {
-        const updatedPurchase = await response.json();
-        setPurchases(prev => prev.map(p => 
-          p.id === purchaseId ? updatedPurchase : p
-        ));
-        onPurchaseUpdate?.();
-        setEditingPurchase(null);
+        if (response.ok) {
+          const updatedPurchase = await response.json();
+          setPurchases(prev => prev.map(p => (p.id === purchaseId ? updatedPurchase : p)));
+          onPurchaseUpdate?.();
+          setEditingPurchase(null);
+        }
+      } catch (error) {
+        console.error('仕入れ記録の更新に失敗しました:', error);
       }
-    } catch (error) {
-      console.error('仕入れ記録の更新に失敗しました:', error);
-    }
-  }, [onPurchaseUpdate]);
+    },
+    [onPurchaseUpdate]
+  );
 
   // 掛け率を更新
   const updateMarkupRate = useCallback(async (category, rate) => {
@@ -122,20 +135,20 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify({ category, rate })
+        body: JSON.stringify({ category, rate }),
       });
 
       if (response.ok) {
         setMarkupRates(prev => ({ ...prev, [category]: rate }));
-        
+
         // 該当カテゴリの全ての仕入れの販売価格を再計算
-        setPurchases(prev => prev.map(p => 
-          p.category === category 
-            ? { ...p, sellingPrice: p.purchasePrice * rate }
-            : p
-        ));
+        setPurchases(prev =>
+          prev.map(p =>
+            p.category === category ? { ...p, sellingPrice: p.purchasePrice * rate } : p
+          )
+        );
       }
     } catch (error) {
       console.error('掛け率の更新に失敗しました:', error);
@@ -145,11 +158,12 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
   // フィルタリングされた仕入れ一覧
   const filteredPurchases = useMemo(() => {
     return purchases.filter(purchase => {
-      const matchesSearch = purchase.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           purchase.supplierName.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch =
+        purchase.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        purchase.supplierName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = !selectedCategory || purchase.category === selectedCategory;
       const matchesSupplier = !selectedSupplier || purchase.supplierId === selectedSupplier;
-      
+
       return matchesSearch && matchesCategory && matchesSupplier;
     });
   }, [purchases, searchTerm, selectedCategory, selectedSupplier]);
@@ -161,7 +175,7 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
     const totalSellingAmount = filteredPurchases.reduce((sum, p) => sum + p.sellingPrice, 0);
     const totalProfit = totalSellingAmount - totalPurchaseAmount;
     const profitRate = totalPurchaseAmount > 0 ? (totalProfit / totalPurchaseAmount) * 100 : 0;
-    
+
     const categoryBreakdown = {};
     filteredPurchases.forEach(p => {
       if (!categoryBreakdown[p.category]) {
@@ -169,7 +183,7 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
       }
       categoryBreakdown[p.category].count++;
       categoryBreakdown[p.category].amount += p.purchasePrice;
-      categoryBreakdown[p.category].profit += (p.sellingPrice - p.purchasePrice);
+      categoryBreakdown[p.category].profit += p.sellingPrice - p.purchasePrice;
     });
 
     return {
@@ -178,7 +192,7 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
       totalSellingAmount,
       totalProfit,
       profitRate,
-      categoryBreakdown
+      categoryBreakdown,
     };
   }, [filteredPurchases]);
 
@@ -186,11 +200,11 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
     fetchPurchaseData();
   }, [fetchPurchaseData]);
 
-  const formatCurrency = (amount) => {
+  const formatCurrency = amount => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount || 0);
   };
 
@@ -212,7 +226,9 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
 
       <StatisticsGrid>
         <StatCard>
-          <StatIcon><Package size={24} color="#3b82f6" /></StatIcon>
+          <StatIcon>
+            <Package size={24} color="#3b82f6" />
+          </StatIcon>
           <StatContent>
             <StatLabel>仕入れ件数</StatLabel>
             <StatValue>{statistics.totalPurchases}件</StatValue>
@@ -220,7 +236,9 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
         </StatCard>
 
         <StatCard>
-          <StatIcon><Truck size={24} color="#10b981" /></StatIcon>
+          <StatIcon>
+            <Truck size={24} color="#10b981" />
+          </StatIcon>
           <StatContent>
             <StatLabel>仕入れ総額</StatLabel>
             <StatValue>{formatCurrency(statistics.totalPurchaseAmount)}</StatValue>
@@ -228,7 +246,9 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
         </StatCard>
 
         <StatCard>
-          <StatIcon><Calculator size={24} color="#f59e0b" /></StatIcon>
+          <StatIcon>
+            <Calculator size={24} color="#f59e0b" />
+          </StatIcon>
           <StatContent>
             <StatLabel>販売総額</StatLabel>
             <StatValue>{formatCurrency(statistics.totalSellingAmount)}</StatValue>
@@ -236,7 +256,9 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
         </StatCard>
 
         <StatCard>
-          <StatIcon><TrendingUp size={24} color="#ef4444" /></StatIcon>
+          <StatIcon>
+            <TrendingUp size={24} color="#ef4444" />
+          </StatIcon>
           <StatContent>
             <StatLabel>利益額</StatLabel>
             <StatValue>{formatCurrency(statistics.totalProfit)}</StatValue>
@@ -252,30 +274,28 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
             type="text"
             placeholder="品目名・仕入先で検索"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
           />
         </SearchInput>
 
         <FilterSelect>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
+          <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
             <option value="">全カテゴリ</option>
             {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
             ))}
           </select>
         </FilterSelect>
 
         <FilterSelect>
-          <select
-            value={selectedSupplier}
-            onChange={(e) => setSelectedSupplier(e.target.value)}
-          >
+          <select value={selectedSupplier} onChange={e => setSelectedSupplier(e.target.value)}>
             <option value="">全仕入先</option>
             {suppliers.map(supplier => (
-              <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
+              <option key={supplier.id} value={supplier.id}>
+                {supplier.name}
+              </option>
             ))}
           </select>
         </FilterSelect>
@@ -323,10 +343,7 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
                   </td>
                   <td>{new Date(purchase.purchaseDate).toLocaleDateString()}</td>
                   <td>
-                    <ActionButton 
-                      size="small"
-                      onClick={() => setEditingPurchase(purchase)}
-                    >
+                    <ActionButton size="small" onClick={() => setEditingPurchase(purchase)}>
                       編集
                     </ActionButton>
                   </td>
@@ -344,9 +361,7 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
             <MarkupCard key={category.id}>
               <MarkupCardHeader>
                 <h4>{category.name}</h4>
-                <MarkupRateDisplay>
-                  {markupRates[category.id] || 1.3}倍
-                </MarkupRateDisplay>
+                <MarkupRateDisplay>{markupRates[category.id] || 1.3}倍</MarkupRateDisplay>
               </MarkupCardHeader>
               <MarkupRateInput
                 type="number"
@@ -354,11 +369,13 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
                 min="1.0"
                 max="10.0"
                 value={markupRates[category.id] || 1.3}
-                onChange={(e) => updateMarkupRate(category.id, parseFloat(e.target.value))}
+                onChange={e => updateMarkupRate(category.id, parseFloat(e.target.value))}
               />
               <MarkupCardFooter>
                 <span>適用件数: {statistics.categoryBreakdown[category.id]?.count || 0}</span>
-                <span>利益: {formatCurrency(statistics.categoryBreakdown[category.id]?.profit || 0)}</span>
+                <span>
+                  利益: {formatCurrency(statistics.categoryBreakdown[category.id]?.profit || 0)}
+                </span>
               </MarkupCardFooter>
             </MarkupCard>
           ))}
@@ -378,7 +395,7 @@ const PurchaseManagement = ({ projectId, onPurchaseUpdate }) => {
       {editingPurchase && (
         <PurchaseForm
           purchase={editingPurchase}
-          onSubmit={(data) => updatePurchase(editingPurchase.id, data)}
+          onSubmit={data => updatePurchase(editingPurchase.id, data)}
           onClose={() => setEditingPurchase(null)}
           suppliers={suppliers}
           categories={categories}
@@ -399,7 +416,7 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
     quantity: purchase?.quantity || 1,
     unit: purchase?.unit || '個',
     purchaseDate: purchase?.purchaseDate || new Date().toISOString().split('T')[0],
-    notes: purchase?.notes || ''
+    notes: purchase?.notes || '',
   });
 
   const [calculatedPrice, setCalculatedPrice] = useState(0);
@@ -409,21 +426,21 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
     setCalculatedPrice(formData.purchasePrice * markupRate);
   }, [formData.purchasePrice, formData.category, markupRates]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
     const markupRate = markupRates[formData.category] || 1.3;
-    
+
     onSubmit({
       ...formData,
       markupRate,
       sellingPrice: calculatedPrice,
-      supplierName: suppliers.find(s => s.id === formData.supplierId)?.name || ''
+      supplierName: suppliers.find(s => s.id === formData.supplierId)?.name || '',
     });
   };
 
   return (
     <FormOverlay onClick={onClose}>
-      <FormContainer onClick={(e) => e.stopPropagation()}>
+      <FormContainer onClick={e => e.stopPropagation()}>
         <FormHeader>
           <h3>{purchase ? '仕入れ編集' : '仕入れ追加'}</h3>
           <button onClick={onClose}>×</button>
@@ -437,7 +454,7 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
                 type="text"
                 required
                 value={formData.itemName}
-                onChange={(e) => setFormData({...formData, itemName: e.target.value})}
+                onChange={e => setFormData({ ...formData, itemName: e.target.value })}
                 placeholder="品目名を入力"
               />
             </FormGroup>
@@ -447,11 +464,13 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
               <select
                 required
                 value={formData.category}
-                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                onChange={e => setFormData({ ...formData, category: e.target.value })}
               >
                 <option value="">選択してください</option>
                 {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
                 ))}
               </select>
             </FormGroup>
@@ -461,11 +480,13 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
               <select
                 required
                 value={formData.supplierId}
-                onChange={(e) => setFormData({...formData, supplierId: e.target.value})}
+                onChange={e => setFormData({ ...formData, supplierId: e.target.value })}
               >
                 <option value="">選択してください</option>
                 {suppliers.map(supplier => (
-                  <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
+                  <option key={supplier.id} value={supplier.id}>
+                    {supplier.name}
+                  </option>
                 ))}
               </select>
             </FormGroup>
@@ -477,7 +498,9 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
                 required
                 min="0"
                 value={formData.purchasePrice}
-                onChange={(e) => setFormData({...formData, purchasePrice: parseFloat(e.target.value) || 0})}
+                onChange={e =>
+                  setFormData({ ...formData, purchasePrice: parseFloat(e.target.value) || 0 })
+                }
                 placeholder="0"
               />
             </FormGroup>
@@ -488,7 +511,9 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
                 type="number"
                 min="1"
                 value={formData.quantity}
-                onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value, 10) || 1})}
+                onChange={e =>
+                  setFormData({ ...formData, quantity: parseInt(e.target.value, 10) || 1 })
+                }
               />
             </FormGroup>
 
@@ -496,7 +521,7 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
               <label>単位</label>
               <select
                 value={formData.unit}
-                onChange={(e) => setFormData({...formData, unit: e.target.value})}
+                onChange={e => setFormData({ ...formData, unit: e.target.value })}
               >
                 <option value="個">個</option>
                 <option value="本">本</option>
@@ -513,7 +538,7 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
               <input
                 type="date"
                 value={formData.purchaseDate}
-                onChange={(e) => setFormData({...formData, purchaseDate: e.target.value})}
+                onChange={e => setFormData({ ...formData, purchaseDate: e.target.value })}
               />
             </FormGroup>
 
@@ -521,7 +546,7 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
               <label>備考</label>
               <textarea
                 value={formData.notes}
-                onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                onChange={e => setFormData({ ...formData, notes: e.target.value })}
                 placeholder="備考を入力"
                 rows="3"
               />
@@ -531,7 +556,11 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
           <PriceCalculation>
             <CalculationRow>
               <span>仕入価格:</span>
-              <span>{new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(formData.purchasePrice)}</span>
+              <span>
+                {new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(
+                  formData.purchasePrice
+                )}
+              </span>
             </CalculationRow>
             <CalculationRow>
               <span>掛け率:</span>
@@ -539,7 +568,11 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
             </CalculationRow>
             <CalculationRow className="total">
               <span>販売価格:</span>
-              <span>{new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(calculatedPrice)}</span>
+              <span>
+                {new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(
+                  calculatedPrice
+                )}
+              </span>
             </CalculationRow>
           </PriceCalculation>
 
@@ -547,9 +580,7 @@ const PurchaseForm = ({ purchase, onSubmit, onClose, suppliers, categories, mark
             <button type="button" onClick={onClose}>
               キャンセル
             </button>
-            <button type="submit">
-              {purchase ? '更新' : '追加'}
-            </button>
+            <button type="submit">{purchase ? '更新' : '追加'}</button>
           </FormActions>
         </form>
       </FormContainer>
@@ -596,14 +627,14 @@ const ActionButton = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: ${props => props.size === 'small' ? '6px 12px' : '10px 16px'};
+  padding: ${props => (props.size === 'small' ? '6px 12px' : '10px 16px')};
   background: #3b82f6;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  
+
   &:hover {
     background: #2563eb;
   }
@@ -675,7 +706,7 @@ const SearchInput = styled.div`
   padding: 8px 12px;
   flex: 1;
   min-width: 200px;
-  
+
   input {
     border: none;
     outline: none;
@@ -710,13 +741,13 @@ const TabHeader = styled.div`
 
 const TabButton = styled.button`
   padding: 15px 20px;
-  background: ${props => props.active ? '#f9fafb' : 'white'};
+  background: ${props => (props.active ? '#f9fafb' : 'white')};
   border: none;
-  border-bottom: 2px solid ${props => props.active ? '#3b82f6' : 'transparent'};
+  border-bottom: 2px solid ${props => (props.active ? '#3b82f6' : 'transparent')};
   cursor: pointer;
   font-weight: 500;
-  color: ${props => props.active ? '#3b82f6' : '#6b7280'};
-  
+  color: ${props => (props.active ? '#3b82f6' : '#6b7280')};
+
   &:hover {
     background: #f9fafb;
   }
@@ -729,19 +760,20 @@ const TabContent = styled.div`
 const PurchaseTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  
-  th, td {
+
+  th,
+  td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #e5e7eb;
   }
-  
+
   th {
     background: #f9fafb;
     font-weight: 600;
     color: #374151;
   }
-  
+
   @media (max-width: 768px) {
     display: none;
   }
@@ -763,7 +795,7 @@ const CategoryTag = styled.span`
 `;
 
 const ProfitAmount = styled.span`
-  color: ${props => props.profit >= 0 ? '#10b981' : '#ef4444'};
+  color: ${props => (props.profit >= 0 ? '#10b981' : '#ef4444')};
   font-weight: 600;
 `;
 
@@ -798,7 +830,7 @@ const MarkupCardHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
-  
+
   h4 {
     margin: 0;
     color: #1f2937;
@@ -817,7 +849,7 @@ const MarkupRateInput = styled.input`
   border: 1px solid #d1d5db;
   border-radius: 6px;
   margin-bottom: 10px;
-  
+
   &:focus {
     outline: none;
     border-color: #3b82f6;
@@ -869,13 +901,13 @@ const FormHeader = styled.div`
   align-items: center;
   padding: 20px;
   border-bottom: 1px solid #e5e7eb;
-  
+
   h3 {
     margin: 0;
     font-size: 18px;
     color: #1f2937;
   }
-  
+
   button {
     background: none;
     border: none;
@@ -890,11 +922,11 @@ const FormGrid = styled.div`
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   padding: 20px;
-  
+
   .full-width {
     grid-column: 1 / -1;
   }
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -907,14 +939,16 @@ const FormGroup = styled.div`
     font-weight: 500;
     color: #374151;
   }
-  
-  input, select, textarea {
+
+  input,
+  select,
+  textarea {
     width: 100%;
     padding: 8px 12px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
     font-size: 14px;
-    
+
     &:focus {
       outline: none;
       border-color: #3b82f6;
@@ -940,7 +974,7 @@ const CalculationRow = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
-  
+
   &.total {
     font-weight: 600;
     font-size: 16px;
@@ -957,24 +991,24 @@ const FormActions = styled.div`
   justify-content: flex-end;
   padding: 20px;
   border-top: 1px solid #e5e7eb;
-  
+
   button {
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
-    
-    &[type="button"] {
+
+    &[type='button'] {
       background: #f3f4f6;
       color: #374151;
     }
-    
-    &[type="submit"] {
+
+    &[type='submit'] {
       background: #3b82f6;
       color: white;
     }
-    
+
     &:hover {
       opacity: 0.9;
     }

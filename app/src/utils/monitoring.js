@@ -18,7 +18,7 @@ export const initWebVitals = () => {
 };
 
 // パフォーマンスデータ送信
-const sendToAnalytics = (metric) => {
+const sendToAnalytics = metric => {
   // Vercel Analyticsに送信
   if (window.va) {
     window.va('track', metric.name, {
@@ -68,7 +68,7 @@ export const trackEvent = (eventName, properties = {}) => {
 };
 
 // ページビュー追跡
-export const trackPageView = (page) => {
+export const trackPageView = page => {
   if (process.env.REACT_APP_ANALYTICS_ENABLED === 'true') {
     if (window.va) {
       window.va('track', 'PageView', {
@@ -86,23 +86,29 @@ export const monitoringData = {
   getSystemStatus: () => ({
     online: navigator.onLine,
     connection: navigator.connection?.effectiveType || 'unknown',
-    memory: performance.memory ? {
-      used: Math.round(performance.memory.usedJSHeapSize / 1048576),
-      total: Math.round(performance.memory.totalJSHeapSize / 1048576),
-      limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576),
-    } : null,
+    memory: performance.memory
+      ? {
+          used: Math.round(performance.memory.usedJSHeapSize / 1048576),
+          total: Math.round(performance.memory.totalJSHeapSize / 1048576),
+          limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576),
+        }
+      : null,
     timestamp: new Date().toISOString(),
   }),
 
   // パフォーマンス情報
   getPerformanceInfo: () => {
     const navigation = performance.getEntriesByType('navigation')[0];
-    return navigation ? {
-      loadTime: Math.round(navigation.loadEventEnd - navigation.fetchStart),
-      domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.fetchStart),
-      firstPaint: Math.round(performance.getEntriesByName('first-paint')[0]?.startTime || 0),
-      firstContentfulPaint: Math.round(performance.getEntriesByName('first-contentful-paint')[0]?.startTime || 0),
-    } : null;
+    return navigation
+      ? {
+          loadTime: Math.round(navigation.loadEventEnd - navigation.fetchStart),
+          domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.fetchStart),
+          firstPaint: Math.round(performance.getEntriesByName('first-paint')[0]?.startTime || 0),
+          firstContentfulPaint: Math.round(
+            performance.getEntriesByName('first-contentful-paint')[0]?.startTime || 0
+          ),
+        }
+      : null;
   },
 };
 
@@ -115,7 +121,7 @@ export const initMonitoring = () => {
   window.addEventListener('beforeunload', () => {
     const systemStatus = monitoringData.getSystemStatus();
     const performanceInfo = monitoringData.getPerformanceInfo();
-    
+
     trackEvent('SessionEnd', {
       systemStatus,
       performanceInfo,

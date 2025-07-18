@@ -29,13 +29,13 @@ import {
   FiInfo,
 } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
-import { 
-  FONT_SIZES, 
-  TOUCH_SIZES, 
-  SPACING, 
-  MOBILE_STYLES, 
-  COLORS, 
-  mediaQuery 
+import {
+  FONT_SIZES,
+  TOUCH_SIZES,
+  SPACING,
+  MOBILE_STYLES,
+  COLORS,
+  mediaQuery,
 } from '../styles/mobileConstants';
 
 // アニメーション定義
@@ -103,7 +103,7 @@ const WizardHeader = styled.div`
   ${mediaQuery.mobile} {
     padding: ${SPACING.lg};
     margin-bottom: ${SPACING.lg};
-    
+
     &::before {
       font-size: 36px;
       right: ${SPACING.lg};
@@ -115,7 +115,7 @@ const WizardTitle = styled.h1`
   margin: 0 0 ${SPACING.base} 0;
   font-size: ${FONT_SIZES['3xl']};
   ${MOBILE_STYLES.preventZoom}
-  
+
   ${mediaQuery.mobile} {
     font-size: ${FONT_SIZES['2xl']};
   }
@@ -147,7 +147,7 @@ const ProgressContainer = styled.div`
   border-radius: 12px;
   padding: ${SPACING.xl};
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  
+
   ${mediaQuery.mobile} {
     padding: ${SPACING.base};
     margin-bottom: ${SPACING.xl};
@@ -379,7 +379,7 @@ const ItemsContainer = styled.div`
   border-radius: 12px;
   padding: ${SPACING.xl};
   margin-bottom: ${SPACING.xl};
-  
+
   ${mediaQuery.mobile} {
     padding: ${SPACING.base};
   }
@@ -770,7 +770,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
   // 初期データ読み込み
   useEffect(() => {
     loadInitialData();
-  }, [estimateId, loadInitialData]);
+  }, [loadInitialData]);
 
   // リアルタイム金額計算
   const calculatedAmounts = useMemo(() => {

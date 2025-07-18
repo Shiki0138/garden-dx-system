@@ -164,7 +164,7 @@ describe('errorHandler', () => {
 
       expect(result1.type).toBe('unknown');
       expect(result1.message).toContain('不明なエラー');
-      
+
       expect(result2.type).toBe('unknown');
       expect(result2.message).toContain('不明なエラー');
     });
@@ -282,7 +282,7 @@ describe('errorHandler', () => {
   describe('logError', () => {
     test('エラーログの出力', () => {
       const { log } = require('../logger');
-      
+
       const error = new Error('テストエラー');
       const context = createErrorContext({ action: 'test' });
 
@@ -302,7 +302,7 @@ describe('errorHandler', () => {
 
     test('非エラーオブジェクトのログ', () => {
       const { log } = require('../logger');
-      
+
       const errorLikeObject = {
         message: 'カスタムエラー',
         code: 'CUSTOM_ERROR',
@@ -426,7 +426,7 @@ describe('errorHandler', () => {
       circularError.self = circularError; // 循環参照作成
 
       const context = createErrorContext({ action: 'test' });
-      
+
       // 循環参照があってもエラーを起こさないことを確認
       expect(() => {
         logError(circularError, context);

@@ -25,7 +25,7 @@ const useFocusManagement = () => {
   const [lastKeyDown, setLastKeyDown] = useState(null);
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = event => {
       setLastKeyDown(event.key);
       if (event.key === 'Tab') {
         setFocusVisible(true);
@@ -49,251 +49,254 @@ const useFocusManagement = () => {
 };
 
 // ライブリージョン（動的コンテンツの読み上げ）
-const LiveRegion = memo(({ 
-  children, 
-  politeness = 'polite', // 'polite' | 'assertive' | 'off'
-  atomic = false,
-  relevant = 'additions text',
-  className 
-}) => (
-  <div
-    aria-live={politeness}
-    aria-atomic={atomic}
-    aria-relevant={relevant}
-    className={className}
-  >
-    {children}
-  </div>
-));
+const LiveRegion = memo(
+  ({
+    children,
+    politeness = 'polite', // 'polite' | 'assertive' | 'off'
+    atomic = false,
+    relevant = 'additions text',
+    className,
+  }) => (
+    <div aria-live={politeness} aria-atomic={atomic} aria-relevant={relevant} className={className}>
+      {children}
+    </div>
+  )
+);
 
 // アクセシブルボタン
-const AccessibleButton = memo(({
-  children,
-  onClick,
-  disabled = false,
-  ariaLabel,
-  ariaDescribedBy,
-  variant = 'primary',
-  size = 'medium',
-  type = 'button',
-  ...props
-}) => {
-  const { focusVisible } = useFocusManagement();
-  const [isPressed, setIsPressed] = useState(false);
+const AccessibleButton = memo(
+  ({
+    children,
+    onClick,
+    disabled = false,
+    ariaLabel,
+    ariaDescribedBy,
+    variant = 'primary',
+    size = 'medium',
+    type = 'button',
+    ...props
+  }) => {
+    const { focusVisible } = useFocusManagement();
+    const [isPressed, setIsPressed] = useState(false);
 
-  const handleKeyDown = useCallback((event) => {
-    if (event.key === ' ' || event.key === 'Enter') {
-      event.preventDefault();
-      setIsPressed(true);
-    }
-  }, []);
-
-  const handleKeyUp = useCallback((event) => {
-    if (event.key === ' ' || event.key === 'Enter') {
-      event.preventDefault();
-      setIsPressed(false);
-      if (!disabled) {
-        onClick?.(event);
+    const handleKeyDown = useCallback(event => {
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();
+        setIsPressed(true);
       }
-    }
-  }, [disabled, onClick]);
+    }, []);
 
-  const handleClick = useCallback((event) => {
-    if (!disabled) {
-      onClick?.(event);
-    }
-  }, [disabled, onClick]);
+    const handleKeyUp = useCallback(
+      event => {
+        if (event.key === ' ' || event.key === 'Enter') {
+          event.preventDefault();
+          setIsPressed(false);
+          if (!disabled) {
+            onClick?.(event);
+          }
+        }
+      },
+      [disabled, onClick]
+    );
 
-  return (
-    <StyledAccessibleButton
-      type={type}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      onKeyUp={handleKeyUp}
-      disabled={disabled}
-      aria-label={ariaLabel}
-      aria-describedby={ariaDescribedBy}
-      aria-pressed={isPressed}
-      $variant={variant}
-      $size={size}
-      $focusVisible={focusVisible}
-      {...props}
-    >
-      {children}
-    </StyledAccessibleButton>
-  );
-});
+    const handleClick = useCallback(
+      event => {
+        if (!disabled) {
+          onClick?.(event);
+        }
+      },
+      [disabled, onClick]
+    );
 
-// アクセシブル入力フィールド
-const AccessibleInput = memo(({
-  label,
-  id,
-  type = 'text',
-  required = false,
-  error,
-  helpText,
-  placeholder,
-  value,
-  onChange,
-  autoComplete,
-  ...props
-}) => {
-  const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
-  const errorId = `${inputId}-error`;
-  const helpId = `${inputId}-help`;
-  const { focusVisible } = useFocusManagement();
-
-  return (
-    <InputContainer>
-      <InputLabel htmlFor={inputId} $required={required}>
-        {label}
-        {required && (
-          <>
-            <RequiredAsterisk aria-hidden="true">*</RequiredAsterisk>
-            <ScreenReaderOnly>必須項目</ScreenReaderOnly>
-          </>
-        )}
-      </InputLabel>
-      
-      <StyledInput
-        id={inputId}
+    return (
+      <StyledAccessibleButton
         type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        autoComplete={autoComplete}
-        aria-invalid={!!error}
-        aria-describedby={`${error ? errorId : ''} ${helpText ? helpId : ''}`.trim()}
-        $hasError={!!error}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-describedby={ariaDescribedBy}
+        aria-pressed={isPressed}
+        $variant={variant}
+        $size={size}
         $focusVisible={focusVisible}
         {...props}
-      />
-      
-      {helpText && (
-        <HelpText id={helpId} role="note">
-          {helpText}
-        </HelpText>
-      )}
-      
-      {error && (
-        <ErrorMessage id={errorId} role="alert" aria-live="polite">
-          <span aria-hidden="true">⚠️</span> {error}
-        </ErrorMessage>
-      )}
-    </InputContainer>
-  );
-});
+      >
+        {children}
+      </StyledAccessibleButton>
+    );
+  }
+);
+
+// アクセシブル入力フィールド
+const AccessibleInput = memo(
+  ({
+    label,
+    id,
+    type = 'text',
+    required = false,
+    error,
+    helpText,
+    placeholder,
+    value,
+    onChange,
+    autoComplete,
+    ...props
+  }) => {
+    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+    const errorId = `${inputId}-error`;
+    const helpId = `${inputId}-help`;
+    const { focusVisible } = useFocusManagement();
+
+    return (
+      <InputContainer>
+        <InputLabel htmlFor={inputId} $required={required}>
+          {label}
+          {required && (
+            <>
+              <RequiredAsterisk aria-hidden="true">*</RequiredAsterisk>
+              <ScreenReaderOnly>必須項目</ScreenReaderOnly>
+            </>
+          )}
+        </InputLabel>
+
+        <StyledInput
+          id={inputId}
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          autoComplete={autoComplete}
+          aria-invalid={!!error}
+          aria-describedby={`${error ? errorId : ''} ${helpText ? helpId : ''}`.trim()}
+          $hasError={!!error}
+          $focusVisible={focusVisible}
+          {...props}
+        />
+
+        {helpText && (
+          <HelpText id={helpId} role="note">
+            {helpText}
+          </HelpText>
+        )}
+
+        {error && (
+          <ErrorMessage id={errorId} role="alert" aria-live="polite">
+            <span aria-hidden="true">⚠️</span> {error}
+          </ErrorMessage>
+        )}
+      </InputContainer>
+    );
+  }
+);
 
 // アクセシブルモーダル
-const AccessibleModal = memo(({
-  isOpen,
-  onClose,
-  title,
-  children,
-  closeOnEscape = true,
-  closeOnOverlay = true,
-  ...props
-}) => {
-  const modalRef = useRef(null);
-  const previousFocusRef = useRef(null);
+const AccessibleModal = memo(
+  ({ isOpen, onClose, title, children, closeOnEscape = true, closeOnOverlay = true, ...props }) => {
+    const modalRef = useRef(null);
+    const previousFocusRef = useRef(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      // 前のフォーカス要素を記憶
-      previousFocusRef.current = document.activeElement;
-      
-      // モーダル内の最初のフォーカス可能要素にフォーカス
-      const focusableElements = modalRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      
-      if (focusableElements?.length > 0) {
-        focusableElements[0].focus();
-      }
-      
-      // body のスクロールを無効化
-      document.body.style.overflow = 'hidden';
-    } else {
-      // 前のフォーカス要素に戻す
-      if (previousFocusRef.current) {
-        previousFocusRef.current.focus();
-      }
-      
-      // body のスクロールを有効化
-      document.body.style.overflow = '';
-    }
+    useEffect(() => {
+      if (isOpen) {
+        // 前のフォーカス要素を記憶
+        previousFocusRef.current = document.activeElement;
 
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+        // モーダル内の最初のフォーカス可能要素にフォーカス
+        const focusableElements = modalRef.current?.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
 
-  const handleKeyDown = useCallback((event) => {
-    if (!isOpen) return;
-
-    if (event.key === 'Escape' && closeOnEscape) {
-      onClose();
-    }
-
-    // Tab キーでのフォーカストラップ
-    if (event.key === 'Tab') {
-      const focusableElements = modalRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      
-      if (focusableElements?.length > 0) {
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
-
-        if (event.shiftKey && document.activeElement === firstElement) {
-          event.preventDefault();
-          lastElement.focus();
-        } else if (!event.shiftKey && document.activeElement === lastElement) {
-          event.preventDefault();
-          firstElement.focus();
+        if (focusableElements?.length > 0) {
+          focusableElements[0].focus();
         }
+
+        // body のスクロールを無効化
+        document.body.style.overflow = 'hidden';
+      } else {
+        // 前のフォーカス要素に戻す
+        if (previousFocusRef.current) {
+          previousFocusRef.current.focus();
+        }
+
+        // body のスクロールを有効化
+        document.body.style.overflow = '';
       }
-    }
-  }, [isOpen, closeOnEscape, onClose]);
 
-  const handleOverlayClick = useCallback((event) => {
-    if (closeOnOverlay && event.target === event.currentTarget) {
-      onClose();
-    }
-  }, [closeOnOverlay, onClose]);
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }, [isOpen]);
 
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
+    const handleKeyDown = useCallback(
+      event => {
+        if (!isOpen) return;
 
-  if (!isOpen) return null;
+        if (event.key === 'Escape' && closeOnEscape) {
+          onClose();
+        }
 
-  return (
-    <ModalOverlay onClick={handleOverlayClick} role="presentation">
-      <ModalContainer
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-        {...props}
-      >
-        <ModalHeader>
-          <ModalTitle id="modal-title">{title}</ModalTitle>
-          <CloseButton
-            onClick={onClose}
-            aria-label="モーダルを閉じる"
-            type="button"
-          >
-            ×
-          </CloseButton>
-        </ModalHeader>
-        <ModalContent>{children}</ModalContent>
-      </ModalContainer>
-    </ModalOverlay>
-  );
-});
+        // Tab キーでのフォーカストラップ
+        if (event.key === 'Tab') {
+          const focusableElements = modalRef.current?.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+
+          if (focusableElements?.length > 0) {
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (event.shiftKey && document.activeElement === firstElement) {
+              event.preventDefault();
+              lastElement.focus();
+            } else if (!event.shiftKey && document.activeElement === lastElement) {
+              event.preventDefault();
+              firstElement.focus();
+            }
+          }
+        }
+      },
+      [isOpen, closeOnEscape, onClose]
+    );
+
+    const handleOverlayClick = useCallback(
+      event => {
+        if (closeOnOverlay && event.target === event.currentTarget) {
+          onClose();
+        }
+      },
+      [closeOnOverlay, onClose]
+    );
+
+    useEffect(() => {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [handleKeyDown]);
+
+    if (!isOpen) return null;
+
+    return (
+      <ModalOverlay onClick={handleOverlayClick} role="presentation">
+        <ModalContainer
+          ref={modalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          {...props}
+        >
+          <ModalHeader>
+            <ModalTitle id="modal-title">{title}</ModalTitle>
+            <CloseButton onClick={onClose} aria-label="モーダルを閉じる" type="button">
+              ×
+            </CloseButton>
+          </ModalHeader>
+          <ModalContent>{children}</ModalContent>
+        </ModalContainer>
+      </ModalOverlay>
+    );
+  }
+);
 
 // スキップリンク
 const SkipLinks = memo(() => (
@@ -304,12 +307,7 @@ const SkipLinks = memo(() => (
 ));
 
 // アクセシブルツールチップ
-const AccessibleTooltip = memo(({
-  children,
-  content,
-  position = 'top',
-  delay = 300
-}) => {
+const AccessibleTooltip = memo(({ children, content, position = 'top', delay = 300 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [timeoutId, setTimeoutId] = useState(null);
   const tooltipId = `tooltip-${Math.random().toString(36).substr(2, 9)}`;
@@ -326,11 +324,14 @@ const AccessibleTooltip = memo(({
     setIsVisible(false);
   }, [timeoutId]);
 
-  const handleKeyDown = useCallback((event) => {
-    if (event.key === 'Escape') {
-      hideTooltip();
-    }
-  }, [hideTooltip]);
+  const handleKeyDown = useCallback(
+    event => {
+      if (event.key === 'Escape') {
+        hideTooltip();
+      }
+    },
+    [hideTooltip]
+  );
 
   return (
     <TooltipContainer
@@ -341,14 +342,10 @@ const AccessibleTooltip = memo(({
       onKeyDown={handleKeyDown}
     >
       {React.cloneElement(children, {
-        'aria-describedby': isVisible ? tooltipId : undefined
+        'aria-describedby': isVisible ? tooltipId : undefined,
       })}
       {isVisible && (
-        <TooltipContent
-          id={tooltipId}
-          role="tooltip"
-          $position={position}
-        >
+        <TooltipContent id={tooltipId} role="tooltip" $position={position}>
           {content}
         </TooltipContent>
       )}
@@ -358,9 +355,7 @@ const AccessibleTooltip = memo(({
 
 // 色覚テストユーティリティ
 const ColorVisionSimulator = memo(({ filter, children }) => (
-  <div style={{ filter: filter }}>
-    {children}
-  </div>
+  <div style={{ filter: filter }}>{children}</div>
 ));
 
 // アクセシビリティ設定パネル
@@ -369,15 +364,15 @@ const AccessibilitySettings = memo(() => {
     highContrast: false,
     reducedMotion: false,
     fontSize: 'normal',
-    colorBlindMode: 'none'
+    colorBlindMode: 'none',
   });
 
   const handleSettingChange = useCallback((setting, value) => {
     setSettings(prev => ({ ...prev, [setting]: value }));
-    
+
     // CSSカスタムプロパティを更新
     const root = document.documentElement;
-    
+
     switch (setting) {
       case 'highContrast':
         root.style.setProperty('--high-contrast', value ? '1' : '0');
@@ -395,7 +390,7 @@ const AccessibilitySettings = memo(() => {
           none: 'none',
           protanopia: 'url(#protanopia)',
           deuteranopia: 'url(#deuteranopia)',
-          tritanopia: 'url(#tritanopia)'
+          tritanopia: 'url(#tritanopia)',
         };
         root.style.setProperty('--color-filter', filterMap[value]);
         break;
@@ -406,13 +401,13 @@ const AccessibilitySettings = memo(() => {
   return (
     <SettingsPanel role="region" aria-label="アクセシビリティ設定">
       <SettingsTitle>アクセシビリティ設定</SettingsTitle>
-      
+
       <SettingGroup>
         <SettingLabel>
           <input
             type="checkbox"
             checked={settings.highContrast}
-            onChange={(e) => handleSettingChange('highContrast', e.target.checked)}
+            onChange={e => handleSettingChange('highContrast', e.target.checked)}
           />
           <SettingText>ハイコントラスト</SettingText>
         </SettingLabel>
@@ -423,7 +418,7 @@ const AccessibilitySettings = memo(() => {
           <input
             type="checkbox"
             checked={settings.reducedMotion}
-            onChange={(e) => handleSettingChange('reducedMotion', e.target.checked)}
+            onChange={e => handleSettingChange('reducedMotion', e.target.checked)}
           />
           <SettingText>アニメーション削減</SettingText>
         </SettingLabel>
@@ -434,7 +429,7 @@ const AccessibilitySettings = memo(() => {
           <SettingText>文字サイズ:</SettingText>
           <select
             value={settings.fontSize}
-            onChange={(e) => handleSettingChange('fontSize', e.target.value)}
+            onChange={e => handleSettingChange('fontSize', e.target.value)}
           >
             <option value="small">小</option>
             <option value="normal">標準</option>
@@ -448,7 +443,7 @@ const AccessibilitySettings = memo(() => {
           <SettingText>色覚モード:</SettingText>
           <select
             value={settings.colorBlindMode}
-            onChange={(e) => handleSettingChange('colorBlindMode', e.target.value)}
+            onChange={e => handleSettingChange('colorBlindMode', e.target.value)}
           >
             <option value="none">通常</option>
             <option value="protanopia">1型色覚</option>
@@ -473,7 +468,7 @@ const StyledAccessibleButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   /* サイズ */
   ${props => {
     switch (props.$size) {
@@ -497,7 +492,7 @@ const StyledAccessibleButton = styled.button`
         `;
     }
   }}
-  
+
   /* バリエーション */
   ${props => {
     switch (props.$variant) {
@@ -531,25 +526,27 @@ const StyledAccessibleButton = styled.button`
   }}
   
   /* フォーカス表示 */
-  ${props => props.$focusVisible && css`
-    &:focus {
-      outline: 3px solid #fbbf24;
-      outline-offset: 2px;
-    }
-  `}
+  ${props =>
+    props.$focusVisible &&
+    css`
+      &:focus {
+        outline: 3px solid #fbbf24;
+        outline-offset: 2px;
+      }
+    `}
   
   /* 無効状態 */
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-  
+
   /* ハイコントラストモード */
   @media (prefers-contrast: high) {
     border-width: 2px;
     border-style: solid;
   }
-  
+
   /* 動きの削減 */
   @media (prefers-reduced-motion: reduce) {
     transition: none;
@@ -578,17 +575,17 @@ const RequiredAsterisk = styled.span`
 
 const StyledInput = styled.input`
   padding: 12px 16px;
-  border: 2px solid ${props => props.$hasError ? '#dc2626' : '#d1d5db'};
+  border: 2px solid ${props => (props.$hasError ? '#dc2626' : '#d1d5db')};
   border-radius: 4px;
   font-size: 16px;
   transition: border-color 0.2s ease;
-  
+
   &:focus {
-    outline: ${props => props.$focusVisible ? '3px solid #fbbf24' : 'none'};
+    outline: ${props => (props.$focusVisible ? '3px solid #fbbf24' : 'none')};
     outline-offset: 2px;
-    border-color: ${props => props.$hasError ? '#dc2626' : '#3b82f6'};
+    border-color: ${props => (props.$hasError ? '#dc2626' : '#3b82f6')};
   }
-  
+
   @media (prefers-reduced-motion: reduce) {
     transition: none;
   }
@@ -650,11 +647,11 @@ const CloseButton = styled.button`
   cursor: pointer;
   color: #6b7280;
   padding: 4px;
-  
+
   &:hover {
     color: #374151;
   }
-  
+
   &:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
@@ -670,7 +667,7 @@ const SkipLinksContainer = styled.div`
   top: -100px;
   left: 0;
   z-index: 10000;
-  
+
   &:focus-within {
     top: 0;
   }
@@ -685,7 +682,7 @@ const SkipLink = styled.a`
   padding: 8px 16px;
   text-decoration: none;
   z-index: 10001;
-  
+
   &:focus {
     top: 0;
   }
@@ -705,7 +702,7 @@ const TooltipContent = styled.div`
   font-size: 14px;
   white-space: nowrap;
   z-index: 1000;
-  
+
   ${props => {
     switch (props.$position) {
       case 'bottom':
@@ -779,7 +776,7 @@ export {
   SkipLinks,
   AccessibleTooltip,
   ColorVisionSimulator,
-  AccessibilitySettings
+  AccessibilitySettings,
 };
 
 export default {
@@ -792,5 +789,5 @@ export default {
   SkipLinks,
   AccessibleTooltip,
   ColorVisionSimulator,
-  AccessibilitySettings
+  AccessibilitySettings,
 };

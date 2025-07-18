@@ -12,22 +12,22 @@ export const BREAKPOINTS = {
 
 // フォントサイズ（iOS自動ズーム防止のため16px以上）
 export const FONT_SIZES = {
-  xs: '14px',     // 補助テキスト用（重要でない情報）
-  sm: '16px',     // 最小推奨サイズ
-  base: '16px',   // 基本サイズ
-  md: '18px',     // 中サイズ
-  lg: '20px',     // 大サイズ
-  xl: '24px',     // 特大サイズ
-  '2xl': '28px',  // 見出し用
-  '3xl': '32px',  // 大見出し用
+  xs: '14px', // 補助テキスト用（重要でない情報）
+  sm: '16px', // 最小推奨サイズ
+  base: '16px', // 基本サイズ
+  md: '18px', // 中サイズ
+  lg: '20px', // 大サイズ
+  xl: '24px', // 特大サイズ
+  '2xl': '28px', // 見出し用
+  '3xl': '32px', // 大見出し用
 };
 
 // タッチターゲットサイズ（最小44px）
 export const TOUCH_SIZES = {
-  small: '44px',   // 最小推奨サイズ
-  medium: '48px',  // 標準サイズ
-  large: '56px',   // 大きめサイズ
-  xlarge: '64px',  // 特大サイズ（FABなど）
+  small: '44px', // 最小推奨サイズ
+  medium: '48px', // 標準サイズ
+  large: '56px', // 大きめサイズ
+  xlarge: '64px', // 特大サイズ（FABなど）
 };
 
 // スペーシング
@@ -49,32 +49,32 @@ export const MOBILE_STYLES = {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
   `,
-  
+
   // タッチ最適化
   touchOptimized: `
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     user-select: none;
   `,
-  
+
   // セーフエリア対応
   safeArea: `
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
     padding-bottom: env(safe-area-inset-bottom);
   `,
-  
+
   // キーボード対応
   keyboardAware: `
     padding-bottom: env(keyboard-inset-height, 0);
   `,
-  
+
   // スクロール最適化
   smoothScroll: `
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   `,
-  
+
   // 入力フィールド最適化
   inputOptimized: `
     font-size: 16px;
@@ -84,7 +84,7 @@ export const MOBILE_STYLES = {
     -webkit-border-radius: 8px;
     border-radius: 8px;
   `,
-  
+
   // ボタン最適化
   buttonOptimized: `
     min-height: 48px;

@@ -1,6 +1,6 @@
 /**
  * Supabase設定ファイル
- * 
+ *
  * このファイルではSupabaseの接続設定を一元管理します。
  * 将来的にプロジェクトを切り分ける際も、このファイルのみを変更すれば対応可能です。
  */
@@ -16,7 +16,7 @@ export const SUPABASE_CONFIG = {
   // 環境変数から取得（.env, .env.production で管理）
   url: process.env.REACT_APP_SUPABASE_URL,
   anonKey: process.env.REACT_APP_SUPABASE_ANON_KEY,
-  
+
   // オプション設定
   options: {
     auth: {
@@ -38,7 +38,7 @@ export const SUPABASE_CONFIG = {
 };
 
 // テーブル名の取得（プレフィックス付き）
-export const getTableName = (tableName) => {
+export const getTableName = tableName => {
   return `${TABLE_PREFIX}${tableName}`;
 };
 
@@ -48,36 +48,36 @@ export const TABLES = {
   COMPANIES: getTableName('companies'),
   USERS: getTableName('users'),
   USER_PROFILES: getTableName('user_profiles'),
-  
+
   // 見積管理
   ESTIMATES: getTableName('estimates'),
   ESTIMATE_ITEMS: getTableName('estimate_items'),
   ESTIMATE_TEMPLATES: getTableName('estimate_templates'),
-  
+
   // 工程管理
   PROJECTS: getTableName('projects'),
   PROJECT_SCHEDULES: getTableName('project_schedules'),
   PROJECT_TASKS: getTableName('project_tasks'),
-  
+
   // 予算管理
   BUDGETS: getTableName('budgets'),
   BUDGET_ITEMS: getTableName('budget_items'),
   ACTUAL_COSTS: getTableName('actual_costs'),
-  
+
   // 請求管理
   INVOICES: getTableName('invoices'),
   INVOICE_ITEMS: getTableName('invoice_items'),
   PAYMENTS: getTableName('payments'),
-  
+
   // マスタデータ
   PRICE_MASTER: getTableName('price_master'),
   CATEGORIES: getTableName('categories'),
   UNITS: getTableName('units'),
-  
+
   // 顧客管理
   CUSTOMERS: getTableName('customers'),
   CUSTOMER_CONTACTS: getTableName('customer_contacts'),
-  
+
   // その他
   NOTIFICATIONS: getTableName('notifications'),
   ACTIVITY_LOGS: getTableName('activity_logs'),
@@ -100,7 +100,7 @@ export const AUTH_CONFIG = {
     MANAGER: 'manager',
     EMPLOYEE: 'employee',
   },
-  
+
   // 権限
   permissions: {
     VIEW_PROFIT: 'view_profit',
@@ -108,7 +108,7 @@ export const AUTH_CONFIG = {
     MANAGE_STAFF: 'manage_staff',
     VIEW_ALL_PROJECTS: 'view_all_projects',
   },
-  
+
   // セッション設定
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7日間
@@ -120,10 +120,10 @@ export const AUTH_CONFIG = {
 export const API_CONFIG = {
   // APIベースURL
   baseUrl: process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_SUPABASE_URL,
-  
+
   // タイムアウト設定
-  timeout: parseInt(process.env.REACT_APP_API_TIMEOUT) || 30000,
-  
+  timeout: parseInt(process.env.REACT_APP_API_TIMEOUT, 10) || 30000,
+
   // リトライ設定
   retry: {
     count: 3,

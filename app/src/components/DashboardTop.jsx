@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { 
-  FileText, 
-  Calendar, 
-  DollarSign, 
+import {
+  FileText,
+  Calendar,
+  DollarSign,
   Package,
   TrendingUp,
   Clock,
@@ -11,7 +11,7 @@ import {
   AlertCircle,
   Users,
   BarChart3,
-  ArrowRight
+  ArrowRight,
 } from 'lucide-react';
 
 // スタイルコンポーネント
@@ -99,7 +99,7 @@ const StatValue = styled.div`
 
 const StatChange = styled.div`
   font-size: 0.9rem;
-  color: ${props => props.positive ? '#10b981' : '#ef4444'};
+  color: ${props => (props.positive ? '#10b981' : '#ef4444')};
   display: flex;
   align-items: center;
   gap: 4px;
@@ -109,7 +109,7 @@ const MainGrid = styled.div`
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 24px;
-  
+
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
   }
@@ -282,7 +282,7 @@ const DashboardTop = ({ data, onModuleChange, user }) => {
       positive: true,
       icon: <FileText size={24} />,
       color: '#3b82f6',
-      bgColor: '#eff6ff'
+      bgColor: '#eff6ff',
     },
     {
       title: '今月の売上',
@@ -291,7 +291,7 @@ const DashboardTop = ({ data, onModuleChange, user }) => {
       positive: true,
       icon: <DollarSign size={24} />,
       color: '#10b981',
-      bgColor: '#f0fdf4'
+      bgColor: '#f0fdf4',
     },
     {
       title: 'アクティブプロジェクト',
@@ -300,7 +300,7 @@ const DashboardTop = ({ data, onModuleChange, user }) => {
       positive: true,
       icon: <BarChart3 size={24} />,
       color: '#f59e0b',
-      bgColor: '#fffbeb'
+      bgColor: '#fffbeb',
     },
     {
       title: '完了工程',
@@ -309,8 +309,8 @@ const DashboardTop = ({ data, onModuleChange, user }) => {
       positive: true,
       icon: <CheckCircle size={24} />,
       color: '#8b5cf6',
-      bgColor: '#f5f3ff'
-    }
+      bgColor: '#f5f3ff',
+    },
   ];
 
   const quickActions = [
@@ -318,26 +318,26 @@ const DashboardTop = ({ data, onModuleChange, user }) => {
       icon: <FileText size={20} />,
       title: '新規見積作成',
       description: '見積書を作成します',
-      action: () => onModuleChange('estimate')
+      action: () => onModuleChange('estimate'),
     },
     {
       icon: <Calendar size={20} />,
       title: '工程表作成',
       description: 'プロジェクトの工程表を作成',
-      action: () => onModuleChange('process')
+      action: () => onModuleChange('process'),
     },
     {
       icon: <DollarSign size={20} />,
       title: '予算管理',
       description: '予算と実績を管理',
-      action: () => onModuleChange('budget')
+      action: () => onModuleChange('budget'),
     },
     {
       icon: <Package size={20} />,
       title: '請求書発行',
       description: '請求書を作成・発行',
-      action: () => onModuleChange('invoice')
-    }
+      action: () => onModuleChange('invoice'),
+    },
   ];
 
   const recentActivities = [
@@ -345,34 +345,38 @@ const DashboardTop = ({ data, onModuleChange, user }) => {
       icon: <FileText size={16} />,
       title: '見積書 #2024-001 が承認されました',
       time: '2時間前',
-      type: 'success'
+      type: 'success',
     },
     {
       icon: <Calendar size={16} />,
       title: '駒沢公園プロジェクトの工程が更新されました',
       time: '5時間前',
-      type: 'info'
+      type: 'info',
     },
     {
       icon: <AlertCircle size={16} />,
       title: '横浜プロジェクトの納期が近づいています',
       time: '1日前',
-      type: 'warning'
+      type: 'warning',
     },
     {
       icon: <Package size={16} />,
       title: '請求書 #INV-2024-015 が発行されました',
       time: '2日前',
-      type: 'success'
-    }
+      type: 'success',
+    },
   ];
 
-  const getActivityColor = (type) => {
-    switch(type) {
-      case 'success': return { color: '#10b981', bgColor: '#f0fdf4' };
-      case 'warning': return { color: '#f59e0b', bgColor: '#fffbeb' };
-      case 'info': return { color: '#3b82f6', bgColor: '#eff6ff' };
-      default: return { color: '#64748b', bgColor: '#f8fafc' };
+  const getActivityColor = type => {
+    switch (type) {
+      case 'success':
+        return { color: '#10b981', bgColor: '#f0fdf4' };
+      case 'warning':
+        return { color: '#f59e0b', bgColor: '#fffbeb' };
+      case 'info':
+        return { color: '#3b82f6', bgColor: '#eff6ff' };
+      default:
+        return { color: '#64748b', bgColor: '#f8fafc' };
     }
   };
 
@@ -461,9 +465,7 @@ const DashboardTop = ({ data, onModuleChange, user }) => {
               const colors = getActivityColor(activity.type);
               return (
                 <ActivityItem key={index}>
-                  <ActivityIcon {...colors}>
-                    {activity.icon}
-                  </ActivityIcon>
+                  <ActivityIcon {...colors}>{activity.icon}</ActivityIcon>
                   <ActivityContent>
                     <ActivityTitle>{activity.title}</ActivityTitle>
                     <ActivityTime>{activity.time}</ActivityTime>

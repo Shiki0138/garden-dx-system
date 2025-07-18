@@ -343,7 +343,7 @@
 }
 
 /* インプット要素 */
-input[type="number"] {
+input[type='number'] {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -352,7 +352,7 @@ input[type="number"] {
   width: 120px;
 }
 
-input[type="number"]:focus {
+input[type='number']:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
@@ -363,36 +363,36 @@ input[type="number"]:focus {
   .api-integration-test {
     padding: 16px;
   }
-  
+
   .test-header {
     padding: 20px;
   }
-  
+
   .test-header h2 {
     font-size: 1.5rem;
   }
-  
+
   .test-navigation {
     flex-direction: column;
   }
-  
+
   .test-content {
     padding: 20px;
   }
-  
+
   .button-group {
     flex-direction: column;
   }
-  
+
   .test-actions {
     flex-direction: column;
   }
-  
+
   .test-result-item {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .test-timestamp {
     margin: 4px 0 0 0;
   }
@@ -421,17 +421,17 @@ input[type="number"]:focus {
     background: #0f172a;
     color: #e2e8f0;
   }
-  
+
   .test-content,
   .test-results {
     background: #1e293b;
   }
-  
+
   .test-section {
     background: #334155;
     border-color: #475569;
   }
-  
+
   .test-navigation {
     background: #1e293b;
   }

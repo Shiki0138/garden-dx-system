@@ -12,12 +12,8 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import ItemsTable from '../ItemsTable';
 
 // DnD Provider でラップするヘルパー関数
-const renderWithDnD = (component) => {
-  return render(
-    <DndProvider backend={HTML5Backend}>
-      {component}
-    </DndProvider>
-  );
+const renderWithDnD = component => {
+  return render(<DndProvider backend={HTML5Backend}>{component}</DndProvider>);
 };
 
 // モックデータ
@@ -124,7 +120,7 @@ describe('ItemsTable', () => {
 
       // ヘッダーは表示される
       expect(screen.getByText('品目・摘要')).toBeInTheDocument();
-      
+
       // 合計行は表示される（0円）
       expect(screen.getByText('小計')).toBeInTheDocument();
     });
@@ -324,7 +320,7 @@ describe('ItemsTable', () => {
 
     test('調整額が0の場合は調整額行が表示されない', () => {
       const estimateWithoutAdjustment = { ...mockEstimate, adjustment_amount: 0 };
-      
+
       renderWithDnD(
         <ItemsTable
           items={mockItems}
@@ -393,7 +389,7 @@ describe('ItemsTable', () => {
       fireEvent.click(quantityCell);
 
       const input = screen.getByDisplayValue('2');
-      
+
       // 文字入力（number inputなので実際は入力されない）
       await userEvent.type(input, 'abc');
       fireEvent.blur(input);
@@ -407,7 +403,7 @@ describe('ItemsTable', () => {
 
     test('updateItem関数でエラーが発生した場合', async () => {
       const mockOnUpdateItemWithError = jest.fn().mockRejectedValue(new Error('Update failed'));
-      
+
       renderWithDnD(
         <ItemsTable
           items={mockItems}
@@ -447,7 +443,7 @@ describe('ItemsTable', () => {
 
       const deleteButtons = screen.getAllByTitle('削除');
       expect(deleteButtons).toHaveLength(3);
-      
+
       deleteButtons.forEach(button => {
         expect(button).toHaveAttribute('title', '削除');
       });
@@ -467,10 +463,10 @@ describe('ItemsTable', () => {
       // Tabキーでの移動とEnterキーでの編集開始をテスト
       const itemDescription = screen.getByText('クロマツ H3.0m');
       itemDescription.focus();
-      
+
       // クリックで編集開始
       fireEvent.click(itemDescription);
-      
+
       const textarea = screen.getByDisplayValue('クロマツ H3.0m');
       expect(textarea).toHaveFocus();
     });
@@ -492,7 +488,7 @@ describe('ItemsTable', () => {
       }));
 
       const startTime = performance.now();
-      
+
       renderWithDnD(
         <ItemsTable
           items={largeItems}
@@ -502,13 +498,13 @@ describe('ItemsTable', () => {
           estimate={mockEstimate}
         />
       );
-      
+
       const endTime = performance.now();
       const renderTime = endTime - startTime;
 
       // レンダリング時間が妥当な範囲内であることを確認
       expect(renderTime).toBeLessThan(3000); // 3秒以内
-      
+
       // 最初のアイテムが表示されることを確認
       expect(screen.getByText('項目1')).toBeInTheDocument();
     });

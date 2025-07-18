@@ -10,14 +10,14 @@ import { breakpoints, touchTarget, spacing } from '../styles/breakpoints';
  * </SwipeableContainer>
  */
 
-export const SwipeableContainer = ({ 
-  children, 
-  onSwipeLeft, 
-  onSwipeRight, 
-  onSwipeUp, 
+export const SwipeableContainer = ({
+  children,
+  onSwipeLeft,
+  onSwipeRight,
+  onSwipeUp,
   onSwipeDown,
   threshold = 50,
-  className 
+  className,
 }) => {
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
@@ -26,26 +26,26 @@ export const SwipeableContainer = ({
 
   const minSwipeDistance = threshold;
 
-  const onTouchStart = (e) => {
+  const onTouchStart = e => {
     setTouchEnd(null);
     setTouchStart({
       x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
+      y: e.targetTouches[0].clientY,
     });
     setIsScrolling(false);
   };
 
-  const onTouchMove = (e) => {
+  const onTouchMove = e => {
     if (!touchStart) return;
-    
+
     const currentTouch = {
       x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
+      y: e.targetTouches[0].clientY,
     };
-    
+
     const deltaX = Math.abs(currentTouch.x - touchStart.x);
     const deltaY = Math.abs(currentTouch.y - touchStart.y);
-    
+
     // 縦スクロールの場合はスワイプを無効化
     if (deltaY > deltaX) {
       setIsScrolling(true);
@@ -54,15 +54,15 @@ export const SwipeableContainer = ({
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd || isScrolling) return;
-    
+
     const distanceX = touchStart.x - touchEnd.x;
     const distanceY = touchStart.y - touchEnd.y;
-    
+
     const isLeftSwipe = distanceX > minSwipeDistance;
     const isRightSwipe = distanceX < -minSwipeDistance;
     const isUpSwipe = distanceY > minSwipeDistance;
     const isDownSwipe = distanceY < -minSwipeDistance;
-    
+
     if (isLeftSwipe && onSwipeLeft) {
       onSwipeLeft();
     } else if (isRightSwipe && onSwipeRight) {
@@ -74,10 +74,10 @@ export const SwipeableContainer = ({
     }
   };
 
-  const handleTouchMove = (e) => {
+  const handleTouchMove = e => {
     setTouchEnd({
       x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
+      y: e.targetTouches[0].clientY,
     });
     onTouchMove(e);
   };
@@ -98,39 +98,39 @@ export const SwipeableContainer = ({
 /**
  * タッチフィードバック付きボタン
  */
-export const TouchButton = ({ 
-  children, 
-  onClick, 
-  variant = 'primary', 
+export const TouchButton = ({
+  children,
+  onClick,
+  variant = 'primary',
   size = 'medium',
   disabled = false,
   loading = false,
   ripple = true,
   haptic = true,
   className,
-  ...props 
+  ...props
 }) => {
   const [isPressed, setIsPressed] = useState(false);
   const [rippleEffect, setRippleEffect] = useState(null);
   const buttonRef = useRef(null);
 
-  const handleTouchStart = (e) => {
+  const handleTouchStart = e => {
     setIsPressed(true);
-    
+
     // ハプティックフィードバック
     if (haptic && navigator.vibrate) {
       navigator.vibrate(10);
     }
-    
+
     // リップル効果
     if (ripple) {
       const rect = buttonRef.current.getBoundingClientRect();
       const size = Math.max(rect.width, rect.height);
       const x = e.touches[0].clientX - rect.left - size / 2;
       const y = e.touches[0].clientY - rect.top - size / 2;
-      
+
       setRippleEffect({ x, y, size });
-      
+
       setTimeout(() => setRippleEffect(null), 600);
     }
   };
@@ -139,7 +139,7 @@ export const TouchButton = ({
     setIsPressed(false);
   };
 
-  const handleClick = (e) => {
+  const handleClick = e => {
     if (disabled || loading) return;
     onClick?.(e);
   };
@@ -159,17 +159,9 @@ export const TouchButton = ({
       {...props}
     >
       {rippleEffect && (
-        <RippleEffect
-          x={rippleEffect.x}
-          y={rippleEffect.y}
-          size={rippleEffect.size}
-        />
+        <RippleEffect x={rippleEffect.x} y={rippleEffect.y} size={rippleEffect.size} />
       )}
-      {loading ? (
-        <LoadingSpinner size={size} />
-      ) : (
-        children
-      )}
+      {loading ? <LoadingSpinner size={size} /> : children}
     </TouchButtonContainer>
   );
 };
@@ -183,14 +175,14 @@ export const PullToRefresh = ({ onRefresh, children, threshold = 80 }) => {
   const [startY, setStartY] = useState(0);
   const containerRef = useRef(null);
 
-  const handleTouchStart = (e) => {
+  const handleTouchStart = e => {
     setStartY(e.touches[0].clientY);
   };
 
-  const handleTouchMove = (e) => {
+  const handleTouchMove = e => {
     const currentY = e.touches[0].clientY;
     const distance = currentY - startY;
-    
+
     if (distance > 0 && containerRef.current.scrollTop === 0) {
       e.preventDefault();
       setPullDistance(Math.min(distance, threshold * 1.5));
@@ -216,15 +208,13 @@ export const PullToRefresh = ({ onRefresh, children, threshold = 80 }) => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <PullIndicator
-        pullDistance={pullDistance}
-        threshold={threshold}
-        isRefreshing={isRefreshing}
-      >
+      <PullIndicator pullDistance={pullDistance} threshold={threshold} isRefreshing={isRefreshing}>
         {isRefreshing ? (
           <LoadingSpinner size="small" />
+        ) : pullDistance >= threshold ? (
+          '離してリフレッシュ'
         ) : (
-          pullDistance >= threshold ? '離してリフレッシュ' : 'プルしてリフレッシュ'
+          'プルしてリフレッシュ'
         )}
       </PullIndicator>
       {children}
@@ -236,9 +226,7 @@ export const PullToRefresh = ({ onRefresh, children, threshold = 80 }) => {
  * スワイプ可能なタブ
  */
 export const SwipeableTabs = ({ tabs, activeTab, onTabChange, children }) => {
-  const [currentIndex, setCurrentIndex] = useState(
-    tabs.findIndex(tab => tab.id === activeTab)
-  );
+  const [currentIndex, setCurrentIndex] = useState(tabs.findIndex(tab => tab.id === activeTab));
 
   const handleSwipeLeft = () => {
     const nextIndex = Math.min(currentIndex + 1, tabs.length - 1);
@@ -272,10 +260,7 @@ export const SwipeableTabs = ({ tabs, activeTab, onTabChange, children }) => {
           </TabButton>
         ))}
       </TabsHeader>
-      <SwipeableContainer
-        onSwipeLeft={handleSwipeLeft}
-        onSwipeRight={handleSwipeRight}
-      >
+      <SwipeableContainer onSwipeLeft={handleSwipeLeft} onSwipeRight={handleSwipeRight}>
         <TabContent>{children}</TabContent>
       </SwipeableContainer>
     </SwipeableTabsContainer>
@@ -300,7 +285,7 @@ const TouchButtonContainer = styled.button`
   transition: all 0.2s ease;
   user-select: none;
   touch-action: manipulation;
-  
+
   /* サイズ設定 */
   ${props => {
     switch (props.size) {
@@ -324,7 +309,7 @@ const TouchButtonContainer = styled.button`
         `;
     }
   }}
-  
+
   /* バリエーション */
   ${props => {
     switch (props.variant) {
@@ -358,17 +343,23 @@ const TouchButtonContainer = styled.button`
   }}
   
   /* 状態 */
-  ${props => props.isPressed && `
+  ${props =>
+    props.isPressed &&
+    `
     transform: scale(0.95);
     opacity: 0.8;
   `}
   
-  ${props => props.disabled && `
+  ${props =>
+    props.disabled &&
+    `
     opacity: 0.6;
     cursor: not-allowed;
   `}
   
-  ${props => props.loading && `
+  ${props =>
+    props.loading &&
+    `
     pointer-events: none;
   `}
   
@@ -376,7 +367,7 @@ const TouchButtonContainer = styled.button`
   ${breakpoints.tablet} {
     min-height: ${touchTarget.mobile};
   }
-  
+
   &:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
@@ -389,12 +380,12 @@ const RippleEffect = styled.div`
   background: rgba(255, 255, 255, 0.6);
   pointer-events: none;
   animation: ripple 0.6s ease-out;
-  
+
   left: ${props => props.x}px;
   top: ${props => props.y}px;
   width: ${props => props.size}px;
   height: ${props => props.size}px;
-  
+
   @keyframes ripple {
     0% {
       opacity: 1;
@@ -408,16 +399,20 @@ const RippleEffect = styled.div`
 `;
 
 const LoadingSpinner = styled.div`
-  width: ${props => props.size === 'small' ? '16px' : '20px'};
-  height: ${props => props.size === 'small' ? '16px' : '20px'};
+  width: ${props => (props.size === 'small' ? '16px' : '20px')};
+  height: ${props => (props.size === 'small' ? '16px' : '20px')};
   border: 2px solid transparent;
   border-top: 2px solid currentColor;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  
+
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 `;
 
@@ -456,12 +451,12 @@ const TabButton = styled.button`
   border: none;
   background: none;
   font-weight: 600;
-  color: ${props => props.active ? '#007bff' : '#666'};
-  border-bottom: 2px solid ${props => props.active ? '#007bff' : 'transparent'};
+  color: ${props => (props.active ? '#007bff' : '#666')};
+  border-bottom: 2px solid ${props => (props.active ? '#007bff' : 'transparent')};
   transition: all 0.2s ease;
   min-height: ${touchTarget.mobile};
   touch-action: manipulation;
-  
+
   &:focus {
     outline: none;
     background: rgba(0, 123, 255, 0.1);
@@ -477,5 +472,5 @@ export default {
   SwipeableContainer,
   TouchButton,
   PullToRefresh,
-  SwipeableTabs
+  SwipeableTabs,
 };

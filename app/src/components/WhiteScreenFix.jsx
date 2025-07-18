@@ -10,11 +10,11 @@ import styled, { keyframes } from 'styled-components';
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      hasError: false, 
+    this.state = {
+      hasError: false,
       error: null,
       errorInfo: null,
-      retryCount: 0
+      retryCount: 0,
     };
   }
 
@@ -25,12 +25,12 @@ class ErrorBoundary extends Component {
   componentDidCatch(error, errorInfo) {
     this.setState({
       error: error,
-      errorInfo: errorInfo
+      errorInfo: errorInfo,
     });
 
     // エラーログ送信
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     // 本番環境でのエラー報告
     if (process.env.NODE_ENV === 'production') {
       this.reportError(error, errorInfo);
@@ -45,7 +45,7 @@ class ErrorBoundary extends Component {
       componentStack: errorInfo.componentStack,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
-      url: window.location.href
+      url: window.location.href,
     });
   };
 
@@ -55,7 +55,7 @@ class ErrorBoundary extends Component {
         hasError: false,
         error: null,
         errorInfo: null,
-        retryCount: prevState.retryCount + 1
+        retryCount: prevState.retryCount + 1,
       }));
     } else {
       // 3回以上失敗した場合はページリロード
@@ -74,17 +74,16 @@ class ErrorBoundary extends Component {
           <ErrorIcon>⚠️</ErrorIcon>
           <ErrorTitle>申し訳ございません</ErrorTitle>
           <ErrorMessage>
-            アプリケーションでエラーが発生しました。<br />
+            アプリケーションでエラーが発生しました。
+            <br />
             しばらく時間をおいてから再度お試しください。
           </ErrorMessage>
-          
+
           <ErrorActions>
             <RetryButton onClick={this.handleRetry}>
               再試行 ({3 - this.state.retryCount}回まで)
             </RetryButton>
-            <ReloadButton onClick={this.handleReload}>
-              ページを再読み込み
-            </ReloadButton>
+            <ReloadButton onClick={this.handleReload}>ページを再読み込み</ReloadButton>
           </ErrorActions>
 
           {/* 開発環境でのデバッグ情報 */}
@@ -129,11 +128,7 @@ const ProgressiveLoader = ({ children, fallback }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  return (
-    <Suspense fallback={showFallback ? fallback : <div />}>
-      {children}
-    </Suspense>
-  );
+  return <Suspense fallback={showFallback ? fallback : <div />}>{children}</Suspense>;
 };
 
 // ネットワーク状態監視コンポーネント
@@ -159,7 +154,8 @@ const NetworkStatus = ({ children }) => {
         <OfflineIcon>📡</OfflineIcon>
         <OfflineTitle>オフラインです</OfflineTitle>
         <OfflineMessage>
-          インターネット接続を確認してください。<br />
+          インターネット接続を確認してください。
+          <br />
           接続が復旧すると自動的に再開されます。
         </OfflineMessage>
         <ConnectivityStatus>
@@ -177,9 +173,7 @@ const NetworkStatus = ({ children }) => {
 const AppWrapper = ({ children }) => (
   <ErrorBoundary>
     <NetworkStatus>
-      <ProgressiveLoader fallback={<LoadingSpinner />}>
-        {children}
-      </ProgressiveLoader>
+      <ProgressiveLoader fallback={<LoadingSpinner />}>{children}</ProgressiveLoader>
     </NetworkStatus>
   </ErrorBoundary>
 );
@@ -336,7 +330,7 @@ const StatusDot = styled.div`
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: ${props => props.$online ? '#10b981' : '#ef4444'};
+  background: ${props => (props.$online ? '#10b981' : '#ef4444')};
 `;
 
 const DebugInfo = styled.details`
@@ -360,7 +354,7 @@ const DebugTitle = styled.summary`
 const DebugContent = styled.div`
   font-size: 12px;
   color: #7f1d1d;
-  
+
   pre {
     background: #fef2f2;
     padding: 8px;
@@ -371,12 +365,6 @@ const DebugContent = styled.div`
   }
 `;
 
-export {
-  ErrorBoundary,
-  LoadingSpinner,
-  ProgressiveLoader,
-  NetworkStatus,
-  AppWrapper
-};
+export { ErrorBoundary, LoadingSpinner, ProgressiveLoader, NetworkStatus, AppWrapper };
 
 export default AppWrapper;

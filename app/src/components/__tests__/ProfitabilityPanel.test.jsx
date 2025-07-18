@@ -149,7 +149,7 @@ describe('ProfitabilityPanel', () => {
       // ラベルと値が同じ行に表示されていることを確認
       const costLabel = screen.getByText('原価:');
       const costValue = screen.getByText('￥80,000');
-      
+
       expect(costLabel).toBeInTheDocument();
       expect(costValue).toBeInTheDocument();
 

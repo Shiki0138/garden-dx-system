@@ -47,7 +47,7 @@ describe('useAuth', () => {
   describe('初期状態', () => {
     test('トークンがない場合の初期状態', async () => {
       const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
-      
+
       const { result } = renderHook(() => useAuth(), { wrapper });
 
       // 初期状態の確認
@@ -65,7 +65,7 @@ describe('useAuth', () => {
 
     test('トークンがある場合の初期状態', async () => {
       mockLocalStorage.getItem.mockReturnValue('valid-token');
-      
+
       const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
       const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -134,7 +134,7 @@ describe('useAuth', () => {
   describe('ログアウト機能', () => {
     test('ログアウト正常処理', async () => {
       mockLocalStorage.getItem.mockReturnValue('valid-token');
-      
+
       const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
       const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -160,7 +160,7 @@ describe('useAuth', () => {
   describe('権限チェック機能', () => {
     test('経営者の権限チェック', async () => {
       mockLocalStorage.getItem.mockReturnValue('valid-token');
-      
+
       const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
       const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -178,7 +178,7 @@ describe('useAuth', () => {
 
     test('役割チェック', async () => {
       mockLocalStorage.getItem.mockReturnValue('valid-token');
-      
+
       const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
       const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -210,7 +210,7 @@ describe('useAuth', () => {
   describe('カスタムフック', () => {
     test('usePermission フック', async () => {
       mockLocalStorage.getItem.mockReturnValue('valid-token');
-      
+
       const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
       const { result } = renderHook(() => usePermission(PERMISSIONS.INVOICE_CREATE), { wrapper });
 
@@ -223,7 +223,7 @@ describe('useAuth', () => {
 
     test('useRole フック', async () => {
       mockLocalStorage.getItem.mockReturnValue('valid-token');
-      
+
       const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
       const { result } = renderHook(() => useRole(USER_ROLES.MANAGER), { wrapper });
 
@@ -236,7 +236,7 @@ describe('useAuth', () => {
 
     test('useManagerPermission フック', async () => {
       mockLocalStorage.getItem.mockReturnValue('valid-token');
-      
+
       const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
       const { result } = renderHook(() => useManagerPermission(), { wrapper });
 
@@ -249,7 +249,7 @@ describe('useAuth', () => {
 
     test('useInvoicePermissions フック', async () => {
       mockLocalStorage.getItem.mockReturnValue('valid-token');
-      
+
       const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
       const { result } = renderHook(() => useInvoicePermissions(), { wrapper });
 
@@ -267,7 +267,7 @@ describe('useAuth', () => {
 
     test('useEstimatePermissions フック', async () => {
       mockLocalStorage.getItem.mockReturnValue('valid-token');
-      
+
       const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
       const { result } = renderHook(() => useEstimatePermissions(), { wrapper });
 

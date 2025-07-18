@@ -1,31 +1,31 @@
 /**
  * Garden DX 工程表管理システム - 高度な工程管理機能
- * 
+ *
  * @features
  * - 見積書項目から工程期間の手入力
  * - 期間を踏まえた工程表案の自動生成
  * - スライドバーでの微調整機能
  * - ガントチャート形式での表示
  * - PDF出力機能
- * 
+ *
  * @author Garden DX Team
  * @version 1.0.0
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { 
-  Calendar, 
-  Clock, 
-  Play, 
-  Pause, 
-  CheckCircle, 
-  Settings, 
+import {
+  Calendar,
+  Clock,
+  Play,
+  Pause,
+  CheckCircle,
+  Settings,
   Download,
   Edit3,
   Save,
   RotateCcw,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react';
 import InteractiveGanttChart from './InteractiveGanttChart';
 
@@ -46,7 +46,7 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
         dependencies: [],
         category: item.category || '一般作業',
         quantity: item.quantity || 1,
-        complexity: 'medium' // 'low' | 'medium' | 'high'
+        complexity: 'medium', // 'low' | 'medium' | 'high'
       }));
       setProcessItems(items);
     }
@@ -54,52 +54,48 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
 
   // 工程期間の更新
   const updateProcessDuration = useCallback((itemId, days) => {
-    setProcessItems(prev => 
-      prev.map(item => 
-        item.id === itemId 
-          ? { ...item, estimatedDays: Math.max(1, parseInt(days, 10) || 1) }
-          : item
+    setProcessItems(prev =>
+      prev.map(item =>
+        item.id === itemId ? { ...item, estimatedDays: Math.max(1, parseInt(days, 10) || 1) } : item
       )
     );
   }, []);
 
   // 複雑度の更新
   const updateComplexity = useCallback((itemId, complexity) => {
-    setProcessItems(prev => 
-      prev.map(item => 
-        item.id === itemId 
-          ? { ...item, complexity }
-          : item
-      )
+    setProcessItems(prev =>
+      prev.map(item => (item.id === itemId ? { ...item, complexity } : item))
     );
   }, []);
 
   // 工程表案の自動生成
   const generateSchedule = useCallback(() => {
     setIsGenerating(true);
-    
+
     setTimeout(() => {
       const schedule = [];
       const baseDate = new Date(startDate);
-      
+
       processItems.forEach((item, index) => {
         // 前の工程の終了日を基準に開始日を計算
-        const previousItemEndDate = index > 0 ? new Date(schedule[index - 1].endDate) : new Date(baseDate);
-        const startDateForItem = index > 0 ? 
-          new Date(previousItemEndDate.getTime() + 2 * 24 * 60 * 60 * 1000) : // 2日の余裕
-          new Date(baseDate);
-        
+        const previousItemEndDate =
+          index > 0 ? new Date(schedule[index - 1].endDate) : new Date(baseDate);
+        const startDateForItem =
+          index > 0
+            ? new Date(previousItemEndDate.getTime() + 2 * 24 * 60 * 60 * 1000) // 2日の余裕
+            : new Date(baseDate);
+
         // 複雑度による日数調整
         const complexityMultiplier = {
           low: 0.8,
           medium: 1.0,
-          high: 1.3
+          high: 1.3,
         };
-        
+
         const adjustedDays = Math.ceil(item.estimatedDays * complexityMultiplier[item.complexity]);
         const endDate = new Date(startDateForItem);
         endDate.setDate(endDate.getDate() + adjustedDays - 1);
-        
+
         schedule.push({
           id: item.id,
           name: item.name,
@@ -109,14 +105,14 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
           progress: 0,
           category: item.category,
           dependencies: item.dependencies,
-          status: 'pending'
+          status: 'pending',
         });
       });
-      
+
       setScheduleData(schedule);
       setCurrentView('schedule');
       setIsGenerating(false);
-      
+
       if (onScheduleUpdate) {
         onScheduleUpdate(schedule);
       }
@@ -128,37 +124,37 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
     setScheduleData(prev => {
       const updatedSchedule = [...prev];
       const itemIndex = updatedSchedule.findIndex(item => item.id === itemId);
-      
+
       if (itemIndex !== -1) {
         const item = updatedSchedule[itemIndex];
         const startDate = new Date(item.startDate);
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + newDuration - 1);
-        
+
         updatedSchedule[itemIndex] = {
           ...item,
           duration: newDuration,
-          endDate: endDate.toISOString().split('T')[0]
+          endDate: endDate.toISOString().split('T')[0],
         };
-        
+
         // 後続の工程日程を調整
         for (let i = itemIndex + 1; i < updatedSchedule.length; i++) {
           const prevItem = updatedSchedule[i - 1];
           const currentItem = updatedSchedule[i];
           const newStartDate = new Date(prevItem.endDate);
           newStartDate.setDate(newStartDate.getDate() + 2);
-          
+
           const newEndDate = new Date(newStartDate);
           newEndDate.setDate(newEndDate.getDate() + currentItem.duration - 1);
-          
+
           updatedSchedule[i] = {
             ...currentItem,
             startDate: newStartDate.toISOString().split('T')[0],
-            endDate: newEndDate.toISOString().split('T')[0]
+            endDate: newEndDate.toISOString().split('T')[0],
           };
         }
       }
-      
+
       return updatedSchedule;
     });
   }, []);
@@ -178,26 +174,20 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
         <Edit3 size={24} />
         工程期間の入力
       </SectionTitle>
-      
+
       <StartDateSetting>
         <label>工事開始予定日:</label>
-        <DateInput
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-        />
+        <DateInput type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
       </StartDateSetting>
 
       <ProcessItemsList>
-        {processItems.map((item) => (
+        {processItems.map(item => (
           <ProcessItemCard key={item.id}>
             <ItemHeader>
               <ItemName>{item.name}</ItemName>
-              <CategoryBadge category={item.category}>
-                {item.category}
-              </CategoryBadge>
+              <CategoryBadge category={item.category}>{item.category}</CategoryBadge>
             </ItemHeader>
-            
+
             <ItemControls>
               <DurationControl>
                 <label>作業日数:</label>
@@ -206,16 +196,16 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
                   min="1"
                   max="30"
                   value={item.estimatedDays}
-                  onChange={(e) => updateProcessDuration(item.id, e.target.value)}
+                  onChange={e => updateProcessDuration(item.id, e.target.value)}
                 />
                 <span>日</span>
               </DurationControl>
-              
+
               <ComplexityControl>
                 <label>複雑度:</label>
                 <ComplexitySelect
                   value={item.complexity}
-                  onChange={(e) => updateComplexity(item.id, e.target.value)}
+                  onChange={e => updateComplexity(item.id, e.target.value)}
                 >
                   <option value="low">低 (0.8倍)</option>
                   <option value="medium">中 (1.0倍)</option>
@@ -249,9 +239,7 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
       <SectionTitle>
         <Calendar size={24} />
         工程表の微調整
-        <ScheduleInfo>
-          総工期: {totalDuration}日間
-        </ScheduleInfo>
+        <ScheduleInfo>総工期: {totalDuration}日間</ScheduleInfo>
       </SectionTitle>
 
       <ScheduleList>
@@ -266,7 +254,7 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
                 </ItemDates>
               </ItemDetails>
             </ItemInfo>
-            
+
             <DurationSlider>
               <label>期間調整:</label>
               <SliderContainer>
@@ -275,7 +263,7 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
                   min="1"
                   max="15"
                   value={item.duration}
-                  onChange={(e) => adjustScheduleItem(item.id, parseInt(e.target.value, 10))}
+                  onChange={e => adjustScheduleItem(item.id, parseInt(e.target.value, 10))}
                 />
                 <SliderValue>{item.duration}日</SliderValue>
               </SliderContainer>
@@ -320,13 +308,16 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
           <TaskColumn>作業項目</TaskColumn>
           <TimelineColumn>工程表 (総工期: {totalDuration}日間)</TimelineColumn>
         </GanttHeader>
-        
+
         <GanttBody>
           {scheduleData.map((item, index) => {
-            const startDay = Math.ceil((new Date(item.startDate) - new Date(scheduleData[0].startDate)) / (1000 * 60 * 60 * 24));
+            const startDay = Math.ceil(
+              (new Date(item.startDate) - new Date(scheduleData[0].startDate)) /
+                (1000 * 60 * 60 * 24)
+            );
             const widthPercent = (item.duration / totalDuration) * 100;
             const leftPercent = (startDay / totalDuration) * 100;
-            
+
             return (
               <GanttRow key={item.id}>
                 <TaskCell>
@@ -338,7 +329,7 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
                   <GanttBar
                     style={{
                       left: `${leftPercent}%`,
-                      width: `${widthPercent}%`
+                      width: `${widthPercent}%`,
                     }}
                     category={item.category}
                   >
@@ -358,28 +349,25 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
       <Header>
         <Title>工程表管理システム</Title>
         <ViewTabs>
-          <ViewTab 
-            active={currentView === 'input'} 
-            onClick={() => setCurrentView('input')}
-          >
+          <ViewTab active={currentView === 'input'} onClick={() => setCurrentView('input')}>
             期間入力
           </ViewTab>
-          <ViewTab 
-            active={currentView === 'schedule'} 
+          <ViewTab
+            active={currentView === 'schedule'}
             onClick={() => setCurrentView('schedule')}
             disabled={scheduleData.length === 0}
           >
             工程調整
           </ViewTab>
-          <ViewTab 
-            active={currentView === 'gantt'} 
+          <ViewTab
+            active={currentView === 'gantt'}
             onClick={() => setCurrentView('gantt')}
             disabled={scheduleData.length === 0}
           >
             ガントチャート
           </ViewTab>
-          <ViewTab 
-            active={currentView === 'interactive'} 
+          <ViewTab
+            active={currentView === 'interactive'}
             onClick={() => setCurrentView('interactive')}
             disabled={scheduleData.length === 0}
           >
@@ -393,7 +381,7 @@ const ProcessScheduleManager = ({ estimateData, onScheduleUpdate }) => {
         {currentView === 'schedule' && renderScheduleView()}
         {currentView === 'gantt' && renderGanttView()}
         {currentView === 'interactive' && (
-          <InteractiveGanttChart 
+          <InteractiveGanttChart
             initialData={scheduleData}
             projectName={estimateData?.projectName || '工程表'}
           />
@@ -430,18 +418,18 @@ const ViewTabs = styled.div`
 
 const ViewTab = styled.button`
   padding: 8px 16px;
-  background: ${props => props.active ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)'};
+  background: ${props => (props.active ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)')};
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 6px;
   color: white;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.2);
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -489,7 +477,7 @@ const StartDateSetting = styled.div`
   background: #f8fdf8;
   border-radius: 8px;
   border: 1px solid #e0f0e0;
-  
+
   label {
     font-weight: 600;
     color: #2d5a2d;
@@ -515,7 +503,7 @@ const ProcessItemCard = styled.div`
   border-radius: 8px;
   padding: 16px;
   background: white;
-  
+
   &:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
@@ -538,18 +526,26 @@ const CategoryBadge = styled.span`
   padding: 4px 8px;
   background: ${props => {
     switch (props.category) {
-      case '植栽工事': return '#e8f5e8';
-      case '土工事': return '#f0e8d8';
-      case '設備工事': return '#e8f0f8';
-      default: return '#f5f5f5';
+      case '植栽工事':
+        return '#e8f5e8';
+      case '土工事':
+        return '#f0e8d8';
+      case '設備工事':
+        return '#e8f0f8';
+      default:
+        return '#f5f5f5';
     }
   }};
   color: ${props => {
     switch (props.category) {
-      case '植栽工事': return '#2d5a2d';
-      case '土工事': return '#8b4513';
-      case '設備工事': return '#1e40af';
-      default: return '#666';
+      case '植栽工事':
+        return '#2d5a2d';
+      case '土工事':
+        return '#8b4513';
+      case '設備工事':
+        return '#1e40af';
+      default:
+        return '#666';
     }
   }};
   border-radius: 4px;
@@ -567,7 +563,7 @@ const DurationControl = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   label {
     font-size: 14px;
     color: #666;
@@ -587,7 +583,7 @@ const ComplexityControl = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   label {
     font-size: 14px;
     color: #666;
@@ -614,25 +610,29 @@ const GenerateButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(45, 90, 45, 0.3);
   }
-  
+
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
   }
-  
+
   .spinning {
     animation: spin 1s linear infinite;
   }
-  
+
   @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;
 
@@ -690,7 +690,7 @@ const DurationSlider = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  
+
   label {
     font-size: 14px;
     color: #666;
@@ -702,14 +702,14 @@ const SliderContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  
-  input[type="range"] {
+
+  input[type='range'] {
     width: 120px;
     height: 6px;
     border-radius: 3px;
     background: #e0f0e0;
     outline: none;
-    
+
     &::-webkit-slider-thumb {
       appearance: none;
       width: 18px;
@@ -718,7 +718,7 @@ const SliderContainer = styled.div`
       background: #2d5a2d;
       cursor: pointer;
     }
-    
+
     &::-moz-range-thumb {
       width: 18px;
       height: 18px;
@@ -749,16 +749,16 @@ const ActionButton = styled.button`
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  border: 1px solid ${props => props.variant === 'primary' ? '#2d5a2d' : '#ddd'};
-  background: ${props => props.variant === 'primary' ? '#2d5a2d' : 'white'};
-  color: ${props => props.variant === 'primary' ? 'white' : '#666'};
+  border: 1px solid ${props => (props.variant === 'primary' ? '#2d5a2d' : '#ddd')};
+  background: ${props => (props.variant === 'primary' ? '#2d5a2d' : 'white')};
+  color: ${props => (props.variant === 'primary' ? 'white' : '#666')};
   border-radius: 6px;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
-    background: ${props => props.variant === 'primary' ? '#4a7c4a' : '#f5f5f5'};
+    background: ${props => (props.variant === 'primary' ? '#4a7c4a' : '#f5f5f5')};
   }
 `;
 
@@ -797,7 +797,7 @@ const GanttRow = styled.div`
   display: grid;
   grid-template-columns: 300px 1fr;
   border-bottom: 1px solid #f0f0f0;
-  
+
   &:hover {
     background: #fafffa;
   }
@@ -848,10 +848,14 @@ const GanttBar = styled.div`
   height: 24px;
   background: ${props => {
     switch (props.category) {
-      case '植栽工事': return 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)';
-      case '土工事': return 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)';
-      case '設備工事': return 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
-      default: return 'linear-gradient(135deg, #a1a1aa 0%, #71717a 100%)';
+      case '植栽工事':
+        return 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)';
+      case '土工事':
+        return 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)';
+      case '設備工事':
+        return 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)';
+      default:
+        return 'linear-gradient(135deg, #a1a1aa 0%, #71717a 100%)';
     }
   }};
   border-radius: 4px;
