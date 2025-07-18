@@ -27,6 +27,8 @@ import EstimateCreator from './EstimateCreator';
 import EstimateWizard from './EstimateWizard';
 import InvoiceForm from './invoices/InvoiceForm';
 import DashboardTop from './DashboardTop';
+import EmployeeDashboard from './EmployeeDashboard';
+import AdditionalEstimate from './AdditionalEstimate';
 import { generateProcessPDF } from '../utils/processPDFGenerator';
 import { generateProcessSchedule } from '../utils/processGenerator';
 
@@ -35,6 +37,9 @@ const GardenDXMain = () => {
   const { user, isAuthenticated: isAuthenticatedFn, loading: authLoading } = authContext;
   const isAuthenticated = typeof isAuthenticatedFn === 'function' ? isAuthenticatedFn() : false;
   const { isDemoMode } = useDemoMode();
+
+  // ユーザーの役割を判定
+  const userRole = user?.user_metadata?.role || user?.role || 'employee';
 
   // デバッグログ（開発環境のみ）
   useEffect(() => {
@@ -200,6 +205,11 @@ const GardenDXMain = () => {
         dashboardData={dashboardData}
       />
     );
+  }
+
+  // 従業員の場合は専用ダッシュボードを表示
+  if (userRole === 'employee') {
+    return <EmployeeDashboard />;
   }
 
   return (
@@ -422,6 +432,7 @@ const DashboardView = ({ data, onModuleChange, currentProject, onProjectChange }
 const EstimateModule = ({ currentProject, onProjectChange }) => {
   const [estimateMode, setEstimateMode] = useState('wizard'); // 'wizard' or 'advanced'
   const [estimateData, setEstimateData] = useState(null);
+  const [showAdditionalEstimate, setShowAdditionalEstimate] = useState(false);
 
   const handleEstimateComplete = async data => {
     setEstimateData(data);
@@ -443,6 +454,16 @@ const EstimateModule = ({ currentProject, onProjectChange }) => {
     }
   };
 
+  if (showAdditionalEstimate && currentProject) {
+    return (
+      <AdditionalEstimate
+        projectId={currentProject.id}
+        originalEstimateId={estimateData?.id}
+        onBack={() => setShowAdditionalEstimate(false)}
+      />
+    );
+  }
+
   return (
     <EstimateContainer>
       <EstimateHeader>
@@ -456,6 +477,9 @@ const EstimateModule = ({ currentProject, onProjectChange }) => {
           >
             詳細入力
           </ModeButton>
+          {estimateData && (
+            <ModeButton onClick={() => setShowAdditionalEstimate(true)}>追加見積もり</ModeButton>
+          )}
         </ModeToggle>
       </EstimateHeader>
 

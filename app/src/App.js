@@ -86,14 +86,28 @@ const AppContent = () => {
   // デモモード時は自動的にテスト開始
   useEffect(() => {
     if (isDemoMode && !user) {
-      // デモモード時は自動でオーナー権限でログイン
-      const demoUser = {
-        id: 'demo-owner-001',
-        name: 'テストユーザー（オーナー）',
-        email: 'demo@garden-dx.example.com',
-        role: 'owner',
-        permissions: ['view_profit', 'create_invoice', 'manage_staff', 'view_all_projects'],
-      };
+      // URLパラメータでロールを判定
+      const urlParams = new URLSearchParams(window.location.search);
+      const role = urlParams.get('role') || 'manager';
+
+      const demoUser =
+        role === 'employee'
+          ? {
+              id: 'demo-employee-001',
+              name: 'テストユーザー（従業員）',
+              email: 'employee@garden-dx.example.com',
+              role: 'employee',
+              user_metadata: { role: 'employee' },
+              permissions: ['view_schedule', 'create_report'],
+            }
+          : {
+              id: 'demo-owner-001',
+              name: 'テストユーザー（経営者）',
+              email: 'demo@garden-dx.example.com',
+              role: 'manager',
+              user_metadata: { role: 'manager' },
+              permissions: ['view_profit', 'create_invoice', 'manage_staff', 'view_all_projects'],
+            };
       setUser(demoUser);
 
       // 初回アクセス時のみガイドを表示

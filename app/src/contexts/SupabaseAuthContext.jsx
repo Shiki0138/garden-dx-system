@@ -170,7 +170,7 @@ export const SupabaseAuthProvider = ({ children }) => {
           data: {
             company_name: userData.companyName,
             full_name: userData.fullName,
-            role: userData.role || 'employee',
+            role: userData.role || 'employee', // デフォルトは従業員
           },
         },
       });
