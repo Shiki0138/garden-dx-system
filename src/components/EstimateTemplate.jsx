@@ -50,6 +50,7 @@ const ClientInfo = styled.div`
     padding: 10mm;
     border: 1px solid #ddd;
     margin-bottom: 10mm;
+    white-space: pre-line;
   }
 `;
 
@@ -75,6 +76,10 @@ const CompanyInfo = styled.div`
       width: 20mm;
       height: 20mm;
       border: 1px solid #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12pt;
     }
   }
 `;
@@ -174,6 +179,7 @@ const ProjectDetails = styled.div`
     
     .detail-content {
       padding-left: 10mm;
+      white-space: pre-line;
     }
   }
 `;
@@ -259,8 +265,11 @@ const EstimateTemplate = ({ data = {} }) => {
   ];
 
   const subtotal = sampleItems.reduce((sum, item) => sum + item.amount, 0);
-  const taxAmount = Math.floor(subtotal * taxRate / 100);
-  const total = subtotal + taxAmount;
+  const designFee = 200000;
+  const miscExpenses = 641088;
+  const beforeTax = subtotal + designFee + miscExpenses;
+  const taxAmount = Math.floor(beforeTax * taxRate / 100);
+  const total = beforeTax + taxAmount;
 
   return (
     <>
@@ -306,7 +315,7 @@ const EstimateTemplate = ({ data = {} }) => {
           </CompanyInfo>
 
           <SummaryBox>
-            <div className="total-amount">合計金額 {totalAmount}</div>
+            <div className="total-amount">合計金額 ¥{total.toLocaleString()}</div>
             <div className="tax-info">
               内消費税（{taxRate}%） ¥{taxAmount.toLocaleString()}
             </div>
@@ -354,8 +363,8 @@ const EstimateTemplate = ({ data = {} }) => {
             <div className="detail-item">
               <div className="detail-label">支払時期（契約書作成）</div>
               <div className="detail-content">
-                着工時　　¥1,838,935<br />
-                中間金　　（契約書に基づく）<br />
+                着工時　　¥1,838,935
+                中間金　　（契約書に基づく）
                 完成時　　追加費用を含む契約金残金
               </div>
             </div>
@@ -383,15 +392,15 @@ const EstimateTemplate = ({ data = {} }) => {
               ))}
               <tr className="subtotal-row">
                 <td colSpan="4" style={{ textAlign: 'right' }}>設計費</td>
-                <td className="amount">200,000</td>
+                <td className="amount">{designFee.toLocaleString()}</td>
               </tr>
               <tr className="subtotal-row">
                 <td colSpan="4" style={{ textAlign: 'right' }}>諸経費（交通費込み）</td>
-                <td className="amount">641,088</td>
+                <td className="amount">{miscExpenses.toLocaleString()}</td>
               </tr>
               <tr className="subtotal-row">
                 <td colSpan="4" style={{ textAlign: 'right' }}>小計</td>
-                <td className="amount">{subtotal.toLocaleString()}</td>
+                <td className="amount">{beforeTax.toLocaleString()}</td>
               </tr>
               <tr className="subtotal-row">
                 <td colSpan="4" style={{ textAlign: 'right' }}>出精値引き</td>
@@ -469,7 +478,7 @@ const EstimateTemplate = ({ data = {} }) => {
               <li>
                 <strong>近隣住宅への配慮</strong><br />
                 作業開始日決定後、近隣住宅へ弊社より直接ご挨拶をさせて頂きます<br />
-                （木在の場合は、挨拶文を郵便ポストに投函させて頂きます）
+                （不在の場合は、挨拶文を郵便ポストに投函させて頂きます）
               </li>
               <li>
                 <strong>電気・水道</strong><br />
