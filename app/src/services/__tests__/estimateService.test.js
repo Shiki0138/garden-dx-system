@@ -12,7 +12,7 @@ import {
   uploadEstimateFile,
 } from '../estimateService';
 
-// Supabaseクライアントのモック
+// Supabaseクライアントのモック  
 jest.mock('../../lib/supabase', () => ({
   dbClient: {
     estimates: {
@@ -56,8 +56,8 @@ describe('estimateService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    const { dbClient, storage, supabase } = require('../../lib/supabase');
+    
+    const { dbClient, storage, supabase } = require('../lib/supabase');
     mockDbClient = dbClient;
     mockStorage = storage;
     mockSupabase = supabase;
@@ -220,7 +220,7 @@ describe('estimateService', () => {
       const result = await saveEstimate(existingClientData, 1, 'user-123');
 
       expect(result.success).toBe(true);
-
+      
       // 既存顧客の場合、顧客作成が呼ばれないことを確認
       expect(mockDbClient.clients.create).not.toHaveBeenCalled();
       expect(mockDbClient.estimates.update).not.toHaveBeenCalled();
@@ -245,7 +245,7 @@ describe('estimateService', () => {
       const result = await saveEstimate(noItemsData, 1, 'user-123');
 
       expect(result.success).toBe(true);
-
+      
       // 項目がない場合、項目作成が呼ばれないことを確認
       expect(mockDbClient.estimateItems.createMany).not.toHaveBeenCalled();
     });

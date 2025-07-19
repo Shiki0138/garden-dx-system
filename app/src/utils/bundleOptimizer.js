@@ -6,14 +6,14 @@
 import React from 'react';
 
 // 動的インポートを使用したコンポーネント読み込み
-export const loadComponent = componentPath => {
+export const loadComponent = (componentPath) => {
   return import(componentPath);
 };
 
 // 遅延読み込み用のコンポーネントファクトリー
-export const createLazyComponent = importFunc => {
+export const createLazyComponent = (importFunc) => {
   const LazyComponent = React.lazy(importFunc);
-
+  
   return function WrappedLazyComponent(props) {
     return (
       <React.Suspense fallback={<LoadingFallback />}>
@@ -25,16 +25,14 @@ export const createLazyComponent = importFunc => {
 
 // 軽量なローディングコンポーネント
 const LoadingFallback = () => (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '200px',
-      color: '#6b7280',
-      fontSize: '14px',
-    }}
-  >
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '200px',
+    color: '#6b7280',
+    fontSize: '14px'
+  }}>
     読み込み中...
   </div>
 );
@@ -53,14 +51,14 @@ export const optimizedImports = {
   debounce: () => import('lodash/debounce'),
   throttle: () => import('lodash/throttle'),
   cloneDeep: () => import('lodash/cloneDeep'),
-
+  
   // date-fnsの必要な関数のみインポート
   formatDate: () => import('date-fns/format'),
   parseDate: () => import('date-fns/parse'),
   addDays: () => import('date-fns/addDays'),
-
+  
   // react-iconsの最適化
-  FiIcon: iconName => import(`react-icons/fi/index.js`).then(module => module[iconName]),
+  FiIcon: (iconName) => import(`react-icons/fi/index.js`).then(module => module[iconName]),
 };
 
 // モジュール分割のベストプラクティス
@@ -69,20 +67,19 @@ export const moduleChunks = {
   estimate: () => import('../components/estimates/EstimateCreator'),
   estimateList: () => import('../components/estimates/EstimateList'),
   estimatePDF: () => import('../components/estimates/EstimatePDFGenerator'),
-
+  
   // 請求書関連（頻度中）
   invoice: () => import('../components/invoices/InvoiceForm'),
   invoiceList: () => import('../components/invoices/InvoiceList'),
-
+  
   // 管理機能（頻度低）
   admin: () => import('../components/admin/AdminPanel'),
   settings: () => import('../components/settings/SettingsPanel'),
-
+  
   // テスト/デバッグ関連（開発時のみ）
-  test: () =>
-    process.env.NODE_ENV === 'development'
-      ? import('../components/test/TestSuite')
-      : Promise.resolve(null),
+  test: () => process.env.NODE_ENV === 'development' 
+    ? import('../components/test/TestSuite') 
+    : Promise.resolve(null),
 };
 
 // プリロード戦略
@@ -95,20 +92,20 @@ export const preloadStrategy = {
       moduleChunks.estimateList();
     }
   },
-
+  
   // ユーザー操作に基づく予測読み込み
-  preloadOnInteraction: section => {
+  preloadOnInteraction: (section) => {
     const preloadMap = {
       'estimate-button': moduleChunks.estimate,
       'invoice-button': moduleChunks.invoice,
       'admin-link': moduleChunks.admin,
     };
-
+    
     if (preloadMap[section]) {
       preloadMap[section]();
     }
   },
-
+  
   // アイドル時間での読み込み
   preloadOnIdle: () => {
     if ('requestIdleCallback' in window) {
@@ -122,35 +119,35 @@ export const preloadStrategy = {
         moduleChunks.settings();
       }, 2000);
     }
-  },
+  }
 };
 
 // Tree Shaking最適化用のユーティリティ
 export const treeShakingOptimizations = {
   // 使用する機能のみエクスポート
   dateUtils: {
-    formatJapaneseDate: date => {
+    formatJapaneseDate: (date) => {
       return new Intl.DateTimeFormat('ja-JP', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric',
+        day: 'numeric'
       }).format(date);
     },
-
-    formatCurrency: amount => {
+    
+    formatCurrency: (amount) => {
       return new Intl.NumberFormat('ja-JP', {
         style: 'currency',
-        currency: 'JPY',
+        currency: 'JPY'
       }).format(amount);
-    },
+    }
   },
-
+  
   // 軽量な検証関数
   validation: {
-    isEmail: email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
-    isPhoneNumber: phone => /^[\d-+()]+$/.test(phone),
-    isNotEmpty: value => value != null && value.toString().trim() !== '',
-  },
+    isEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    isPhoneNumber: (phone) => /^[\d-+()]+$/.test(phone),
+    isNotEmpty: (value) => value != null && value.toString().trim() !== ''
+  }
 };
 
 // Bundle分析用のメトリクス
@@ -158,22 +155,22 @@ export const bundleMetrics = {
   // パフォーマンス監視
   measureLoadTime: (componentName, loadPromise) => {
     const startTime = performance.now();
-
+    
     return loadPromise.then(module => {
       const endTime = performance.now();
       const loadTime = endTime - startTime;
-
+      
       console.log(`Bundle ${componentName} loaded in ${loadTime.toFixed(2)}ms`);
-
+      
       // プロダクションでは分析サービスに送信
       if (process.env.NODE_ENV === 'production') {
         // analytics.track('bundle_load_time', { componentName, loadTime });
       }
-
+      
       return module;
     });
   },
-
+  
   // メモリ使用量監視
   measureMemoryUsage: () => {
     if ('memory' in performance) {
@@ -182,11 +179,11 @@ export const bundleMetrics = {
         used: memory.usedJSHeapSize,
         total: memory.totalJSHeapSize,
         limit: memory.jsHeapSizeLimit,
-        usage: ((memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100).toFixed(2),
+        usage: (memory.usedJSHeapSize / memory.jsHeapSizeLimit * 100).toFixed(2)
       };
     }
     return null;
-  },
+  }
 };
 
 // リソース優先度の設定
@@ -199,11 +196,14 @@ export const resourcePriority = {
     link.href = '/static/css/critical.css';
     document.head.appendChild(link);
   },
-
+  
   // フォントの最適化
   preloadFonts: () => {
-    const fontPreloads = ['/fonts/noto-sans-jp-regular.woff2', '/fonts/noto-sans-jp-bold.woff2'];
-
+    const fontPreloads = [
+      '/fonts/noto-sans-jp-regular.woff2',
+      '/fonts/noto-sans-jp-bold.woff2'
+    ];
+    
     fontPreloads.forEach(font => {
       const link = document.createElement('link');
       link.rel = 'preload';
@@ -213,7 +213,7 @@ export const resourcePriority = {
       link.href = font;
       document.head.appendChild(link);
     });
-  },
+  }
 };
 
 // 初期化
@@ -222,19 +222,19 @@ export const initBundleOptimization = () => {
   preloadStrategy.preloadCritical();
   resourcePriority.preloadCriticalCSS();
   resourcePriority.preloadFonts();
-
+  
   // アイドル時の追加読み込み
   preloadStrategy.preloadOnIdle();
-
+  
   // インタラクションイベントの設定
-  document.addEventListener('mouseover', event => {
+  document.addEventListener('mouseover', (event) => {
     const target = event.target.closest('[data-preload]');
     if (target) {
       const preloadKey = target.dataset.preload;
       preloadStrategy.preloadOnInteraction(preloadKey);
     }
   });
-
+  
   // メトリクス収集の開始
   setInterval(() => {
     const memoryUsage = bundleMetrics.measureMemoryUsage();
@@ -254,5 +254,5 @@ export default {
   treeShakingOptimizations,
   bundleMetrics,
   resourcePriority,
-  initBundleOptimization,
+  initBundleOptimization
 };

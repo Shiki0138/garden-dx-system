@@ -33,8 +33,14 @@ describe('logger', () => {
 
       log.error(message, data);
 
-      expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('[ERROR]'), data);
-      expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining(message), data);
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        expect.stringContaining('[ERROR]'),
+        data
+      );
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        expect.stringContaining(message),
+        data
+      );
     });
 
     test('データなしでエラーログが出力される', () => {
@@ -42,8 +48,14 @@ describe('logger', () => {
 
       log.error(message);
 
-      expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('[ERROR]'), '');
-      expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining(message), '');
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        expect.stringContaining('[ERROR]'),
+        ''
+      );
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        expect.stringContaining(message),
+        ''
+      );
     });
 
     test('本番環境でもエラーログは出力される', () => {
@@ -63,8 +75,14 @@ describe('logger', () => {
 
       log.warn(message, data);
 
-      expect(mockConsoleWarn).toHaveBeenCalledWith(expect.stringContaining('[WARN]'), data);
-      expect(mockConsoleWarn).toHaveBeenCalledWith(expect.stringContaining(message), data);
+      expect(mockConsoleWarn).toHaveBeenCalledWith(
+        expect.stringContaining('[WARN]'),
+        data
+      );
+      expect(mockConsoleWarn).toHaveBeenCalledWith(
+        expect.stringContaining(message),
+        data
+      );
     });
 
     test('本番環境では警告ログが抑制される', () => {
@@ -84,8 +102,14 @@ describe('logger', () => {
 
       log.info(message, data);
 
-      expect(mockConsoleInfo).toHaveBeenCalledWith(expect.stringContaining('[INFO]'), data);
-      expect(mockConsoleInfo).toHaveBeenCalledWith(expect.stringContaining(message), data);
+      expect(mockConsoleInfo).toHaveBeenCalledWith(
+        expect.stringContaining('[INFO]'),
+        data
+      );
+      expect(mockConsoleInfo).toHaveBeenCalledWith(
+        expect.stringContaining(message),
+        data
+      );
     });
 
     test('本番環境では情報ログが抑制される', () => {
@@ -106,8 +130,14 @@ describe('logger', () => {
       // eslint-disable-next-line testing-library/no-debugging-utils
       log.debug(message, data);
 
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining('[DEBUG]'), data);
-      expect(mockConsoleLog).toHaveBeenCalledWith(expect.stringContaining(message), data);
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('[DEBUG]'),
+        data
+      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining(message),
+        data
+      );
     });
 
     test('本番環境ではデバッグログが抑制される', () => {
@@ -167,14 +197,20 @@ describe('logger', () => {
     test('ログレベルが含まれる', () => {
       log.warn('レベルテスト');
 
-      expect(mockConsoleWarn).toHaveBeenCalledWith(expect.stringContaining('[WARN]'), '');
+      expect(mockConsoleWarn).toHaveBeenCalledWith(
+        expect.stringContaining('[WARN]'),
+        ''
+      );
     });
 
     test('メッセージが含まれる', () => {
       const testMessage = 'カスタムメッセージ';
       log.info(testMessage);
 
-      expect(mockConsoleInfo).toHaveBeenCalledWith(expect.stringContaining(testMessage), '');
+      expect(mockConsoleInfo).toHaveBeenCalledWith(
+        expect.stringContaining(testMessage),
+        ''
+      );
     });
   });
 
@@ -188,7 +224,10 @@ describe('logger', () => {
 
       log.info('オブジェクトテスト', data);
 
-      expect(mockConsoleInfo).toHaveBeenCalledWith(expect.any(String), data);
+      expect(mockConsoleInfo).toHaveBeenCalledWith(
+        expect.any(String),
+        data
+      );
     });
 
     test('null及びundefinedの処理', () => {

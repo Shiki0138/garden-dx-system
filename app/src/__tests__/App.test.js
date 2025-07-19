@@ -22,9 +22,7 @@ jest.mock('../hooks/useAuth', () => ({
 }));
 
 jest.mock('../contexts/SupabaseAuthContext', () => ({
-  SupabaseAuthProvider: ({ children }) => (
-    <div data-testid="supabase-auth-provider">{children}</div>
-  ),
+  SupabaseAuthProvider: ({ children }) => <div data-testid="supabase-auth-provider">{children}</div>,
 }));
 
 jest.mock('../contexts/DemoModeContext', () => ({
@@ -42,9 +40,7 @@ jest.mock('../components/ErrorBoundary', () => {
 });
 
 jest.mock('../components/ui/ErrorBoundary', () => ({
-  LandscapingErrorBoundary: ({ children }) => (
-    <div data-testid="landscaping-error-boundary">{children}</div>
-  ),
+  LandscapingErrorBoundary: ({ children }) => <div data-testid="landscaping-error-boundary">{children}</div>,
 }));
 
 jest.mock('../components/DemoBanner', () => {
@@ -121,11 +117,7 @@ jest.mock('../components/auth/LoginPage', () => {
 
 jest.mock('../components/auth/ProtectedRoute', () => {
   return function ProtectedRoute({ children, requireRole }) {
-    return (
-      <div data-testid="protected-route" data-require-role={requireRole}>
-        {children}
-      </div>
-    );
+    return <div data-testid="protected-route" data-require-role={requireRole}>{children}</div>;
   };
 });
 
@@ -180,12 +172,12 @@ jest.mock('react-router-dom', () => ({
 describe('App', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
+    
     // 環境変数をリセット
     process.env.REACT_APP_DEMO_MODE = 'false';
     process.env.REACT_APP_PERFORMANCE_MONITORING = 'false';
     process.env.REACT_APP_ENVIRONMENT = 'development';
-
+    
     // DOM要素をリセット
     document.body.className = '';
   });
@@ -219,7 +211,7 @@ describe('App', () => {
 
     test('デフォルトルートでダッシュボードにリダイレクトされる', () => {
       render(<App />);
-
+      
       // ダッシュボードコンポーネントが表示されることを確認
       expect(screen.getByTestId('estimate-creator')).toBeInTheDocument();
     });
@@ -273,21 +265,21 @@ describe('App', () => {
       // ダイレクトにルートをテスト
       window.history.pushState({}, 'Test page', '/test');
       render(<App />);
-
+      
       expect(screen.getByTestId('connection-test')).toBeInTheDocument();
     });
 
     test('モバイルテストページにアクセス可能', () => {
       window.history.pushState({}, 'Test page', '/mobile-test');
       render(<App />);
-
+      
       expect(screen.getByTestId('mobile-test-page')).toBeInTheDocument();
     });
 
     test('PDFテストページにアクセス可能', () => {
       window.history.pushState({}, 'Test page', '/pdf-test');
       render(<App />);
-
+      
       expect(screen.getByTestId('pdf-generator-test')).toBeInTheDocument();
     });
   });
@@ -295,20 +287,20 @@ describe('App', () => {
   describe('保護されたルート', () => {
     test('非デモモード時にProtectedRouteが適用される', () => {
       process.env.REACT_APP_DEMO_MODE = 'false';
-
+      
       window.history.pushState({}, 'Test page', '/wizard');
       render(<App />);
-
+      
       expect(screen.getByTestId('protected-route')).toBeInTheDocument();
       expect(screen.getByTestId('estimate-wizard-test')).toBeInTheDocument();
     });
 
     test('管理者権限が必要なルートでrequireRoleが設定される', () => {
       process.env.REACT_APP_DEMO_MODE = 'false';
-
+      
       window.history.pushState({}, 'Test page', '/invoices/new');
       render(<App />);
-
+      
       const protectedRoute = screen.getByTestId('protected-route');
       expect(protectedRoute).toHaveAttribute('data-require-role', 'manager');
     });
@@ -317,55 +309,55 @@ describe('App', () => {
   describe('システム初期化', () => {
     test('通知システムが初期化される', () => {
       const { initNotificationSystem } = require('../utils/notifications');
-
+      
       render(<App />);
-
+      
       expect(initNotificationSystem).toHaveBeenCalled();
     });
 
     test('本番環境でパフォーマンス監視が有効化される', () => {
       process.env.REACT_APP_PERFORMANCE_MONITORING = 'true';
       const { initMonitoring } = require('../utils/monitoring');
-
+      
       render(<App />);
-
+      
       expect(initMonitoring).toHaveBeenCalled();
     });
 
     test('開発環境で環境変数チェックが実行される', () => {
       process.env.REACT_APP_ENVIRONMENT = 'development';
       const { checkEnvironmentVariables } = require('../utils/apiErrorHandler');
-
+      
       render(<App />);
-
+      
       expect(checkEnvironmentVariables).toHaveBeenCalled();
     });
 
     test('開発環境で環境変数不足時に警告ログが出力される', () => {
       process.env.REACT_APP_ENVIRONMENT = 'development';
-
+      
       const { checkEnvironmentVariables } = require('../utils/apiErrorHandler');
       const { log } = require('../utils/logger');
-
+      
       checkEnvironmentVariables.mockReturnValue({
         isValid: false,
         missing: ['REACT_APP_API_URL', 'REACT_APP_SUPABASE_URL'],
       });
-
+      
       render(<App />);
-
-      expect(log.warn).toHaveBeenCalledWith('🚨 環境変数が不足しています:', [
-        'REACT_APP_API_URL',
-        'REACT_APP_SUPABASE_URL',
-      ]);
+      
+      expect(log.warn).toHaveBeenCalledWith(
+        '🚨 環境変数が不足しています:',
+        ['REACT_APP_API_URL', 'REACT_APP_SUPABASE_URL']
+      );
     });
 
     test('本番環境でセットアップ完了ログが出力される', () => {
       process.env.REACT_APP_ENVIRONMENT = 'production';
       const { log } = require('../utils/logger');
-
+      
       render(<App />);
-
+      
       expect(log.info).toHaveBeenCalledWith('🚀 本番環境セットアップ完了 - Garden DX System');
     });
   });
@@ -373,13 +365,13 @@ describe('App', () => {
   describe('エラーバウンダリー', () => {
     test('メインエラーバウンダリーが設定されている', () => {
       render(<App />);
-
+      
       expect(screen.getByTestId('error-boundary')).toBeInTheDocument();
     });
 
     test('ダッシュボードでLandscapingErrorBoundaryが設定されている', () => {
       render(<App />);
-
+      
       expect(screen.getByTestId('landscaping-error-boundary')).toBeInTheDocument();
     });
   });
@@ -387,35 +379,35 @@ describe('App', () => {
   describe('ナビゲーションリンク', () => {
     test('すべてのナビゲーションリンクが正しいhrefを持つ', () => {
       render(<App />);
-
+      
       const wizardLink = screen.getByText('🚀 見積ウィザード').closest('a');
       expect(wizardLink).toHaveAttribute('href', '/wizard');
-
+      
       const wizardProLink = screen.getByText('⭐ 本番ウィザード').closest('a');
       expect(wizardProLink).toHaveAttribute('href', '/wizard-pro');
-
+      
       const pdfLink = screen.getByText('📄 PDF生成').closest('a');
       expect(pdfLink).toHaveAttribute('href', '/pdf');
-
+      
       const dashboardLink = screen.getByText('🏠 ダッシュボード').closest('a');
       expect(dashboardLink).toHaveAttribute('href', '/dashboard');
-
+      
       const projectsLink = screen.getByText('🌿 プロジェクト管理').closest('a');
       expect(projectsLink).toHaveAttribute('href', '/projects');
-
+      
       const testLink = screen.getByText('🔧 接続テスト').closest('a');
       expect(testLink).toHaveAttribute('href', '/test');
-
+      
       const mobileTestLink = screen.getByText('📱 モバイルテスト').closest('a');
       expect(mobileTestLink).toHaveAttribute('href', '/mobile-test');
-
+      
       const pdfTestLink = screen.getByText('📄 PDF動作テスト').closest('a');
       expect(pdfTestLink).toHaveAttribute('href', '/pdf-test');
     });
 
     test('ナビゲーションのスタイリングが適用されている', () => {
       render(<App />);
-
+      
       const nav = screen.getByRole('navigation');
       expect(nav).toHaveStyle({
         padding: '20px',
@@ -431,19 +423,19 @@ describe('App', () => {
   describe('条件付きレンダリング', () => {
     test('非デモモード時にログインページが表示される', () => {
       process.env.REACT_APP_DEMO_MODE = 'false';
-
+      
       window.history.pushState({}, 'Test page', '/login');
       render(<App />);
-
+      
       expect(screen.getByTestId('login-page')).toBeInTheDocument();
     });
 
     test('デモモード時にログインページが非表示になる', () => {
       process.env.REACT_APP_DEMO_MODE = 'true';
-
+      
       window.history.pushState({}, 'Test page', '/login');
       render(<App />);
-
+      
       expect(screen.queryByTestId('login-page')).not.toBeInTheDocument();
     });
   });
@@ -463,10 +455,10 @@ describe('App', () => {
       const AppComponent = require('../App').default;
 
       const { unmount } = render(<AppComponent />);
-
+      
       // コンポーネントをアンマウント
       unmount();
-
+      
       expect(document.body.classList.contains('demo-mode')).toBe(false);
     });
   });
@@ -474,19 +466,19 @@ describe('App', () => {
   describe('アクセシビリティ', () => {
     test('ナビゲーション要素にroleが設定されている', () => {
       render(<App />);
-
+      
       expect(screen.getByRole('navigation')).toBeInTheDocument();
     });
 
     test('見出しが適切に設定されている', () => {
       render(<App />);
-
+      
       expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('🏡 庭想システム');
     });
 
     test('リンクがアクセシブルなテキストを持つ', () => {
       render(<App />);
-
+      
       const links = screen.getAllByRole('link');
       links.forEach(link => {
         expect(link).toHaveTextContent(/.+/); // 空でないテキストコンテンツ
@@ -504,7 +496,7 @@ describe('App', () => {
       });
 
       render(<App />);
-
+      
       // 基本的な要素が表示されることを確認
       expect(screen.getByText('🏡 庭想システム')).toBeInTheDocument();
       expect(screen.getByTestId('estimate-creator')).toBeInTheDocument();
@@ -514,12 +506,12 @@ describe('App', () => {
   describe('パフォーマンス', () => {
     test('コンポーネントの初期レンダリング時間', () => {
       const startTime = performance.now();
-
+      
       render(<App />);
-
+      
       const endTime = performance.now();
       const renderTime = endTime - startTime;
-
+      
       // レンダリング時間が合理的な範囲内であることを確認
       expect(renderTime).toBeLessThan(1000); // 1秒以内
     });

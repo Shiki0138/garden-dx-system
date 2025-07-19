@@ -11,13 +11,13 @@ import {
 import { log } from '../../utils/logger';
 import { showError, showSuccess, showWarning, showConfirmDialog } from '../../utils/notifications';
 import { useErrorHandler, withErrorHandling } from '../../utils/errorHandler';
-import {
-  FONT_SIZES,
-  TOUCH_SIZES,
-  SPACING,
-  MOBILE_STYLES,
-  COLORS,
-  mediaQuery,
+import { 
+  FONT_SIZES, 
+  TOUCH_SIZES, 
+  SPACING, 
+  MOBILE_STYLES, 
+  COLORS, 
+  mediaQuery 
 } from '../../styles/mobileConstants';
 
 // アニメーション定義（UX向上）
@@ -104,7 +104,7 @@ const Title = styled.h1`
   font-size: ${FONT_SIZES['2xl']};
   font-weight: 600;
   ${MOBILE_STYLES.preventZoom}
-
+  
   ${mediaQuery.mobile} {
     font-size: ${FONT_SIZES.xl};
   }
@@ -577,7 +577,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
     } catch (error) {
       handleError(error, { context: 'loadInitialData' });
     }
-  }, [estimateId, invoiceId, generateFromEstimate, handleError, generateInvoiceNumber]);
+  }, [estimateId, invoiceId]);
 
   useEffect(() => {
     // TODO: 顧客・プロジェクト・見積データの取得
@@ -589,7 +589,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
     setTotals(calculatedTotals);
   }, [calculatedTotals]);
 
-  const generateInvoiceNumber = useCallback(() => {
+  const generateInvoiceNumber = () => {
     const date = new Date();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -600,7 +600,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
       ...prev,
       invoice_number: number,
     }));
-  }, []);
+  };
 
   const generateFromEstimate = async estimateId => {
     try {
@@ -670,23 +670,20 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
   }, [formData, items]);
 
   // アクセシビリティ: キーボードナビゲーション
-  const handleKeyDown = useCallback(
-    e => {
-      if (e.ctrlKey || e.metaKey) {
-        switch (e.key) {
-          case 's':
-            e.preventDefault();
-            handleSave();
-            break;
-          case 'p':
-            e.preventDefault();
-            handlePreviewPDF();
-            break;
-        }
+  const handleKeyDown = useCallback(e => {
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key) {
+        case 's':
+          e.preventDefault();
+          handleSave();
+          break;
+        case 'p':
+          e.preventDefault();
+          handlePreviewPDF();
+          break;
       }
-    },
-    [handlePreviewPDF, handleSave]
-  );
+    }
+  }, []);
 
   // キーボードイベントの設定
   useEffect(() => {
@@ -812,7 +809,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData, items, totals, user, invoicePermissions, validateForm, handleError]);
+  }, [formData, items, totals, user, invoicePermissions, validateForm]);
 
   const handlePreviewPDF = useCallback(async () => {
     setIsLoading(true);
@@ -853,7 +850,7 @@ const InvoiceForm = ({ invoiceId = null, estimateId = null }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData, items, totals, customers, projects, estimates, handleError]);
+  }, [formData, items, totals, customers, projects, estimates]);
 
   // メモ化された通貨フォーマット関数
   const formatCurrency = useCallback(amount => {

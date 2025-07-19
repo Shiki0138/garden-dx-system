@@ -43,7 +43,7 @@ const AppContent = () => {
   useEffect(() => {
     // 認証デバッグ情報の出力
     initAuthDebug();
-
+    
     // 通知システムの初期化
     initNotificationSystem();
 
@@ -67,7 +67,7 @@ const AppContent = () => {
   }, []);
 
   // ログイン処理
-  const handleLogin = userData => {
+  const handleLogin = (userData) => {
     setUser(userData);
     setShowLogin(false);
     log.info('ユーザーログイン:', userData.name, userData.role);
@@ -86,30 +86,16 @@ const AppContent = () => {
   // デモモード時は自動的にテスト開始
   useEffect(() => {
     if (isDemoMode && !user) {
-      // URLパラメータでロールを判定
-      const urlParams = new URLSearchParams(window.location.search);
-      const role = urlParams.get('role') || 'manager';
-
-      const demoUser =
-        role === 'employee'
-          ? {
-              id: 'demo-employee-001',
-              name: 'テストユーザー（従業員）',
-              email: 'employee@garden-dx.example.com',
-              role: 'employee',
-              user_metadata: { role: 'employee' },
-              permissions: ['view_schedule', 'create_report'],
-            }
-          : {
-              id: 'demo-owner-001',
-              name: 'テストユーザー（経営者）',
-              email: 'demo@garden-dx.example.com',
-              role: 'manager',
-              user_metadata: { role: 'manager' },
-              permissions: ['view_profit', 'create_invoice', 'manage_staff', 'view_all_projects'],
-            };
+      // デモモード時は自動でオーナー権限でログイン
+      const demoUser = {
+        id: 'demo-owner-001',
+        name: 'テストユーザー（オーナー）',
+        email: 'demo@garden-dx.example.com',
+        role: 'owner',
+        permissions: ['view_profit', 'create_invoice', 'manage_staff', 'view_all_projects']
+      };
       setUser(demoUser);
-
+      
       // 初回アクセス時のみガイドを表示
       const hasSeenGuide = localStorage.getItem('demo-guide-seen');
       if (!hasSeenGuide) {
@@ -133,14 +119,12 @@ const AppContent = () => {
       <div className="App">
         {/* <DebugInfo /> */}
         {isDemoMode && <DemoBanner />}
-        <ErrorBoundary>
-          <GardenDXMain />
-        </ErrorBoundary>
+        <GardenDXMain />
         {showGuide && <DemoGuide onClose={handleCloseGuide} />}
       </div>
     </Router>
   );
-};
+}
 
 // OldNavigationコンポーネントは新しいUIでは使用されていないため削除
 

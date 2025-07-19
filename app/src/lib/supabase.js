@@ -5,6 +5,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_CONFIG, PROJECT_ID } from '../config/supabase.config';
+import { TABLES as PREFIXED_TABLES } from '../config/supabase-prefix';
 
 // 環境変数から設定値を取得
 const supabaseUrl = SUPABASE_CONFIG.url || process.env.REACT_APP_SUPABASE_URL;
@@ -141,20 +142,8 @@ export const isSupabaseConnected = () => {
   return supabase !== null;
 };
 
-// データベーステーブル名定数
-export const TABLES = {
-  COMPANIES: 'companies',
-  USERS: 'users',
-  ESTIMATES: 'estimates',
-  ESTIMATE_ITEMS: 'estimate_items',
-  INVOICES: 'invoices',
-  INVOICE_ITEMS: 'invoice_items',
-  PROJECTS: 'projects',
-  PROJECT_TASKS: 'project_tasks',
-  CUSTOMERS: 'customers',
-  UNIT_PRICES: 'unit_prices',
-  CATEGORIES: 'categories',
-};
+// データベーステーブル名定数（プレフィックス付き）
+export const TABLES = PREFIXED_TABLES;
 
 // RLS（Row Level Security）ヘルパー
 export const withRLS = (query, userId = null) => {

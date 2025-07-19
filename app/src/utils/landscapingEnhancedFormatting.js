@@ -8,7 +8,7 @@ const LANDSCAPING_STANDARDS = {
   colors: {
     text: '#1f1f1f',
     secondary: '#2d5a3d',
-  },
+  }
 };
 
 /**
@@ -168,10 +168,10 @@ export const formatLandscapingPeriod = (startDate, endDate) => {
  */
 export const formatProjectScale = totalAmount => {
   if (!totalAmount) return '';
-
+  
   const amount = parseFloat(totalAmount);
   if (isNaN(amount)) return '';
-
+  
   if (amount >= 10000000) {
     return '大規模工事';
   } else if (amount >= 3000000) {

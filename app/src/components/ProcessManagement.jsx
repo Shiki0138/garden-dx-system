@@ -15,8 +15,8 @@ const ProcessManagement = ({ estimateId, projectId, onUpdateProgress }) => {
       setIsLoading(true);
       const response = await fetch(`/api/projects/${projectId}/processes`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
       const data = await response.json();
       setProcesses(data.processes || []);
@@ -35,8 +35,8 @@ const ProcessManagement = ({ estimateId, projectId, onUpdateProgress }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
       const data = await response.json();
       setProcesses(data.processes || []);
@@ -50,28 +50,27 @@ const ProcessManagement = ({ estimateId, projectId, onUpdateProgress }) => {
   }, [estimateId]);
 
   // 工程の進捗更新
-  const updateProcessProgress = useCallback(
-    async (processId, progress) => {
-      try {
-        const response = await fetch(`/api/processes/${processId}/progress`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: JSON.stringify({ progress }),
-        });
-
-        if (response.ok) {
-          setProcesses(prev => prev.map(p => (p.id === processId ? { ...p, progress } : p)));
-          onUpdateProgress?.(processId, progress);
-        }
-      } catch (error) {
-        console.error('進捗更新に失敗しました:', error);
+  const updateProcessProgress = useCallback(async (processId, progress) => {
+    try {
+      const response = await fetch(`/api/processes/${processId}/progress`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ progress })
+      });
+      
+      if (response.ok) {
+        setProcesses(prev => prev.map(p => 
+          p.id === processId ? { ...p, progress } : p
+        ));
+        onUpdateProgress?.(processId, progress);
       }
-    },
-    [onUpdateProgress]
-  );
+    } catch (error) {
+      console.error('進捗更新に失敗しました:', error);
+    }
+  }, [onUpdateProgress]);
 
   // 工程の日程変更
   const updateProcessSchedule = useCallback(async (processId, startDate, endDate) => {
@@ -80,15 +79,15 @@ const ProcessManagement = ({ estimateId, projectId, onUpdateProgress }) => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ startDate, endDate }),
+        body: JSON.stringify({ startDate, endDate })
       });
-
+      
       if (response.ok) {
-        setProcesses(prev =>
-          prev.map(p => (p.id === processId ? { ...p, startDate, endDate } : p))
-        );
+        setProcesses(prev => prev.map(p => 
+          p.id === processId ? { ...p, startDate, endDate } : p
+        ));
       }
     } catch (error) {
       console.error('日程更新に失敗しました:', error);
@@ -96,7 +95,7 @@ const ProcessManagement = ({ estimateId, projectId, onUpdateProgress }) => {
   }, []);
 
   // 工程の状態を計算
-  const getProcessStatus = useCallback(process => {
+  const getProcessStatus = useCallback((process) => {
     if (process.progress === 100) return 'completed';
     if (new Date(process.endDate) < new Date()) return 'overdue';
     if (process.progress > 0) return 'in-progress';
@@ -127,10 +126,16 @@ const ProcessManagement = ({ estimateId, projectId, onUpdateProgress }) => {
         </div>
         <Controls>
           <ViewToggle>
-            <ToggleButton active={!ganttView} onClick={() => setGanttView(false)}>
+            <ToggleButton 
+              active={!ganttView} 
+              onClick={() => setGanttView(false)}
+            >
               リスト表示
             </ToggleButton>
-            <ToggleButton active={ganttView} onClick={() => setGanttView(true)}>
+            <ToggleButton 
+              active={ganttView} 
+              onClick={() => setGanttView(true)}
+            >
               ガントチャート
             </ToggleButton>
           </ViewToggle>
@@ -150,19 +155,19 @@ const ProcessManagement = ({ estimateId, projectId, onUpdateProgress }) => {
               <ProcessHeader>
                 <ProcessTitle>{process.name}</ProcessTitle>
                 <ProcessActions>
-                  <ActionButton size="small" onClick={() => setSelectedProcess(process)}>
+                  <ActionButton 
+                    size="small"
+                    onClick={() => setSelectedProcess(process)}
+                  >
                     <Edit2 size={14} />
                   </ActionButton>
                 </ProcessActions>
               </ProcessHeader>
-
+              
               <ProcessDetails>
                 <DetailItem>
                   <Calendar size={16} />
-                  <span>
-                    {new Date(process.startDate).toLocaleDateString()} -{' '}
-                    {new Date(process.endDate).toLocaleDateString()}
-                  </span>
+                  <span>{new Date(process.startDate).toLocaleDateString()} - {new Date(process.endDate).toLocaleDateString()}</span>
                 </DetailItem>
                 <DetailItem>
                   <Clock size={16} />
@@ -184,14 +189,14 @@ const ProcessManagement = ({ estimateId, projectId, onUpdateProgress }) => {
                   min="0"
                   max="100"
                   value={process.progress}
-                  onChange={e => updateProcessProgress(process.id, parseInt(e.target.value, 10))}
+                  onChange={(e) => updateProcessProgress(process.id, parseInt(e.target.value, 10))}
                 />
                 <ProgressInput
                   type="number"
                   min="0"
                   max="100"
                   value={process.progress}
-                  onChange={e => updateProcessProgress(process.id, parseInt(e.target.value, 10))}
+                  onChange={(e) => updateProcessProgress(process.id, parseInt(e.target.value, 10))}
                 />
               </ProgressControls>
             </ProcessItem>
@@ -200,7 +205,7 @@ const ProcessManagement = ({ estimateId, projectId, onUpdateProgress }) => {
       )}
 
       {selectedProcess && (
-        <ProcessModal
+        <ProcessModal 
           process={selectedProcess}
           onClose={() => setSelectedProcess(null)}
           onUpdate={updateProcessSchedule}
@@ -228,7 +233,7 @@ const GanttChart = ({ processes, onUpdateSchedule }) => {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  const getPositionFromDate = date => {
+  const getPositionFromDate = (date) => {
     if (!timelineStart || !timelineEnd) return 0;
     const totalDays = getDaysDiff(timelineStart, timelineEnd);
     const daysSinceStart = getDaysDiff(timelineStart, date);
@@ -255,7 +260,7 @@ const GanttChart = ({ processes, onUpdateSchedule }) => {
             <GanttBar
               style={{
                 left: `${getPositionFromDate(new Date(process.startDate))}%`,
-                width: `${getWidthFromDuration(process.startDate, process.endDate)}%`,
+                width: `${getWidthFromDuration(process.startDate, process.endDate)}%`
               }}
               progress={process.progress}
             >
@@ -274,10 +279,10 @@ const ProcessModal = ({ process, onClose, onUpdate }) => {
     name: process.name,
     startDate: process.startDate,
     endDate: process.endDate,
-    duration: process.duration,
+    duration: process.duration
   });
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     onUpdate(process.id, formData.startDate, formData.endDate);
     onClose();
@@ -285,7 +290,7 @@ const ProcessModal = ({ process, onClose, onUpdate }) => {
 
   return (
     <ModalOverlay onClick={onClose}>
-      <ModalContent onClick={e => e.stopPropagation()}>
+      <ModalContent onClick={(e) => e.stopPropagation()}>
         <ModalHeader>工程編集</ModalHeader>
         <form onSubmit={handleSubmit}>
           <FormGroup>
@@ -293,7 +298,7 @@ const ProcessModal = ({ process, onClose, onUpdate }) => {
             <input
               type="text"
               value={formData.name}
-              onChange={e => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
             />
           </FormGroup>
           <FormGroup>
@@ -301,7 +306,7 @@ const ProcessModal = ({ process, onClose, onUpdate }) => {
             <input
               type="date"
               value={formData.startDate}
-              onChange={e => setFormData({ ...formData, startDate: e.target.value })}
+              onChange={(e) => setFormData({...formData, startDate: e.target.value})}
             />
           </FormGroup>
           <FormGroup>
@@ -309,7 +314,7 @@ const ProcessModal = ({ process, onClose, onUpdate }) => {
             <input
               type="date"
               value={formData.endDate}
-              onChange={e => setFormData({ ...formData, endDate: e.target.value })}
+              onChange={(e) => setFormData({...formData, endDate: e.target.value})}
             />
           </FormGroup>
           <ModalActions>
@@ -356,7 +361,7 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-
+  
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 15px;
@@ -380,7 +385,7 @@ const Controls = styled.div`
   display: flex;
   gap: 15px;
   align-items: center;
-
+  
   @media (max-width: 768px) {
     flex-direction: column;
     width: 100%;
@@ -396,14 +401,14 @@ const ViewToggle = styled.div`
 
 const ToggleButton = styled.button`
   padding: 8px 16px;
-  background: ${props => (props.active ? '#3b82f6' : '#ffffff')};
-  color: ${props => (props.active ? '#ffffff' : '#374151')};
+  background: ${props => props.active ? '#3b82f6' : '#ffffff'};
+  color: ${props => props.active ? '#ffffff' : '#374151'};
   border: none;
   cursor: pointer;
   font-size: 14px;
-
+  
   &:hover {
-    background: ${props => (props.active ? '#2563eb' : '#f3f4f6')};
+    background: ${props => props.active ? '#2563eb' : '#f3f4f6'};
   }
 `;
 
@@ -411,16 +416,16 @@ const ActionButton = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: ${props => (props.size === 'small' ? '6px 12px' : '10px 16px')};
-  background: ${props => (props.primary ? '#3b82f6' : '#ffffff')};
-  color: ${props => (props.primary ? '#ffffff' : '#374151')};
-  border: 1px solid ${props => (props.primary ? '#3b82f6' : '#d1d5db')};
+  padding: ${props => props.size === 'small' ? '6px 12px' : '10px 16px'};
+  background: ${props => props.primary ? '#3b82f6' : '#ffffff'};
+  color: ${props => props.primary ? '#ffffff' : '#374151'};
+  border: 1px solid ${props => props.primary ? '#3b82f6' : '#d1d5db'};
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-
+  
   &:hover {
-    background: ${props => (props.primary ? '#2563eb' : '#f3f4f6')};
+    background: ${props => props.primary ? '#2563eb' : '#f3f4f6'};
   }
 `;
 
@@ -436,22 +441,16 @@ const ProcessItem = styled.div`
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  ${props =>
-    props.status === 'overdue' &&
-    `
+  
+  ${props => props.status === 'overdue' && `
     border-left: 4px solid #ef4444;
   `}
-
-  ${props =>
-    props.status === 'completed' &&
-    `
+  
+  ${props => props.status === 'completed' && `
     border-left: 4px solid #10b981;
   `}
   
-  ${props =>
-    props.status === 'in-progress' &&
-    `
+  ${props => props.status === 'in-progress' && `
     border-left: 4px solid #f59e0b;
   `}
 `;
@@ -480,7 +479,7 @@ const ProcessDetails = styled.div`
   flex-wrap: wrap;
   gap: 15px;
   margin-bottom: 15px;
-
+  
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 10px;
@@ -515,14 +514,14 @@ const ProgressControls = styled.div`
   display: flex;
   gap: 15px;
   align-items: center;
-
-  input[type='range'] {
+  
+  input[type="range"] {
     flex: 1;
     height: 6px;
     border-radius: 3px;
     background: #e5e7eb;
     outline: none;
-
+    
     &::-webkit-slider-thumb {
       appearance: none;
       width: 18px;
@@ -531,7 +530,7 @@ const ProgressControls = styled.div`
       background: #3b82f6;
       cursor: pointer;
     }
-
+    
     &::-moz-range-thumb {
       width: 18px;
       height: 18px;
@@ -564,7 +563,7 @@ const GanttHeader = styled.div`
   grid-template-columns: 200px 1fr;
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
-
+  
   > div {
     padding: 15px;
     font-weight: 600;
@@ -576,7 +575,7 @@ const GanttRow = styled.div`
   display: grid;
   grid-template-columns: 200px 1fr;
   border-bottom: 1px solid #e5e7eb;
-
+  
   &:last-child {
     border-bottom: none;
   }
@@ -651,21 +650,21 @@ const ModalHeader = styled.h2`
 
 const FormGroup = styled.div`
   margin-bottom: 16px;
-
+  
   label {
     display: block;
     margin-bottom: 6px;
     font-weight: 500;
     color: #374151;
   }
-
+  
   input {
     width: 100%;
     padding: 8px 12px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
     font-size: 14px;
-
+    
     &:focus {
       outline: none;
       border-color: #3b82f6;

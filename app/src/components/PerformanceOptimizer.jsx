@@ -12,17 +12,14 @@ const ExpensiveListItem = memo(({ item, onUpdate, onDelete }) => {
   const formattedPrice = useMemo(() => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
-      currency: 'JPY',
+      currency: 'JPY'
     }).format(item.price);
   }, [item.price]);
 
   // イベントハンドラーをメモ化
-  const handleUpdate = useCallback(
-    event => {
-      onUpdate(item.id, event.target.value);
-    },
-    [item.id, onUpdate]
-  );
+  const handleUpdate = useCallback((event) => {
+    onUpdate(item.id, event.target.value);
+  }, [item.id, onUpdate]);
 
   const handleDelete = useCallback(() => {
     onDelete(item.id);
@@ -32,7 +29,11 @@ const ExpensiveListItem = memo(({ item, onUpdate, onDelete }) => {
     <ListItemContainer>
       <ItemName>{item.name}</ItemName>
       <ItemPrice>{formattedPrice}</ItemPrice>
-      <input value={item.quantity || 0} onChange={handleUpdate} type="number" />
+      <input 
+        value={item.quantity || 0}
+        onChange={handleUpdate}
+        type="number"
+      />
       <button onClick={handleDelete}>削除</button>
     </ListItemContainer>
   );
@@ -42,10 +43,9 @@ const ExpensiveListItem = memo(({ item, onUpdate, onDelete }) => {
 const OptimizedEstimateList = memo(({ estimates, searchTerm, sortBy }) => {
   // フィルタリングとソートをメモ化
   const filteredAndSortedEstimates = useMemo(() => {
-    const result = estimates.filter(
-      estimate =>
-        estimate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        estimate.customer.toLowerCase().includes(searchTerm.toLowerCase())
+    const result = estimates.filter(estimate => 
+      estimate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      estimate.customer.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     result.sort((a, b) => {
@@ -70,7 +70,7 @@ const OptimizedEstimateList = memo(({ estimates, searchTerm, sortBy }) => {
     console.log('見積更新:', id, data);
   }, []);
 
-  const handleDeleteEstimate = useCallback(id => {
+  const handleDeleteEstimate = useCallback((id) => {
     if (window.confirm('この見積を削除しますか？')) {
       console.log('見積削除:', id);
     }
@@ -78,7 +78,9 @@ const OptimizedEstimateList = memo(({ estimates, searchTerm, sortBy }) => {
 
   return (
     <EstimateListContainer>
-      <ListHeader>見積一覧 ({filteredAndSortedEstimates.length}件)</ListHeader>
+      <ListHeader>
+        見積一覧 ({filteredAndSortedEstimates.length}件)
+      </ListHeader>
       <EstimateGrid>
         {filteredAndSortedEstimates.map(estimate => (
           <OptimizedEstimateCard
@@ -98,20 +100,17 @@ const OptimizedEstimateCard = memo(({ estimate, onUpdate, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // カードの計算をメモ化
-  const cardSummary = useMemo(
-    () => ({
-      totalItems: estimate.items?.length || 0,
-      totalAmount: estimate.items?.reduce((sum, item) => sum + item.amount, 0) || 0,
-      status: estimate.status || 'draft',
-      daysAgo: Math.floor((Date.now() - new Date(estimate.date)) / (1000 * 60 * 60 * 24)),
-    }),
-    [estimate]
-  );
+  const cardSummary = useMemo(() => ({
+    totalItems: estimate.items?.length || 0,
+    totalAmount: estimate.items?.reduce((sum, item) => sum + item.amount, 0) || 0,
+    status: estimate.status || 'draft',
+    daysAgo: Math.floor((Date.now() - new Date(estimate.date)) / (1000 * 60 * 60 * 24))
+  }), [estimate]);
 
   const formattedAmount = useMemo(() => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
-      currency: 'JPY',
+      currency: 'JPY'
     }).format(cardSummary.totalAmount);
   }, [cardSummary.totalAmount]);
 
@@ -133,7 +132,7 @@ const OptimizedEstimateCard = memo(({ estimate, onUpdate, onDelete }) => {
         <EstimateName>{estimate.name}</EstimateName>
         <EstimateAmount>{formattedAmount}</EstimateAmount>
       </CardHeader>
-
+      
       <CardMeta>
         <MetaItem>顧客: {estimate.customer}</MetaItem>
         <MetaItem>項目数: {cardSummary.totalItems}</MetaItem>
@@ -151,9 +150,7 @@ const OptimizedEstimateCard = memo(({ estimate, onUpdate, onDelete }) => {
           </DetailsList>
           <CardActions>
             <ActionButton onClick={handleEdit}>編集</ActionButton>
-            <ActionButton variant="danger" onClick={handleDelete}>
-              削除
-            </ActionButton>
+            <ActionButton variant="danger" onClick={handleDelete}>削除</ActionButton>
           </CardActions>
         </CardDetails>
       )}
@@ -170,7 +167,7 @@ const VirtualizedList = memo(({ items, itemHeight = 60, containerHeight = 400 })
     const start = Math.floor(scrollTop / itemHeight);
     const visibleCount = Math.ceil(containerHeight / itemHeight);
     const end = Math.min(start + visibleCount + 1, items.length);
-
+    
     return { start, end };
   }, [scrollTop, itemHeight, containerHeight, items.length]);
 
@@ -179,7 +176,7 @@ const VirtualizedList = memo(({ items, itemHeight = 60, containerHeight = 400 })
     return items.slice(visibleRange.start, visibleRange.end);
   }, [items, visibleRange]);
 
-  const handleScroll = useCallback(event => {
+  const handleScroll = useCallback((event) => {
     setScrollTop(event.target.scrollTop);
   }, []);
 
@@ -187,12 +184,22 @@ const VirtualizedList = memo(({ items, itemHeight = 60, containerHeight = 400 })
   const offsetY = visibleRange.start * itemHeight;
 
   return (
-    <VirtualContainer height={containerHeight} onScroll={handleScroll}>
+    <VirtualContainer 
+      height={containerHeight}
+      onScroll={handleScroll}
+    >
       <VirtualContent height={totalHeight}>
         <VisibleItemsContainer style={{ transform: `translateY(${offsetY}px)` }}>
           {visibleItems.map((item, index) => (
-            <VirtualItem key={visibleRange.start + index} height={itemHeight}>
-              <ExpensiveListItem item={item} onUpdate={() => {}} onDelete={() => {}} />
+            <VirtualItem 
+              key={visibleRange.start + index} 
+              height={itemHeight}
+            >
+              <ExpensiveListItem 
+                item={item}
+                onUpdate={() => {}}
+                onDelete={() => {}}
+              />
             </VirtualItem>
           ))}
         </VisibleItemsContainer>
@@ -241,7 +248,7 @@ const EstimateCard = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.2s ease;
-
+  
   &:hover {
     transform: translateY(-2px);
   }
@@ -305,15 +312,12 @@ const ActionButton = styled.button`
   font-size: 14px;
   font-weight: 500;
   transition: background 0.2s ease;
-
-  ${props =>
-    props.variant === 'danger'
-      ? `
+  
+  ${props => props.variant === 'danger' ? `
     background: #dc2626;
     color: white;
     &:hover { background: #b91c1c; }
-  `
-      : `
+  ` : `
     background: #3b82f6;
     color: white;
     &:hover { background: #2563eb; }
@@ -343,7 +347,12 @@ const VirtualItem = styled.div`
   height: ${props => props.height}px;
 `;
 
-export { ExpensiveListItem, OptimizedEstimateList, OptimizedEstimateCard, VirtualizedList };
+export {
+  ExpensiveListItem,
+  OptimizedEstimateList,
+  OptimizedEstimateCard,
+  VirtualizedList
+};
 
 export default memo(() => (
   <div>

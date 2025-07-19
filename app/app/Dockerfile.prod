@@ -1,0 +1,37 @@
+# 本番用 Dockerfile - フロントエンド
+FROM node:18-alpine AS build
+
+WORKDIR /app
+
+# パッケージファイルをコピー
+COPY package*.json ./
+RUN npm ci --only=production
+
+# ソースコードをコピー
+COPY . .
+
+# 環境変数設定
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
+# 本番ビルド実行
+RUN npm run build
+
+# 本番用Nginxイメージ
+FROM nginx:alpine
+
+# Nginxの設定ファイルをコピー
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# ビルドされたファイルをコピー
+COPY --from=build /app/build /usr/share/nginx/html
+
+# セキュリティヘッダー設定
+RUN echo 'add_header X-Frame-Options "SAMEORIGIN" always;' > /etc/nginx/conf.d/security.conf && \
+    echo 'add_header X-Content-Type-Options "nosniff" always;' >> /etc/nginx/conf.d/security.conf && \
+    echo 'add_header X-XSS-Protection "1; mode=block" always;' >> /etc/nginx/conf.d/security.conf && \
+    echo 'add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;' >> /etc/nginx/conf.d/security.conf
+
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"]

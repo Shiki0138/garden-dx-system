@@ -43,10 +43,12 @@ jest.mock('../../utils/notifications', () => ({
 }));
 
 // テストユーティリティ
-const renderWithProviders = component => {
+const renderWithProviders = (component) => {
   return render(
     <DndProvider backend={HTML5Backend}>
-      <AuthProvider>{component}</AuthProvider>
+      <AuthProvider>
+        {component}
+      </AuthProvider>
     </DndProvider>
   );
 };
@@ -85,22 +87,22 @@ const mockEstimateItems = [
 describe('見積作成統合テスト', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
+    
     // デフォルトのAPIレスポンス設定
     estimateApi.getEstimate.mockResolvedValue({
       success: true,
       data: mockEstimateData,
     });
-
+    
     estimateApi.getEstimateItems.mockResolvedValue({
       success: true,
       data: mockEstimateItems,
     });
-
+    
     estimateApi.updateEstimate.mockResolvedValue({
       success: true,
     });
-
+    
     estimateApi.createEstimate.mockResolvedValue({
       success: true,
       data: { ...mockEstimateData, estimate_id: 'new-001' },
@@ -185,7 +187,7 @@ describe('見積作成統合テスト', () => {
     test('エラーハンドリングの統合テスト', async () => {
       // APIエラーのモック
       estimateApi.getEstimate.mockRejectedValue(new Error('Network error'));
-
+      
       renderWithProviders(<EstimateCreator estimateId="invalid-id" />);
 
       // エラー時のデフォルト表示
@@ -201,18 +203,21 @@ describe('見積作成統合テスト', () => {
 
     test('ウィザード全ステップの統合テスト', async () => {
       renderWithProviders(
-        <EstimateWizardPro onComplete={mockOnComplete} onCancel={mockOnCancel} />
+        <EstimateWizardPro 
+          onComplete={mockOnComplete} 
+          onCancel={mockOnCancel}
+        />
       );
 
       // ステップ1: 基本情報入力
       expect(screen.getByText('基本情報')).toBeInTheDocument();
-
+      
       const customerNameInput = screen.getByLabelText(/顧客名/);
       await userEvent.type(customerNameInput, 'テスト造園株式会社');
-
+      
       const phoneInput = screen.getByLabelText(/電話番号/);
       await userEvent.type(phoneInput, '03-1234-5678');
-
+      
       const addressInput = screen.getByLabelText(/住所/);
       await userEvent.type(addressInput, '東京都渋谷区テスト1-1-1');
 
@@ -224,28 +229,28 @@ describe('見積作成統合テスト', () => {
       await waitFor(() => {
         expect(screen.getByText('プロジェクト詳細・要望')).toBeInTheDocument();
       });
-
+      
       const projectNameInput = screen.getByLabelText(/プロジェクト名/);
       await userEvent.type(projectNameInput, '統合テスト庭園工事');
-
+      
       fireEvent.click(screen.getByRole('button', { name: /次のステップ/ }));
 
       // ステップ3: 項目選択
       await waitFor(() => {
         expect(screen.getByText('工事項目の選択・数量入力')).toBeInTheDocument();
       });
-
+      
       // 項目選択チェックボックスを探してクリック
       const itemCheckbox = screen.getAllByRole('checkbox')[0];
       fireEvent.click(itemCheckbox);
-
+      
       fireEvent.click(screen.getByRole('button', { name: /次のステップ/ }));
 
       // ステップ4: 金額確認
       await waitFor(() => {
         expect(screen.getByText('金額確認・調整')).toBeInTheDocument();
       });
-
+      
       // 完成ボタンクリック
       const completeButton = screen.getByRole('button', { name: /見積書完成/ });
       fireEvent.click(completeButton);
@@ -265,7 +270,10 @@ describe('見積作成統合テスト', () => {
 
     test('バリデーションエラーでステップが進まない', async () => {
       renderWithProviders(
-        <EstimateWizardPro onComplete={mockOnComplete} onCancel={mockOnCancel} />
+        <EstimateWizardPro 
+          onComplete={mockOnComplete} 
+          onCancel={mockOnCancel}
+        />
       );
 
       // 空のまま次のステップを試行
@@ -283,7 +291,10 @@ describe('見積作成統合テスト', () => {
 
     test('キャンセル機能のテスト', async () => {
       renderWithProviders(
-        <EstimateWizardPro onComplete={mockOnComplete} onCancel={mockOnCancel} />
+        <EstimateWizardPro 
+          onComplete={mockOnComplete} 
+          onCancel={mockOnCancel}
+        />
       );
 
       // キャンセルボタンクリック
@@ -306,9 +317,9 @@ describe('見積作成統合テスト', () => {
       // Tabキーでのフォーカス移動
       const nameInput = screen.getByDisplayValue('新規見積');
       nameInput.focus();
-
+      
       fireEvent.keyDown(nameInput, { key: 'Tab' });
-
+      
       // 次のフォーカス可能要素を確認
       // 実際の実装に合わせて調整が必要
     });
@@ -343,13 +354,13 @@ describe('見積作成統合テスト', () => {
       });
 
       const startTime = performance.now();
-
+      
       renderWithProviders(<EstimateCreator estimateId="test-001" />);
-
+      
       await waitFor(() => {
         expect(screen.getByDisplayValue('テスト見積')).toBeInTheDocument();
       });
-
+      
       const endTime = performance.now();
       const renderTime = endTime - startTime;
 
@@ -366,7 +377,7 @@ describe('見積作成統合テスト', () => {
 
       // 短時間で複数回保存を試行
       const saveButton = screen.getByRole('button', { name: /保存/ });
-
+      
       const promises = [];
       for (let i = 0; i < 5; i++) {
         promises.push(
@@ -424,7 +435,7 @@ describe('見積作成統合テスト', () => {
     test('ネットワークエラーからの回復', async () => {
       // 最初はエラー
       estimateApi.getEstimate.mockRejectedValueOnce(new Error('Network error'));
-
+      
       renderWithProviders(<EstimateCreator estimateId="test-001" />);
 
       // エラー時のデフォルト表示

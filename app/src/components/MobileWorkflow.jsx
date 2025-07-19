@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import {
-  FileText,
-  Calendar,
-  DollarSign,
-  Package,
-  Camera,
+import { 
+  FileText, 
+  Calendar, 
+  DollarSign, 
+  Package, 
+  Camera, 
   MapPin,
   CheckCircle,
   Clock,
@@ -14,28 +14,28 @@ import {
   Search,
   Filter,
   Menu,
-  X,
+  X
 } from 'lucide-react';
 import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
-import {
-  FONT_SIZES,
-  TOUCH_SIZES,
-  SPACING,
-  MOBILE_STYLES,
-  COLORS,
+import { 
+  FONT_SIZES, 
+  TOUCH_SIZES, 
+  SPACING, 
+  MOBILE_STYLES, 
+  COLORS, 
   Z_INDEX,
-  mediaQuery,
+  mediaQuery 
 } from '../styles/mobileConstants';
 
-const MobileWorkflow = ({
-  activeModule,
-  setActiveModule,
-  currentProject,
-  onProjectChange,
-  user,
-  isDemoMode,
-  notifications,
-  dashboardData,
+const MobileWorkflow = ({ 
+  activeModule, 
+  setActiveModule, 
+  currentProject, 
+  onProjectChange, 
+  user, 
+  isDemoMode, 
+  notifications, 
+  dashboardData 
 }) => {
   const [activeTab, setActiveTab] = useState(activeModule || 'estimate');
   const [showMenu, setShowMenu] = useState(false);
@@ -53,7 +53,7 @@ const MobileWorkflow = ({
   }, [activeModule, activeTab]);
 
   // タブ変更時に親のsetActiveModuleを呼び出し
-  const handleTabChange = tab => {
+  const handleTabChange = (tab) => {
     setActiveTab(tab);
     if (setActiveModule) {
       setActiveModule(tab);
@@ -64,13 +64,13 @@ const MobileWorkflow = ({
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        position => {
+        (position) => {
           setCurrentLocation({
             lat: position.coords.latitude,
-            lng: position.coords.longitude,
+            lng: position.coords.longitude
           });
         },
-        error => {
+        (error) => {
           console.error('位置情報の取得に失敗:', error);
         }
       );
@@ -82,7 +82,7 @@ const MobileWorkflow = ({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' },
-        audio: false,
+        audio: false
       });
       setCameraStream(stream);
       setShowCamera(true);
@@ -102,7 +102,7 @@ const MobileWorkflow = ({
   }, [cameraStream]);
 
   // クイックアクション
-  const handleQuickAction = action => {
+  const handleQuickAction = (action) => {
     switch (action) {
       case 'new-estimate':
         // 新しい見積作成
@@ -146,7 +146,10 @@ const MobileWorkflow = ({
       </MobileHeader>
 
       <QuickActionBar>
-        <QuickActionButton priority="high" onClick={() => handleQuickAction('new-estimate')}>
+        <QuickActionButton 
+          priority="high"
+          onClick={() => handleQuickAction('new-estimate')}
+        >
           <Plus size={16} />
           <span>新規見積</span>
         </QuickActionButton>
@@ -158,25 +161,40 @@ const MobileWorkflow = ({
           <MapPin size={16} />
           <span>現在地</span>
         </QuickActionButton>
-        <QuickActionButton priority="emergency" onClick={() => handleQuickAction('emergency')}>
+        <QuickActionButton 
+          priority="emergency"
+          onClick={() => handleQuickAction('emergency')}
+        >
           <span>緊急連絡</span>
         </QuickActionButton>
       </QuickActionBar>
 
       <TabNavigation>
-        <TabButton active={activeTab === 'estimate'} onClick={() => handleTabChange('estimate')}>
+        <TabButton 
+          active={activeTab === 'estimate'} 
+          onClick={() => handleTabChange('estimate')}
+        >
           <FileText size={16} />
           <span>見積</span>
         </TabButton>
-        <TabButton active={activeTab === 'process'} onClick={() => handleTabChange('process')}>
+        <TabButton 
+          active={activeTab === 'process'} 
+          onClick={() => handleTabChange('process')}
+        >
           <Calendar size={16} />
           <span>工程</span>
         </TabButton>
-        <TabButton active={activeTab === 'budget'} onClick={() => handleTabChange('budget')}>
+        <TabButton 
+          active={activeTab === 'budget'} 
+          onClick={() => handleTabChange('budget')}
+        >
           <DollarSign size={16} />
           <span>予算</span>
         </TabButton>
-        <TabButton active={activeTab === 'invoice'} onClick={() => handleTabChange('invoice')}>
+        <TabButton 
+          active={activeTab === 'invoice'} 
+          onClick={() => handleTabChange('invoice')}
+        >
           <Package size={16} />
           <span>請求</span>
         </TabButton>
@@ -193,13 +211,15 @@ const MobileWorkflow = ({
         <Plus size={24} />
       </FloatingActionButton>
 
-      {showMenu && <MobileMenu onClose={() => setShowMenu(false)} />}
+      {showMenu && (
+        <MobileMenu onClose={() => setShowMenu(false)} />
+      )}
 
       {showCamera && (
-        <CameraModal
+        <CameraModal 
           stream={cameraStream}
           onClose={stopCamera}
-          onCapture={imageData => {
+          onCapture={(imageData) => {
             // 写真を保存
             console.log('写真を撮影:', imageData);
             stopCamera();
@@ -224,7 +244,7 @@ const EstimateTab = () => {
             type="text"
             placeholder="見積を検索..."
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </SearchInput>
         <FilterButton>
@@ -250,9 +270,7 @@ const EstimateTab = () => {
           </CardContent>
           <CardActions>
             <ActionButton size="small">編集</ActionButton>
-            <ActionButton size="small" primary>
-              送信
-            </ActionButton>
+            <ActionButton size="small" primary>送信</ActionButton>
           </CardActions>
         </EstimateCard>
 
@@ -294,9 +312,7 @@ const EstimateTab = () => {
           </CardContent>
           <CardActions>
             <ActionButton size="small">工程表</ActionButton>
-            <ActionButton size="small" primary>
-              開始
-            </ActionButton>
+            <ActionButton size="small" primary>開始</ActionButton>
           </CardActions>
         </EstimateCard>
       </CardList>
@@ -315,7 +331,7 @@ const ProcessTab = () => {
         <DateInput
           type="date"
           value={selectedDate.toISOString().split('T')[0]}
-          onChange={e => setSelectedDate(new Date(e.target.value))}
+          onChange={(e) => setSelectedDate(new Date(e.target.value))}
         />
       </DateSelector>
 
@@ -430,7 +446,9 @@ const BudgetTab = () => {
         </BudgetItem>
       </BudgetList>
 
-      {showQuickEntry && <QuickEntryModal onClose={() => setShowQuickEntry(false)} />}
+      {showQuickEntry && (
+        <QuickEntryModal onClose={() => setShowQuickEntry(false)} />
+      )}
     </TabContainer>
   );
 };
@@ -486,7 +504,9 @@ const InvoiceTab = () => {
         </PurchaseItem>
       </PurchaseList>
 
-      {showScanner && <ReceiptScanner onClose={() => setShowScanner(false)} />}
+      {showScanner && (
+        <ReceiptScanner onClose={() => setShowScanner(false)} />
+      )}
     </TabContainer>
   );
 };
@@ -502,7 +522,7 @@ const MobileMenu = ({ onClose }) => {
 
   return (
     <MenuOverlay onClick={onClose}>
-      <MenuContainer onClick={e => e.stopPropagation()}>
+      <MenuContainer onClick={(e) => e.stopPropagation()}>
         <MenuHeader>
           <MenuTitle>メニュー</MenuTitle>
           <CloseButton onClick={onClose}>
@@ -511,12 +531,7 @@ const MobileMenu = ({ onClose }) => {
         </MenuHeader>
         <MenuList>
           {menuItems.map((item, index) => (
-            <MenuItem
-              key={index}
-              onClick={() => {
-                window.location.href = item.path;
-              }}
-            >
+            <MenuItem key={index} onClick={() => { window.location.href = item.path; }}>
               <item.icon size={20} />
               <span>{item.label}</span>
               <ChevronRight size={16} />
@@ -543,11 +558,11 @@ const CameraModal = ({ stream, onClose, onCapture }) => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-
+    
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0);
-
+    
     const imageData = canvas.toDataURL('image/jpeg');
     onCapture(imageData);
   };
@@ -580,7 +595,7 @@ const QuickEntryModal = ({ onClose }) => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     // 仕入額を記録
     console.log('仕入額記録:', { amount, description });
@@ -589,7 +604,7 @@ const QuickEntryModal = ({ onClose }) => {
 
   return (
     <ModalOverlay onClick={onClose}>
-      <ModalContainer onClick={e => e.stopPropagation()}>
+      <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>仕入額入力</ModalTitle>
           <CloseButton onClick={onClose}>
@@ -602,7 +617,7 @@ const QuickEntryModal = ({ onClose }) => {
             <AmountInput
               type="number"
               value={amount}
-              onChange={e => setAmount(e.target.value)}
+              onChange={(e) => setAmount(e.target.value)}
               placeholder="0"
               required
             />
@@ -612,7 +627,7 @@ const QuickEntryModal = ({ onClose }) => {
             <TextInput
               type="text"
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder="仕入れ内容を入力"
               required
             />
@@ -635,7 +650,7 @@ const QuickEntryModal = ({ onClose }) => {
 const ReceiptScanner = ({ onClose }) => {
   return (
     <ModalOverlay onClick={onClose}>
-      <ModalContainer onClick={e => e.stopPropagation()}>
+      <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>レシート撮影</ModalTitle>
           <CloseButton onClick={onClose}>
@@ -723,7 +738,7 @@ const LocationButton = styled.button`
   border-radius: 8px;
   cursor: pointer;
   ${MOBILE_STYLES.touchOptimized}
-
+  
   &:active {
     background: rgba(255, 255, 255, 0.3);
   }
@@ -741,7 +756,7 @@ const CameraButton = styled.button`
   border-radius: 8px;
   cursor: pointer;
   ${MOBILE_STYLES.touchOptimized}
-
+  
   &:active {
     background: rgba(255, 255, 255, 0.3);
   }
@@ -755,7 +770,7 @@ const QuickActionBar = styled.div`
   border-bottom: 1px solid ${COLORS.gray[200]};
   overflow-x: auto;
   ${MOBILE_STYLES.smoothScroll}
-
+  
   /* スクロールバーを隠す */
   &::-webkit-scrollbar {
     display: none;
@@ -788,12 +803,12 @@ const QuickActionButton = styled.button`
   font-size: ${FONT_SIZES.sm};
   flex-shrink: 0;
   ${MOBILE_STYLES.touchOptimized}
-
+  
   &:active {
     transform: scale(0.98);
     opacity: 0.9;
   }
-
+  
   span {
     white-space: nowrap;
   }
@@ -815,17 +830,17 @@ const TabButton = styled.button`
   min-height: ${TOUCH_SIZES.medium};
   background: none;
   border: none;
-  border-bottom: 2px solid ${props => (props.active ? COLORS.primary : 'transparent')};
-  color: ${props => (props.active ? COLORS.primary : COLORS.gray[500])};
+  border-bottom: 2px solid ${props => props.active ? COLORS.primary : 'transparent'};
+  color: ${props => props.active ? COLORS.primary : COLORS.gray[500]};
   cursor: pointer;
   font-size: ${FONT_SIZES.sm};
   font-weight: 500;
   ${MOBILE_STYLES.touchOptimized}
-
+  
   &:active {
     background: ${COLORS.gray[50]};
   }
-
+  
   span {
     white-space: nowrap;
   }
@@ -858,14 +873,14 @@ const SearchInput = styled.div`
   border-radius: 8px;
   padding: ${SPACING.sm} ${SPACING.md};
   min-height: ${TOUCH_SIZES.medium};
-
+  
   input {
     flex: 1;
     border: none;
     outline: none;
     font-size: ${FONT_SIZES.base};
     ${MOBILE_STYLES.preventZoom}
-
+    
     &::placeholder {
       color: ${COLORS.gray[400]};
     }
@@ -883,7 +898,7 @@ const FilterButton = styled.button`
   justify-content: center;
   cursor: pointer;
   ${MOBILE_STYLES.touchOptimized}
-
+  
   &:active {
     background: ${COLORS.gray[50]};
   }
@@ -901,7 +916,7 @@ const EstimateCard = styled.div`
   padding: ${SPACING.base};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   ${MOBILE_STYLES.touchOptimized}
-
+  
   &:active {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   }
@@ -927,9 +942,9 @@ const CardStatus = styled.span`
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
-
+  
   ${props => {
-    switch (props.status) {
+    switch(props.status) {
       case 'draft':
         return 'background: #fef3c7; color: #92400e;';
       case 'sent':
@@ -962,11 +977,10 @@ const CardActions = styled.div`
 `;
 
 const ActionButton = styled.button`
-  padding: ${props =>
-    props.size === 'small' ? `${SPACING.sm} ${SPACING.md}` : `${SPACING.md} ${SPACING.base}`};
-  min-height: ${props => (props.size === 'small' ? TOUCH_SIZES.small : TOUCH_SIZES.medium)};
-  background: ${props => (props.primary ? COLORS.primary : COLORS.gray[100])};
-  color: ${props => (props.primary ? COLORS.white : COLORS.gray[700])};
+  padding: ${props => props.size === 'small' ? `${SPACING.sm} ${SPACING.md}` : `${SPACING.md} ${SPACING.base}`};
+  min-height: ${props => props.size === 'small' ? TOUCH_SIZES.small : TOUCH_SIZES.medium};
+  background: ${props => props.primary ? COLORS.primary : COLORS.gray[100]};
+  color: ${props => props.primary ? COLORS.white : COLORS.gray[700]};
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -989,7 +1003,7 @@ const DateInput = styled.input`
   width: 100%;
   ${MOBILE_STYLES.inputOptimized}
   border: 1px solid ${COLORS.gray[300]};
-
+  
   &:focus {
     outline: none;
     border-color: ${COLORS.primary};
@@ -1017,9 +1031,9 @@ const TimelineMarker = styled.div`
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-
+  
   ${props => {
-    switch (props.status) {
+    switch(props.status) {
       case 'completed':
         return 'background: #10b981; color: white;';
       case 'in-progress':
@@ -1120,7 +1134,7 @@ const SummaryLabel = styled.div`
 const SummaryValue = styled.div`
   font-size: 16px;
   font-weight: 600;
-  color: ${props => (props.positive ? '#10b981' : '#1f2937')};
+  color: ${props => props.positive ? '#10b981' : '#1f2937'};
 `;
 
 const QuickEntryButton = styled.button`
@@ -1137,7 +1151,7 @@ const QuickEntryButton = styled.button`
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-
+  
   &:hover {
     background: #2563eb;
   }
@@ -1187,9 +1201,9 @@ const BudgetDetail = styled.div`
   gap: 4px;
   font-size: 14px;
   color: #6b7280;
-
+  
   span:last-child {
-    color: ${props => (props.positive ? '#10b981' : '#1f2937')};
+    color: ${props => props.positive ? '#10b981' : '#1f2937'};
     font-weight: 500;
   }
 `;
@@ -1220,7 +1234,7 @@ const ScannerButton = styled.button`
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
-
+  
   &:hover {
     background: #059669;
   }
@@ -1289,7 +1303,7 @@ const FloatingActionButton = styled.button`
   justify-content: center;
   z-index: ${Z_INDEX.fixed};
   ${MOBILE_STYLES.touchOptimized}
-
+  
   &:active {
     background: ${COLORS.primaryDark};
     transform: scale(0.95);
@@ -1353,11 +1367,11 @@ const MenuItem = styled.div`
   border-radius: 8px;
   cursor: pointer;
   ${MOBILE_STYLES.touchOptimized}
-
+  
   &:active {
     background: ${COLORS.gray[100]};
   }
-
+  
   span {
     flex: 1;
     font-size: ${FONT_SIZES.base};
@@ -1399,7 +1413,7 @@ const CameraTitle = styled.h2`
 const CameraView = styled.div`
   flex: 1;
   position: relative;
-
+  
   video {
     width: 100%;
     height: 100%;
@@ -1424,7 +1438,7 @@ const CaptureButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-
+  
   &:hover {
     background: #f3f4f6;
   }
@@ -1492,7 +1506,7 @@ const AmountInput = styled.input`
   color: ${COLORS.gray[800]};
   min-height: ${TOUCH_SIZES.large};
   ${MOBILE_STYLES.preventZoom}
-
+  
   &:focus {
     outline: none;
     border-color: ${COLORS.primary};
@@ -1504,7 +1518,7 @@ const TextInput = styled.input`
   width: 100%;
   ${MOBILE_STYLES.inputOptimized}
   border: 1px solid ${COLORS.gray[300]};
-
+  
   &:focus {
     outline: none;
     border-color: ${COLORS.primary};
@@ -1526,18 +1540,15 @@ const ModalButton = styled.button`
   border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
-
-  ${props =>
-    props.primary
-      ? `
+  
+  ${props => props.primary ? `
     background: ${COLORS.primary};
     color: ${COLORS.white};
-  `
-      : `
+  ` : `
     background: ${COLORS.gray[100]};
     color: ${COLORS.gray[700]};
   `}
-
+  
   &:active {
     opacity: 0.9;
     transform: scale(0.98);

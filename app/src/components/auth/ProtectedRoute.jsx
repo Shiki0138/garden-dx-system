@@ -78,13 +78,7 @@ const BackButton = styled.button`
 const ProtectedRoute = ({ children, requireRole = null, requirePermission = null }) => {
   const location = useLocation();
   const authContext = useSupabaseAuth();
-  const {
-    loading,
-    isAuthenticated: isAuthenticatedFn,
-    hasRole,
-    user,
-    isConnected,
-  } = authContext || {};
+  const { loading, isAuthenticated: isAuthenticatedFn, hasRole, user, isConnected } = authContext || {};
   const isAuthenticated = typeof isAuthenticatedFn === 'function' ? isAuthenticatedFn : () => false;
   const { isDemoMode, demoUser } = useDemoMode();
 

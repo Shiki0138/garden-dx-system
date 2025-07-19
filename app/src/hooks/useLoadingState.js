@@ -10,9 +10,9 @@ import { log } from '../utils/logger';
 // ローディング状態の型定義
 export const LOADING_TYPES = {
   API: 'api',
-  FILE: 'file',
+  FILE: 'file', 
   PROCESSING: 'processing',
-  NAVIGATION: 'navigation',
+  NAVIGATION: 'navigation'
 };
 
 // グローバルローディング状態管理
@@ -25,14 +25,14 @@ class LoadingManager {
   // ローディング状態設定
   setLoading(key, isLoading, meta = {}) {
     const timestamp = Date.now();
-
+    
     if (isLoading) {
       this.loadingStates.set(key, {
         startTime: timestamp,
         type: meta.type || LOADING_TYPES.API,
         message: meta.message || '処理中...',
         progress: meta.progress || 0,
-        meta,
+        meta
       });
     } else {
       const loadingState = this.loadingStates.get(key);
@@ -56,7 +56,7 @@ class LoadingManager {
   getAllLoading() {
     return Array.from(this.loadingStates.entries()).map(([key, state]) => ({
       key,
-      ...state,
+      ...state
     }));
   }
 
@@ -88,8 +88,7 @@ class LoadingManager {
   }
 
   // 古いローディング状態のクリーンアップ
-  cleanup(maxAge = 60000) {
-    // 1分
+  cleanup(maxAge = 60000) { // 1分
     const now = Date.now();
     const toDelete = [];
 
@@ -120,17 +119,12 @@ class LoadingManager {
         acc[loading.type] = (acc[loading.type] || 0) + 1;
         return acc;
       }, {}),
-      longestRunning: loadings.reduce(
-        (max, loading) => {
-          const duration = now - loading.startTime;
-          return duration > max.duration ? { key: loading.key, duration } : max;
-        },
-        { key: null, duration: 0 }
-      ),
-      averageDuration:
-        loadings.length > 0
-          ? loadings.reduce((sum, loading) => sum + (now - loading.startTime), 0) / loadings.length
-          : 0,
+      longestRunning: loadings.reduce((max, loading) => {
+        const duration = now - loading.startTime;
+        return duration > max.duration ? { key: loading.key, duration } : max;
+      }, { key: null, duration: 0 }),
+      averageDuration: loadings.length > 0 ? 
+        loadings.reduce((sum, loading) => sum + (now - loading.startTime), 0) / loadings.length : 0
     };
   }
 }
@@ -168,7 +162,7 @@ export const useLoading = (initialLoading = false) => {
       message: loadingMessage = '処理中...',
       type = LOADING_TYPES.API,
       showNotification = false,
-      key = null,
+      key = null
     } = options;
 
     const loadingKey = key || `loading_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -182,7 +176,7 @@ export const useLoading = (initialLoading = false) => {
     loadingManager.setLoading(loadingKey, true, {
       type,
       message: loadingMessage,
-      progress: 0,
+      progress: 0
     });
 
     // 通知表示
@@ -199,7 +193,7 @@ export const useLoading = (initialLoading = false) => {
     if (!isMountedRef.current || !loadingKeyRef.current) return;
 
     setProgress(newProgress);
-
+    
     if (newMessage) {
       setMessage(newMessage);
     }
@@ -210,7 +204,7 @@ export const useLoading = (initialLoading = false) => {
       loadingManager.setLoading(loadingKeyRef.current, true, {
         ...currentState.meta,
         progress: newProgress,
-        message: newMessage || currentState.message,
+        message: newMessage || currentState.message
       });
     }
   }, []);
@@ -236,7 +230,7 @@ export const useLoading = (initialLoading = false) => {
     startLoading,
     updateProgress,
     stopLoading,
-    loadingKey: loadingKeyRef.current,
+    loadingKey: loadingKeyRef.current
   };
 };
 
@@ -246,11 +240,11 @@ export const useGlobalLoading = (filterType = null) => {
   const [hasLoading, setHasLoading] = useState(false);
 
   useEffect(() => {
-    const updateStates = allStates => {
-      const filteredStates = filterType
-        ? allStates.filter(state => state.type === filterType)
-        : allStates;
-
+    const updateStates = (allStates) => {
+      const filteredStates = filterType ? 
+        allStates.filter(state => state.type === filterType) : 
+        allStates;
+      
       setLoadingStates(filteredStates);
       setHasLoading(filteredStates.length > 0);
     };
@@ -279,51 +273,48 @@ export const useGlobalLoading = (filterType = null) => {
     hasLoading,
     count: loadingStates.length,
     getStats,
-    clearAll,
+    clearAll
   };
 };
 
 // カスタムフック: useApiLoading（API専用ローディング）
 export const useApiLoading = () => {
   const loading = useLoading();
+  
+  const withLoading = useCallback(async (apiCall, options = {}) => {
+    const {
+      loadingMessage = 'API通信中...',
+      showNotification = false,
+      onProgress = null
+    } = options;
 
-  const withLoading = useCallback(
-    async (apiCall, options = {}) => {
-      const {
-        loadingMessage = 'API通信中...',
-        showNotification = false,
-        onProgress = null,
-      } = options;
+    const loadingKey = loading.startLoading({
+      message: loadingMessage,
+      type: LOADING_TYPES.API,
+      showNotification
+    });
 
-      const loadingKey = loading.startLoading({
-        message: loadingMessage,
-        type: LOADING_TYPES.API,
-        showNotification,
-      });
-
-      try {
-        let result;
-
-        if (onProgress && typeof apiCall === 'function') {
-          // プログレス監視付きAPI呼び出し
-          result = await apiCall(progress => {
-            loading.updateProgress(progress);
-          });
-        } else {
-          result = await apiCall;
-        }
-
-        return result;
-      } finally {
-        loading.stopLoading();
+    try {
+      let result;
+      
+      if (onProgress && typeof apiCall === 'function') {
+        // プログレス監視付きAPI呼び出し
+        result = await apiCall((progress) => {
+          loading.updateProgress(progress);
+        });
+      } else {
+        result = await apiCall;
       }
-    },
-    [loading]
-  );
+
+      return result;
+    } finally {
+      loading.stopLoading();
+    }
+  }, [loading]);
 
   return {
     ...loading,
-    withLoading,
+    withLoading
   };
 };
 
@@ -331,71 +322,71 @@ export const useApiLoading = () => {
 export const useFileLoading = () => {
   const loading = useLoading();
 
-  const uploadWithProgress = useCallback(
-    async (uploadFn, file, options = {}) => {
-      const { onProgress = null, showNotification = true } = options;
+  const uploadWithProgress = useCallback(async (uploadFn, file, options = {}) => {
+    const {
+      onProgress = null,
+      showNotification = true
+    } = options;
 
-      const loadingKey = loading.startLoading({
-        message: `${file.name} をアップロード中...`,
-        type: LOADING_TYPES.FILE,
-        showNotification,
+    const loadingKey = loading.startLoading({
+      message: `${file.name} をアップロード中...`,
+      type: LOADING_TYPES.FILE,
+      showNotification
+    });
+
+    try {
+      const result = await uploadFn(file, (progressEvent) => {
+        if (progressEvent.lengthComputable && onProgress) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          loading.updateProgress(progress, `${file.name} をアップロード中... ${progress}%`);
+          onProgress(progress);
+        }
       });
 
-      try {
-        const result = await uploadFn(file, progressEvent => {
-          if (progressEvent.lengthComputable && onProgress) {
-            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            loading.updateProgress(progress, `${file.name} をアップロード中... ${progress}%`);
-            onProgress(progress);
-          }
-        });
+      return result;
+    } finally {
+      loading.stopLoading();
+    }
+  }, [loading]);
 
-        return result;
-      } finally {
-        loading.stopLoading();
-      }
-    },
-    [loading]
-  );
+  const downloadWithProgress = useCallback(async (downloadFn, filename, options = {}) => {
+    const {
+      onProgress = null,
+      showNotification = true
+    } = options;
 
-  const downloadWithProgress = useCallback(
-    async (downloadFn, filename, options = {}) => {
-      const { onProgress = null, showNotification = true } = options;
+    const loadingKey = loading.startLoading({
+      message: `${filename} をダウンロード中...`,
+      type: LOADING_TYPES.FILE,
+      showNotification
+    });
 
-      const loadingKey = loading.startLoading({
-        message: `${filename} をダウンロード中...`,
-        type: LOADING_TYPES.FILE,
-        showNotification,
+    try {
+      const result = await downloadFn((progressEvent) => {
+        if (progressEvent.lengthComputable && onProgress) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          loading.updateProgress(progress, `${filename} をダウンロード中... ${progress}%`);
+          onProgress(progress);
+        }
       });
 
-      try {
-        const result = await downloadFn(progressEvent => {
-          if (progressEvent.lengthComputable && onProgress) {
-            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            loading.updateProgress(progress, `${filename} をダウンロード中... ${progress}%`);
-            onProgress(progress);
-          }
-        });
-
-        return result;
-      } finally {
-        loading.stopLoading();
-      }
-    },
-    [loading]
-  );
+      return result;
+    } finally {
+      loading.stopLoading();
+    }
+  }, [loading]);
 
   return {
     ...loading,
     uploadWithProgress,
-    downloadWithProgress,
+    downloadWithProgress
   };
 };
 
 // デバッグ用：ローディング状態可視化コンポーネント用フック
 export const useLoadingDebugger = () => {
   const { loadingStates, getStats } = useGlobalLoading();
-
+  
   const [debugInfo, setDebugInfo] = useState({});
 
   useEffect(() => {
@@ -403,7 +394,7 @@ export const useLoadingDebugger = () => {
       setDebugInfo({
         states: loadingStates,
         stats: getStats(),
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       });
     }, 1000);
 
@@ -415,7 +406,7 @@ export const useLoadingDebugger = () => {
 
 // エクスポート
 export {
-  loadingManager,
+  loadingManager
   // LOADING_TYPESは既に上部でexportされているため、ここでは削除
 };
 
@@ -426,5 +417,5 @@ export default {
   useFileLoading,
   useLoadingDebugger,
   loadingManager,
-  LOADING_TYPES,
+  LOADING_TYPES
 };

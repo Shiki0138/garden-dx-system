@@ -1,0 +1,77 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"],
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "include": [
+        "ban-untagged-todo",
+        "no-throw-literal",
+        "no-await-in-loop",
+        "require-yield"
+      ]
+    }
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "preserve"
+  },
+  "tasks": {
+    "dev": "deno run --allow-net --allow-env --allow-read functions/serve.ts",
+    "test": "deno test --allow-all",
+    "lint": "deno lint",
+    "fmt": "deno fmt",
+    "check": "deno check **/*.ts",
+    "security-audit": "deno run --allow-read --allow-write scripts/security-check.ts"
+  },
+  "imports": {
+    "std/": "https://deno.land/std@0.208.0/",
+    "supabase": "https://esm.sh/@supabase/supabase-js@2.39.7"
+  },
+  "permissions": {
+    "allow-net": [
+      "api.supabase.io",
+      "supabase.co",
+      "esm.sh",
+      "deno.land"
+    ],
+    "allow-env": [
+      "SUPABASE_URL",
+      "SUPABASE_ANON_KEY", 
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "ENVIRONMENT",
+      "ALLOWED_ORIGINS",
+      "FRONTEND_URL"
+    ],
+    "allow-read": [
+      "."
+    ],
+    "deny-write": [
+      "/etc",
+      "/usr",
+      "/var",
+      "/system"
+    ],
+    "deny-run": true,
+    "deny-ffi": true,
+    "deny-hrtime": false
+  },
+  "exclude": [
+    "node_modules/",
+    "build/",
+    "dist/"
+  ]
+}

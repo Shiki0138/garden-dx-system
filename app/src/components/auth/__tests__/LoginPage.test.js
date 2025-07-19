@@ -9,11 +9,11 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import LoginPage from '../LoginPage';
-import { useAuth } from '../../../contexts/SupabaseAuthContext';
+import { useAuth } from '../../contexts/SupabaseAuthContext';
 
 // モック設定
-jest.mock('../../../contexts/SupabaseAuthContext');
-jest.mock('../../../utils/notifications', () => ({
+jest.mock('../../contexts/SupabaseAuthContext');
+jest.mock('../../utils/notifications', () => ({
   showError: jest.fn(),
   showSuccess: jest.fn(),
   showInfo: jest.fn(),
@@ -26,8 +26,12 @@ jest.mock('react-router-dom', () => ({
 }));
 
 // テストユーティリティ
-const renderWithRouter = component => {
-  return render(<Router>{component}</Router>);
+const renderWithRouter = (component) => {
+  return render(
+    <Router>
+      {component}
+    </Router>
+  );
 };
 
 describe('LoginPage', () => {
@@ -36,7 +40,7 @@ describe('LoginPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
+    
     // デフォルトのuseAuthモック
     useAuth.mockReturnValue({
       login: mockLogin,
@@ -63,7 +67,7 @@ describe('LoginPage', () => {
 
     test('デモモードでの表示', () => {
       process.env.REACT_APP_DEMO_MODE = 'true';
-
+      
       renderWithRouter(<LoginPage />);
 
       // デモモードの表示確認
@@ -92,13 +96,13 @@ describe('LoginPage', () => {
   describe('ログイン機能', () => {
     test('正常なログイン処理', async () => {
       mockLogin.mockResolvedValue({ success: true });
-
+      
       renderWithRouter(<LoginPage />);
 
       // フォーム入力
       const emailInput = screen.getByLabelText('メールアドレス');
       const passwordInput = screen.getByLabelText('パスワード');
-
+      
       await userEvent.type(emailInput, 'test@example.com');
       await userEvent.type(passwordInput, 'password123');
 
@@ -119,11 +123,11 @@ describe('LoginPage', () => {
 
     test('ログイン失敗時のエラー表示', async () => {
       const { showError } = require('../../utils/notifications');
-      mockLogin.mockResolvedValue({
-        success: false,
-        error: 'メールアドレスまたはパスワードが間違っています',
+      mockLogin.mockResolvedValue({ 
+        success: false, 
+        error: 'メールアドレスまたはパスワードが間違っています' 
       });
-
+      
       renderWithRouter(<LoginPage />);
 
       // フォーム入力
@@ -145,7 +149,7 @@ describe('LoginPage', () => {
     test('ネットワークエラーのハンドリング', async () => {
       const { showError } = require('../../utils/notifications');
       mockLogin.mockRejectedValue(new Error('Network error'));
-
+      
       renderWithRouter(<LoginPage />);
 
       // フォーム入力と送信
@@ -155,9 +159,7 @@ describe('LoginPage', () => {
 
       // ネットワークエラーの表示確認
       await waitFor(() => {
-        expect(showError).toHaveBeenCalledWith(
-          'ネットワークエラーが発生しました。しばらく待ってから再度お試しください。'
-        );
+        expect(showError).toHaveBeenCalledWith('ネットワークエラーが発生しました。しばらく待ってから再度お試しください。');
       });
     });
   });
@@ -169,7 +171,7 @@ describe('LoginPage', () => {
 
     test('デモユーザーログイン', async () => {
       mockLogin.mockResolvedValue({ success: true });
-
+      
       renderWithRouter(<LoginPage />);
 
       // デモユーザーボタンクリック
@@ -203,7 +205,7 @@ describe('LoginPage', () => {
       await waitFor(() => {
         expect(screen.getByText('メールアドレスを入力してください')).toBeInTheDocument();
       });
-
+      
       await waitFor(() => {
         expect(screen.getByText('パスワードを入力してください')).toBeInTheDocument();
       });
@@ -251,10 +253,12 @@ describe('LoginPage', () => {
   describe('ローディング状態', () => {
     test('ログイン中のローディング表示', async () => {
       // ログインが遅延するようにモック
-      mockLogin.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ success: true }), 1000))
+      mockLogin.mockImplementation(() => 
+        new Promise(resolve => 
+          setTimeout(() => resolve({ success: true }), 1000)
+        )
       );
-
+      
       renderWithRouter(<LoginPage />);
 
       // フォーム入力と送信
@@ -280,7 +284,7 @@ describe('LoginPage', () => {
       // ラベルと入力フィールドの関連付け確認
       const emailInput = screen.getByLabelText('メールアドレス');
       const passwordInput = screen.getByLabelText('パスワード');
-
+      
       expect(emailInput).toHaveAttribute('type', 'email');
       expect(passwordInput).toHaveAttribute('type', 'password');
       expect(emailInput).toHaveAttribute('id');
@@ -293,9 +297,9 @@ describe('LoginPage', () => {
       // Tabキーでのフォーカス移動
       const emailInput = screen.getByLabelText('メールアドレス');
       emailInput.focus();
-
+      
       fireEvent.keyDown(emailInput, { key: 'Tab' });
-
+      
       // パスワードフィールドにフォーカスが移ることを確認
       const passwordInput = screen.getByLabelText('パスワード');
       expect(document.activeElement).toBe(passwordInput);
@@ -303,7 +307,7 @@ describe('LoginPage', () => {
 
     test('Enterキーでのフォーム送信', async () => {
       mockLogin.mockResolvedValue({ success: true });
-
+      
       renderWithRouter(<LoginPage />);
 
       // フォーム入力
@@ -362,10 +366,10 @@ describe('LoginPage', () => {
   describe('エラー状態の持続性', () => {
     test('フォーム再送信時のエラークリア', async () => {
       const { showError } = require('../../utils/notifications');
-
+      
       // 最初はエラー
       mockLogin.mockResolvedValueOnce({ success: false, error: 'ログイン失敗' });
-
+      
       renderWithRouter(<LoginPage />);
 
       // 初回ログイン失敗
@@ -379,7 +383,7 @@ describe('LoginPage', () => {
 
       // 2回目は成功するように設定
       mockLogin.mockResolvedValueOnce({ success: true });
-
+      
       // パスワードを修正して再送信
       const passwordInput = screen.getByLabelText('パスワード');
       await userEvent.clear(passwordInput);

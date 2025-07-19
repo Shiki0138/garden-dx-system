@@ -14,8 +14,8 @@ const defaultAuthContext = {
     user_metadata: {
       name: '開発ユーザー',
       role: 'manager',
-      company_name: 'Garden DX開発',
-    },
+      company_name: 'Garden DX開発'
+    }
   },
   session: { access_token: 'dev-token' },
   loading: false,
@@ -44,8 +44,8 @@ export const useSafeSupabaseAuth = () => {
 };
 
 // HOC to wrap components with safe authentication
-export const withSafeAuth = Component => {
-  return props => {
+export const withSafeAuth = (Component) => {
+  return (props) => {
     const authContext = useSafeSupabaseAuth();
     return <Component {...props} auth={authContext} />;
   };

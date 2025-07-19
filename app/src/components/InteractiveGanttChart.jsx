@@ -100,7 +100,13 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
         return;
     }
 
-    setScheduleData(sorted);
+    // ソート後にorder番号を更新
+    const sortedWithOrder = sorted.map((item, index) => ({
+      ...item,
+      order: index + 1,
+    }));
+
+    setScheduleData(sortedWithOrder);
   };
 
   // ドラッグ開始（バーのドラッグ）
@@ -488,6 +494,8 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
             {scheduleData.map((item, index) => {
               const leftPercent = (item.startDay / totalDuration) * 100;
               const widthPercent = (item.duration / totalDuration) * 100;
+              // orderを使用して実際の表示順序と一致させる
+              const position = (item.order - 1) || index;
 
               return (
                 <GanttBar
@@ -498,7 +506,7 @@ const InteractiveGanttChart = ({ initialData = [], projectName = '' }) => {
                   style={{
                     left: `${leftPercent}%`,
                     width: `${widthPercent}%`,
-                    top: `${index * 56 + 16}px`,
+                    top: `${position * 80 + 20}px`, // TaskRowの高さ（80px）と一致させる
                   }}
                   category={item.category}
                   isDragging={draggedItem?.id === item.id}

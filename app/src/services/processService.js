@@ -4,79 +4,79 @@ import { apiRequest } from './api';
 export const processService = {
   // 工程一覧取得
   async getProcesses(projectId) {
-    return apiRequest(`/projects/${projectId}/processes`, {
-      method: 'GET',
+    return await apiRequest(`/projects/${projectId}/processes`, {
+      method: 'GET'
     });
   },
 
   // 見積書から工程表を自動生成
   async generateProcessesFromEstimate(estimateId) {
-    return apiRequest(`/estimates/${estimateId}/generate-processes`, {
-      method: 'POST',
+    return await apiRequest(`/estimates/${estimateId}/generate-processes`, {
+      method: 'POST'
     });
   },
 
   // 工程作成
   async createProcess(projectId, processData) {
-    return apiRequest(`/projects/${projectId}/processes`, {
+    return await apiRequest(`/projects/${projectId}/processes`, {
       method: 'POST',
-      body: JSON.stringify(processData),
+      body: JSON.stringify(processData)
     });
   },
 
   // 工程更新
   async updateProcess(processId, processData) {
-    return apiRequest(`/processes/${processId}`, {
+    return await apiRequest(`/processes/${processId}`, {
       method: 'PUT',
-      body: JSON.stringify(processData),
+      body: JSON.stringify(processData)
     });
   },
 
   // 工程削除
   async deleteProcess(processId) {
-    return apiRequest(`/processes/${processId}`, {
-      method: 'DELETE',
+    return await apiRequest(`/processes/${processId}`, {
+      method: 'DELETE'
     });
   },
 
   // 工程進捗更新
   async updateProcessProgress(processId, progress) {
-    return apiRequest(`/processes/${processId}/progress`, {
+    return await apiRequest(`/processes/${processId}/progress`, {
       method: 'PUT',
-      body: JSON.stringify({ progress }),
+      body: JSON.stringify({ progress })
     });
   },
 
   // 工程日程更新
   async updateProcessSchedule(processId, startDate, endDate) {
-    return apiRequest(`/processes/${processId}/schedule`, {
+    return await apiRequest(`/processes/${processId}/schedule`, {
       method: 'PUT',
-      body: JSON.stringify({ startDate, endDate }),
+      body: JSON.stringify({ startDate, endDate })
     });
   },
 
   // 工程表PDF生成
   async generateProcessPDF(projectId, format = 'gantt') {
-    return apiRequest(`/projects/${projectId}/processes/pdf`, {
+    return await apiRequest(`/projects/${projectId}/processes/pdf`, {
       method: 'POST',
-      body: JSON.stringify({ format }),
+      body: JSON.stringify({ format })
     });
   },
 
   // 工程テンプレート取得
   async getProcessTemplates() {
-    return apiRequest('/process-templates', {
-      method: 'GET',
+    return await apiRequest('/process-templates', {
+      method: 'GET'
     });
   },
 
   // 工程依存関係設定
   async setProcessDependencies(processId, dependencies) {
-    return apiRequest(`/processes/${processId}/dependencies`, {
+    return await apiRequest(`/processes/${processId}/dependencies`, {
       method: 'PUT',
-      body: JSON.stringify({ dependencies }),
+      body: JSON.stringify({ dependencies })
     });
-  },
+  }
 };
 
 // 造園業界標準工程データ
@@ -89,7 +89,7 @@ export const standardProcesses = {
       category: 'preparation',
       defaultProgress: 0,
       description: '現場の状況確認と正確な測量',
-      dependencies: [],
+      dependencies: []
     },
     {
       name: '設計・図面作成',
@@ -97,7 +97,7 @@ export const standardProcesses = {
       category: 'design',
       defaultProgress: 0,
       description: '詳細設計図面の作成',
-      dependencies: ['現場調査・測量'],
+      dependencies: ['現場調査・測量']
     },
     {
       name: '材料発注',
@@ -105,7 +105,7 @@ export const standardProcesses = {
       category: 'procurement',
       defaultProgress: 0,
       description: '必要資材の発注・手配',
-      dependencies: ['設計・図面作成'],
+      dependencies: ['設計・図面作成']
     },
     {
       name: '基礎工事',
@@ -113,7 +113,7 @@ export const standardProcesses = {
       category: 'foundation',
       defaultProgress: 0,
       description: '基礎の掘削・コンクリート打設',
-      dependencies: ['材料発注'],
+      dependencies: ['材料発注']
     },
     {
       name: '給排水工事',
@@ -121,7 +121,7 @@ export const standardProcesses = {
       category: 'plumbing',
       defaultProgress: 0,
       description: '配管・排水設備の設置',
-      dependencies: ['基礎工事'],
+      dependencies: ['基礎工事']
     },
     {
       name: '電気工事',
@@ -129,7 +129,7 @@ export const standardProcesses = {
       category: 'electrical',
       defaultProgress: 0,
       description: '照明・コンセント設置',
-      dependencies: ['基礎工事'],
+      dependencies: ['基礎工事']
     },
     {
       name: '舗装工事',
@@ -137,7 +137,7 @@ export const standardProcesses = {
       category: 'paving',
       defaultProgress: 0,
       description: 'アスファルト・コンクリート舗装',
-      dependencies: ['給排水工事', '電気工事'],
+      dependencies: ['給排水工事', '電気工事']
     },
     {
       name: '植栽工事',
@@ -145,7 +145,7 @@ export const standardProcesses = {
       category: 'planting',
       defaultProgress: 0,
       description: '樹木・草花の植栽',
-      dependencies: ['舗装工事'],
+      dependencies: ['舗装工事']
     },
     {
       name: '仕上げ・清掃',
@@ -153,8 +153,8 @@ export const standardProcesses = {
       category: 'finishing',
       defaultProgress: 0,
       description: '最終仕上げ・現場清掃',
-      dependencies: ['植栽工事'],
-    },
+      dependencies: ['植栽工事']
+    }
   ],
 
   // 庭園工事
@@ -165,7 +165,7 @@ export const standardProcesses = {
       category: 'preparation',
       defaultProgress: 0,
       description: '土壌の状態と排水性の確認',
-      dependencies: [],
+      dependencies: []
     },
     {
       name: '設計・レイアウト',
@@ -173,7 +173,7 @@ export const standardProcesses = {
       category: 'design',
       defaultProgress: 0,
       description: '庭園デザイン・植栽計画',
-      dependencies: ['現場調査・土壌検査'],
+      dependencies: ['現場調査・土壌検査']
     },
     {
       name: '既存撤去・整地',
@@ -181,7 +181,7 @@ export const standardProcesses = {
       category: 'demolition',
       defaultProgress: 0,
       description: '不要な植栽・構造物の撤去',
-      dependencies: ['設計・レイアウト'],
+      dependencies: ['設計・レイアウト']
     },
     {
       name: '土工事・造成',
@@ -189,7 +189,7 @@ export const standardProcesses = {
       category: 'earthwork',
       defaultProgress: 0,
       description: '土の入れ替え・レベル調整',
-      dependencies: ['既存撤去・整地'],
+      dependencies: ['既存撤去・整地']
     },
     {
       name: '石材・構造物設置',
@@ -197,7 +197,7 @@ export const standardProcesses = {
       category: 'structures',
       defaultProgress: 0,
       description: '石組み・塀・池などの設置',
-      dependencies: ['土工事・造成'],
+      dependencies: ['土工事・造成']
     },
     {
       name: '給排水・照明設備',
@@ -205,7 +205,7 @@ export const standardProcesses = {
       category: 'utilities',
       defaultProgress: 0,
       description: '灌水設備・照明の設置',
-      dependencies: ['石材・構造物設置'],
+      dependencies: ['石材・構造物設置']
     },
     {
       name: '植栽工事',
@@ -213,7 +213,7 @@ export const standardProcesses = {
       category: 'planting',
       defaultProgress: 0,
       description: '高木・中木・低木の植栽',
-      dependencies: ['給排水・照明設備'],
+      dependencies: ['給排水・照明設備']
     },
     {
       name: '芝・草花植栽',
@@ -221,7 +221,7 @@ export const standardProcesses = {
       category: 'lawn',
       defaultProgress: 0,
       description: '芝生・季節の草花植栽',
-      dependencies: ['植栽工事'],
+      dependencies: ['植栽工事']
     },
     {
       name: '仕上げ・養生',
@@ -229,8 +229,8 @@ export const standardProcesses = {
       category: 'finishing',
       defaultProgress: 0,
       description: '最終調整・植栽の養生',
-      dependencies: ['芝・草花植栽'],
-    },
+      dependencies: ['芝・草花植栽']
+    }
   ],
 
   // 剪定・メンテナンス
@@ -241,7 +241,7 @@ export const standardProcesses = {
       category: 'preparation',
       defaultProgress: 0,
       description: '樹木の状態確認と作業計画',
-      dependencies: [],
+      dependencies: []
     },
     {
       name: '道具・機材準備',
@@ -249,7 +249,7 @@ export const standardProcesses = {
       category: 'preparation',
       defaultProgress: 0,
       description: '剪定道具・処分袋の準備',
-      dependencies: ['現場確認・見積'],
+      dependencies: ['現場確認・見積']
     },
     {
       name: '高木剪定',
@@ -257,7 +257,7 @@ export const standardProcesses = {
       category: 'pruning',
       defaultProgress: 0,
       description: '高木の剪定・枝下ろし',
-      dependencies: ['道具・機材準備'],
+      dependencies: ['道具・機材準備']
     },
     {
       name: '中木・低木剪定',
@@ -265,7 +265,7 @@ export const standardProcesses = {
       category: 'pruning',
       defaultProgress: 0,
       description: '中木・低木の形状調整',
-      dependencies: ['高木剪定'],
+      dependencies: ['高木剪定']
     },
     {
       name: '除草・清掃',
@@ -273,7 +273,7 @@ export const standardProcesses = {
       category: 'cleaning',
       defaultProgress: 0,
       description: '雑草除去・落ち葉清掃',
-      dependencies: ['中木・低木剪定'],
+      dependencies: ['中木・低木剪定']
     },
     {
       name: '廃材処分',
@@ -281,20 +281,20 @@ export const standardProcesses = {
       category: 'disposal',
       defaultProgress: 0,
       description: '剪定枝・雑草の処分',
-      dependencies: ['除草・清掃'],
-    },
-  ],
+      dependencies: ['除草・清掃']
+    }
+  ]
 };
 
 // 工程自動生成ロジック
-export const generateProcessesFromEstimate = estimateItems => {
+export const generateProcessesFromEstimate = (estimateItems) => {
   const processes = [];
   let currentStartDate = new Date();
-
+  
   // 見積項目から工程を推定
   estimateItems.forEach(item => {
     let processCategory = 'general';
-
+    
     // 項目名から工程カテゴリを推定
     if (item.name.includes('調査') || item.name.includes('測量')) {
       processCategory = 'preparation';
@@ -319,10 +319,10 @@ export const generateProcessesFromEstimate = estimateItems => {
     } else if (item.name.includes('清掃') || item.name.includes('仕上げ')) {
       processCategory = 'finishing';
     }
-
+    
     // 工程期間を推定（項目金額に基づく）
     const estimatedDuration = Math.max(1, Math.ceil(item.amount / 100000)); // 10万円あたり1日
-
+    
     const process = {
       name: item.name,
       duration: estimatedDuration,
@@ -332,18 +332,18 @@ export const generateProcessesFromEstimate = estimateItems => {
       progress: 0,
       estimateItemId: item.id,
       description: item.description || '',
-      dependencies: [],
+      dependencies: []
     };
-
+    
     processes.push(process);
     currentStartDate = new Date(process.endDate);
   });
-
+  
   return processes;
 };
 
 // 工程依存関係の自動設定
-export const setAutomaticDependencies = processes => {
+export const setAutomaticDependencies = (processes) => {
   const categoryOrder = [
     'preparation',
     'design',
@@ -360,13 +360,13 @@ export const setAutomaticDependencies = processes => {
     'pruning',
     'finishing',
     'cleaning',
-    'disposal',
+    'disposal'
   ];
-
+  
   return processes.map(process => {
     const dependencies = [];
     const currentCategoryIndex = categoryOrder.indexOf(process.category);
-
+    
     // 前の工程カテゴリを依存関係として設定
     if (currentCategoryIndex > 0) {
       const previousCategories = categoryOrder.slice(0, currentCategoryIndex);
@@ -376,23 +376,23 @@ export const setAutomaticDependencies = processes => {
         }
       });
     }
-
+    
     return {
       ...process,
-      dependencies,
+      dependencies
     };
   });
 };
 
 // 工程スケジュール最適化（CPM: Critical Path Method）
-export const optimizeSchedule = processes => {
+export const optimizeSchedule = (processes) => {
   // 最早開始時刻の計算
-  const calculateEarlyStart = processes => {
+  const calculateEarlyStart = (processes) => {
     const processMap = new Map(processes.map(p => [p.name, p]));
-
-    const calculateES = process => {
+    
+    const calculateES = (process) => {
       if (process.earlyStart !== undefined) return process.earlyStart;
-
+      
       if (process.dependencies.length === 0) {
         process.earlyStart = 0;
       } else {
@@ -406,25 +406,27 @@ export const optimizeSchedule = processes => {
         });
         process.earlyStart = Math.max(...dependencyFinishTimes);
       }
-
+      
       return process.earlyStart;
     };
-
+    
     processes.forEach(calculateES);
     return processes;
   };
-
+  
   // 最遅開始時刻の計算
-  const calculateLateStart = processes => {
+  const calculateLateStart = (processes) => {
     const processMap = new Map(processes.map(p => [p.name, p]));
     const projectDuration = Math.max(...processes.map(p => p.earlyStart + p.duration));
-
-    const calculateLS = process => {
+    
+    const calculateLS = (process) => {
       if (process.lateStart !== undefined) return process.lateStart;
-
+      
       // この工程に依存する工程を検索
-      const dependents = processes.filter(p => p.dependencies.includes(process.name));
-
+      const dependents = processes.filter(p => 
+        p.dependencies.includes(process.name)
+      );
+      
       if (dependents.length === 0) {
         process.lateStart = projectDuration - process.duration;
       } else {
@@ -434,44 +436,43 @@ export const optimizeSchedule = processes => {
         });
         process.lateStart = Math.min(...dependentStartTimes) - process.duration;
       }
-
+      
       return process.lateStart;
     };
-
+    
     processes.forEach(calculateLS);
     return processes;
   };
-
+  
   // フロートの計算
-  const calculateFloat = processes => {
+  const calculateFloat = (processes) => {
     return processes.map(process => ({
       ...process,
       totalFloat: process.lateStart - process.earlyStart,
-      isCritical: process.lateStart === process.earlyStart,
+      isCritical: process.lateStart === process.earlyStart
     }));
   };
-
+  
   let optimizedProcesses = calculateEarlyStart([...processes]);
   optimizedProcesses = calculateLateStart(optimizedProcesses);
   optimizedProcesses = calculateFloat(optimizedProcesses);
-
+  
   return optimizedProcesses;
 };
 
 // 進捗レポート生成
-export const generateProgressReport = processes => {
+export const generateProgressReport = (processes) => {
   const totalProcesses = processes.length;
   const completedProcesses = processes.filter(p => p.progress === 100).length;
   const inProgressProcesses = processes.filter(p => p.progress > 0 && p.progress < 100).length;
-  const overdueProcesses = processes.filter(
-    p => new Date(p.endDate) < new Date() && p.progress < 100
+  const overdueProcesses = processes.filter(p => 
+    new Date(p.endDate) < new Date() && p.progress < 100
   ).length;
-
-  const overallProgress =
-    totalProcesses > 0
-      ? Math.round(processes.reduce((sum, p) => sum + p.progress, 0) / totalProcesses)
-      : 0;
-
+  
+  const overallProgress = totalProcesses > 0 
+    ? Math.round(processes.reduce((sum, p) => sum + p.progress, 0) / totalProcesses)
+    : 0;
+  
   return {
     totalProcesses,
     completedProcesses,
@@ -479,7 +480,7 @@ export const generateProgressReport = processes => {
     overdueProcesses,
     overallProgress,
     onSchedule: overdueProcesses === 0,
-    completionRate: totalProcesses > 0 ? (completedProcesses / totalProcesses) * 100 : 0,
+    completionRate: totalProcesses > 0 ? (completedProcesses / totalProcesses) * 100 : 0
   };
 };
 

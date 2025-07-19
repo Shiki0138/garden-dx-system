@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: garden_postgres_prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: garden_production
+      POSTGRES_USER: garden_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_garden_password_2025}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init_data.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./database/database_schema.sql:/docker-entrypoint-initdb.d/02-schema.sql
+    networks:
+      - garden_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U garden_admin -d garden_production"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: garden_backend_prod
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://garden_admin:${DB_PASSWORD:-secure_garden_password_2025}@postgres:5432/garden_production
+      SECRET_KEY: ${JWT_SECRET_KEY:-super_secret_garden_jwt_key_2025}
+      ENVIRONMENT: production
+      DEBUG: "false"
+      CORS_ORIGINS: ${FRONTEND_URL:-https://yourdomain.com}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/logs:/app/logs
+      - ./backend/uploads:/app/uploads
+    networks:
+      - garden_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.prod
+      args:
+        REACT_APP_API_URL: ${API_URL:-https://api.yourdomain.com}
+    container_name: garden_frontend_prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./ssl:/etc/ssl/certs
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - garden_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: garden_redis_prod
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - garden_network
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-secure_redis_password_2025}
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  garden_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

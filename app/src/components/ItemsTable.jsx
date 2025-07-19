@@ -17,15 +17,17 @@ const TableContainer = styled.div`
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0; /* flexbox内での高さ調整 */
 `;
 
 const TableHeader = styled.div`
   display: grid;
-  grid-template-columns: 40px 1fr 80px 80px 120px 120px 120px 60px;
+  grid-template-columns: 40px 2fr 100px 80px 100px 100px 100px 50px;
   background-color: #f8f9fa;
   border-bottom: 2px solid #dee2e6;
   font-weight: 600;
   color: #495057;
+  min-width: 900px; /* 最小幅を設定 */
 `;
 
 const HeaderCell = styled.div`
@@ -38,11 +40,13 @@ const HeaderCell = styled.div`
 const TableBody = styled.div`
   flex: 1;
   overflow-y: auto;
+  overflow-x: auto; /* 横スクロールを追加 */
+  min-height: 0; /* flexbox内での高さ調整 */
 `;
 
 const ItemRow = styled.div`
   display: grid;
-  grid-template-columns: 40px 1fr 80px 80px 120px 120px 120px 60px;
+  grid-template-columns: 40px 2fr 100px 80px 100px 100px 100px 50px;
   border-bottom: 1px solid #e9ecef;
   background-color: ${props => {
     if (props.itemType === 'header') return '#f1f3f4';
@@ -51,6 +55,7 @@ const ItemRow = styled.div`
   }};
   opacity: ${props => (props.isDragging ? 0.5 : 1)};
   cursor: ${props => (props.isDragging ? 'grabbing' : 'default')};
+  min-width: 900px; /* 最小幅を設定 */
 
   &:hover {
     background-color: ${props => {
@@ -133,10 +138,11 @@ const ActionButton = styled.button`
 
 const TotalRow = styled.div`
   display: grid;
-  grid-template-columns: 40px 1fr 80px 80px 120px 120px 120px 60px;
+  grid-template-columns: 40px 2fr 100px 80px 100px 100px 100px 50px;
   background-color: #f8f9fa;
   border-top: 2px solid #dee2e6;
   font-weight: 600;
+  min-width: 900px; /* 最小幅を設定 */
 `;
 
 const TotalCell = styled.div`

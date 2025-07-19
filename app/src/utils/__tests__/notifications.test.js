@@ -12,6 +12,18 @@ import {
   clearAllNotifications,
 } from '../notifications';
 
+// react-toastifyのモック
+jest.mock('react-toastify', () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    dismiss: jest.fn(),
+  },
+  Bounce: 'Bounce',
+}));
+
 // loggerのモック
 jest.mock('../logger', () => ({
   log: {
@@ -23,23 +35,11 @@ jest.mock('../logger', () => ({
 }));
 
 describe('notifications', () => {
+  let mockToast;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    // Clear any existing notification container
-    const existingContainer = document.getElementById('notification-container');
-    if (existingContainer) {
-      existingContainer.remove();
-    }
-    // Initialize notification system for tests
-    initNotificationSystem();
-  });
-
-  afterEach(() => {
-    // Clean up after each test
-    const container = document.getElementById('notification-container');
-    if (container) {
-      container.remove();
-    }
+    mockToast = require('react-toastify').toast;
   });
 
   describe('showSuccess', () => {
@@ -48,35 +48,55 @@ describe('notifications', () => {
 
       showSuccess(message);
 
-      const container = document.getElementById('notification-container');
-      expect(container).toBeTruthy();
-
-      const notifications = container.querySelectorAll('div[id^="notification-"]');
-      expect(notifications).toHaveLength(1);
-
-      const notification = notifications[0];
-      expect(notification.textContent).toContain(message);
-      expect(notification.textContent).toContain('✅');
+      expect(mockToast.success).toHaveBeenCalledWith(message, {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: 'Bounce',
+      });
     });
 
     test('オプション付きで成功メッセージが表示される', () => {
-      const message = '処理が完了しました';
+      const message = 'カスタム成功';
+      const options = {
+        autoClose: 5000,
+        theme: 'dark',
+      };
 
-      showSuccess(message);
+      showSuccess(message, options);
 
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification).toBeTruthy();
-      expect(notification.textContent).toContain(message);
+      expect(mockToast.success).toHaveBeenCalledWith(message, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: 'Bounce',
+      });
     });
 
     test('空のメッセージでもエラーが発生しない', () => {
-      expect(() => showSuccess('')).not.toThrow();
+      expect(() => {
+        showSuccess('');
+      }).not.toThrow();
+
+      expect(mockToast.success).toHaveBeenCalledWith('', expect.any(Object));
     });
 
     test('非常に長いメッセージの処理', () => {
-      const longMessage = 'a'.repeat(500);
-      expect(() => showSuccess(longMessage)).not.toThrow();
+      const longMessage = 'a'.repeat(1000);
+
+      showSuccess(longMessage);
+
+      expect(mockToast.success).toHaveBeenCalledWith(longMessage, expect.any(Object));
     });
   });
 
@@ -86,23 +106,25 @@ describe('notifications', () => {
 
       showError(message);
 
-      const container = document.getElementById('notification-container');
-      const notifications = container.querySelectorAll('div[id^="notification-"]');
-      expect(notifications).toHaveLength(1);
-
-      const notification = notifications[0];
-      expect(notification.textContent).toContain(message);
-      expect(notification.textContent).toContain('❌');
+      expect(mockToast.error).toHaveBeenCalledWith(message, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: 'Bounce',
+      });
     });
 
     test('エラーオブジェクトからメッセージを抽出', () => {
-      const error = new Error('カスタムエラー');
+      const error = new Error('詳細なエラーメッセージ');
 
       showError(error);
 
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification.textContent).toContain('カスタムエラー');
+      expect(mockToast.error).toHaveBeenCalledWith('詳細なエラーメッセージ', expect.any(Object));
     });
 
     test('APIエラーレスポンスの処理', () => {
@@ -116,120 +138,164 @@ describe('notifications', () => {
 
       showError(apiError);
 
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification.textContent).toContain('APIエラーメッセージ');
+      expect(mockToast.error).toHaveBeenCalledWith('APIエラーメッセージ', expect.any(Object));
     });
 
     test('ネストされたエラーメッセージの処理', () => {
-      const nestedError = {
+      const complexError = {
         error: {
-          message: 'ネストされたエラー',
+          details: {
+            message: 'ネストされたエラー',
+          },
         },
       };
 
-      showError(nestedError);
+      showError(complexError);
 
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification.textContent).toContain('ネストされたエラー');
+      expect(mockToast.error).toHaveBeenCalled();
     });
 
     test('オプション付きでエラーメッセージが表示される', () => {
       const message = 'カスタムエラー';
+      const options = {
+        autoClose: false,
+        theme: 'colored',
+      };
 
-      showError(message);
+      showError(message, options);
 
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification).toBeTruthy();
+      expect(mockToast.error).toHaveBeenCalledWith(message, {
+        position: 'top-right',
+        autoClose: false,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'colored',
+        transition: 'Bounce',
+      });
     });
 
     test('ログにエラーが記録される', () => {
-      const logger = require('../logger');
-      const message = 'エラーメッセージ';
+      const { log } = require('../logger');
+      const message = 'ログ記録テスト';
 
       showError(message);
 
-      expect(logger.log.error).toHaveBeenCalledWith('Notification Error:', message);
+      expect(log.error).toHaveBeenCalledWith('Notification Error:', message);
     });
   });
 
   describe('showWarning', () => {
     test('警告メッセージが正しく表示される', () => {
-      const message = '警告: データが保存されていません';
+      const message = 'これは警告です';
 
       showWarning(message);
 
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification.textContent).toContain(message);
-      expect(notification.textContent).toContain('⚠️');
+      expect(mockToast.warn).toHaveBeenCalledWith(message, {
+        position: 'top-right',
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: 'Bounce',
+      });
     });
 
     test('オプション付きで警告メッセージが表示される', () => {
-      const message = '注意が必要です';
+      const message = 'カスタム警告';
+      const options = {
+        position: 'bottom-left',
+        autoClose: 6000,
+      };
 
-      showWarning(message);
+      showWarning(message, options);
 
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification).toBeTruthy();
+      expect(mockToast.warn).toHaveBeenCalledWith(message, {
+        position: 'bottom-left',
+        autoClose: 6000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: 'Bounce',
+      });
     });
 
     test('ログに警告が記録される', () => {
-      const logger = require('../logger');
-      const message = '警告メッセージ';
+      const { log } = require('../logger');
+      const message = '警告ログテスト';
 
       showWarning(message);
 
-      expect(logger.log.warn).toHaveBeenCalledWith('Notification Warning:', message);
+      expect(log.warn).toHaveBeenCalledWith('Notification Warning:', message);
     });
   });
 
   describe('showInfo', () => {
     test('情報メッセージが正しく表示される', () => {
-      const message = 'お知らせ: 新機能が追加されました';
+      const message = '情報をお知らせします';
 
       showInfo(message);
 
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification.textContent).toContain(message);
-      expect(notification.textContent).toContain('ℹ️');
+      expect(mockToast.info).toHaveBeenCalledWith(message, {
+        position: 'top-right',
+        autoClose: 3500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: 'Bounce',
+      });
     });
 
     test('オプション付きで情報メッセージが表示される', () => {
-      const message = '情報メッセージ';
+      const message = 'カスタム情報';
+      const options = {
+        hideProgressBar: true,
+        closeOnClick: false,
+      };
 
-      showInfo(message);
+      showInfo(message, options);
 
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification).toBeTruthy();
+      expect(mockToast.info).toHaveBeenCalledWith(message, {
+        position: 'top-right',
+        autoClose: 3500,
+        hideProgressBar: true,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: 'Bounce',
+      });
     });
 
     test('ログに情報が記録される', () => {
-      const logger = require('../logger');
-      const message = '情報メッセージ';
+      const { log } = require('../logger');
+      const message = '情報ログテスト';
 
       showInfo(message);
 
-      expect(logger.log.info).toHaveBeenCalledWith('Notification Info:', message);
+      expect(log.info).toHaveBeenCalledWith('Notification Info:', message);
     });
   });
 
   describe('initNotificationSystem', () => {
     test('通知システムが初期化される', () => {
-      // Remove existing container first
-      const existing = document.getElementById('notification-container');
-      if (existing) existing.remove();
+      const { log } = require('../logger');
 
       initNotificationSystem();
 
-      const container = document.getElementById('notification-container');
-      expect(container).toBeTruthy();
-      expect(container.style.position).toBe('fixed');
+      expect(log.info).toHaveBeenCalledWith('Notification system initialized');
     });
 
     test('複数回初期化してもエラーが発生しない', () => {
@@ -243,107 +309,185 @@ describe('notifications', () => {
 
   describe('clearAllNotifications', () => {
     test('全ての通知がクリアされる', () => {
-      showSuccess('メッセージ1');
-      showError('メッセージ2');
-      showWarning('メッセージ3');
-
-      const container = document.getElementById('notification-container');
-      expect(container.children.length).toBeGreaterThan(0);
-
       clearAllNotifications();
 
-      expect(container.children.length).toBe(0);
+      expect(mockToast.dismiss).toHaveBeenCalled();
     });
 
     test('ログにクリア操作が記録される', () => {
-      const logger = require('../logger');
+      const { log } = require('../logger');
 
       clearAllNotifications();
 
-      expect(logger.log.info).toHaveBeenCalledWith('All notifications cleared');
+      expect(log.debug).toHaveBeenCalledWith('All notifications cleared');
     });
   });
 
   describe('エラーハンドリング', () => {
-    test('通知システムエラー時の処理', () => {
-      // Remove container to simulate error
-      const container = document.getElementById('notification-container');
-      if (container) container.remove();
+    test('toastライブラリエラー時の処理', () => {
+      mockToast.success.mockImplementationOnce(() => {
+        throw new Error('Toast error');
+      });
 
-      expect(() => showSuccess('test')).not.toThrow();
+      expect(() => {
+        showSuccess('テストメッセージ');
+      }).not.toThrow();
     });
 
     test('undefined/nullメッセージの処理', () => {
-      expect(() => showSuccess(undefined)).not.toThrow();
-      expect(() => showError(null)).not.toThrow();
+      expect(() => {
+        showSuccess(null);
+        showError(undefined);
+        showWarning(null);
+        showInfo(undefined);
+      }).not.toThrow();
     });
 
     test('非文字列型メッセージの処理', () => {
-      expect(() => showSuccess(123)).not.toThrow();
-      expect(() => showError({ key: 'value' })).not.toThrow();
+      expect(() => {
+        showSuccess(123);
+        showError(true);
+        showWarning({ message: 'object' });
+        showInfo(['array', 'message']);
+      }).not.toThrow();
     });
   });
 
-  describe('通知の自動閉じ機能', () => {
-    test('通知が指定時間後に自動的に削除される', done => {
-      showSuccess('テストメッセージ');
+  describe('オプションのマージ', () => {
+    test('デフォルトオプションが正しく設定される', () => {
+      showSuccess('テスト');
 
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification).toBeTruthy();
+      const expectedOptions = {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: 'Bounce',
+      };
 
-      // Wait for auto-close (default duration)
-      setTimeout(() => {
-        expect(container.querySelector('div[id^="notification-"]')).toBeFalsy();
-        done();
-      }, 4000);
-    }, 5000);
+      expect(mockToast.success).toHaveBeenCalledWith('テスト', expectedOptions);
+    });
 
-    test('クリックで通知が削除される', () => {
-      showInfo('クリックで閉じる');
+    test('カスタムオプションがデフォルトをオーバーライドする', () => {
+      const customOptions = {
+        position: 'bottom-center',
+        autoClose: 10000,
+        theme: 'dark',
+        customProperty: 'custom',
+      };
 
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      const closeButton = notification.querySelector('button');
+      showSuccess('テスト', customOptions);
 
-      closeButton.click();
+      const expectedOptions = {
+        position: 'bottom-center',
+        autoClose: 10000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: 'Bounce',
+        customProperty: 'custom',
+      };
 
-      // Should be removed after click
-      setTimeout(() => {
-        expect(container.querySelector('div[id^="notification-"]')).toBeFalsy();
-      }, 500);
+      expect(mockToast.success).toHaveBeenCalledWith('テスト', expectedOptions);
+    });
+
+    test('部分的なオプション指定', () => {
+      const partialOptions = {
+        autoClose: false,
+      };
+
+      showError('テスト', partialOptions);
+
+      expect(mockToast.error).toHaveBeenCalledWith('テスト', expect.objectContaining({
+        autoClose: false,
+        position: 'top-right', // デフォルト値が保持される
+      }));
+    });
+  });
+
+  describe('メッセージの種類別自動閉じ時間', () => {
+    test('成功メッセージのデフォルト時間', () => {
+      showSuccess('成功');
+      expect(mockToast.success).toHaveBeenCalledWith('成功', expect.objectContaining({
+        autoClose: 3000,
+      }));
+    });
+
+    test('エラーメッセージのデフォルト時間', () => {
+      showError('エラー');
+      expect(mockToast.error).toHaveBeenCalledWith('エラー', expect.objectContaining({
+        autoClose: 5000,
+      }));
+    });
+
+    test('警告メッセージのデフォルト時間', () => {
+      showWarning('警告');
+      expect(mockToast.warn).toHaveBeenCalledWith('警告', expect.objectContaining({
+        autoClose: 4000,
+      }));
+    });
+
+    test('情報メッセージのデフォルト時間', () => {
+      showInfo('情報');
+      expect(mockToast.info).toHaveBeenCalledWith('情報', expect.objectContaining({
+        autoClose: 3500,
+      }));
+    });
+  });
+
+  describe('アクセシビリティ', () => {
+    test('通知メッセージにaria属性が含まれる', () => {
+      showError('アクセシブルエラー');
+
+      expect(mockToast.error).toHaveBeenCalledWith(
+        'アクセシブルエラー',
+        expect.objectContaining({
+          role: 'alert',
+          'aria-live': 'assertive',
+        })
+      );
+    });
+
+    test('成功メッセージにaria属性が含まれる', () => {
+      showSuccess('アクセシブル成功');
+
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'アクセシブル成功',
+        expect.objectContaining({
+          role: 'status',
+          'aria-live': 'polite',
+        })
+      );
     });
   });
 
   describe('多言語対応', () => {
     test('日本語メッセージの処理', () => {
-      const message = 'これは日本語のメッセージです';
+      const japaneseMessage = 'これは日本語のメッセージです';
+      showInfo(japaneseMessage);
 
-      showSuccess(message);
-
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification.textContent).toContain(message);
+      expect(mockToast.info).toHaveBeenCalledWith(japaneseMessage, expect.any(Object));
     });
 
     test('英語メッセージの処理', () => {
-      const message = 'This is an English message';
+      const englishMessage = 'This is an English message';
+      showInfo(englishMessage);
 
-      showInfo(message);
-
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification.textContent).toContain(message);
+      expect(mockToast.info).toHaveBeenCalledWith(englishMessage, expect.any(Object));
     });
 
     test('特殊文字を含むメッセージの処理', () => {
-      const message = '特殊文字: <>&"\'';
+      const specialMessage = '🎉 成功しました! 🚀';
+      showSuccess(specialMessage);
 
-      showWarning(message);
-
-      const container = document.getElementById('notification-container');
-      const notification = container.querySelector('div[id^="notification-"]');
-      expect(notification.textContent).toContain(message);
+      expect(mockToast.success).toHaveBeenCalledWith(specialMessage, expect.any(Object));
     });
   });
 });

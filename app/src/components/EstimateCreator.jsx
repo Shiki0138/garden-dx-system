@@ -50,9 +50,11 @@ const MainContent = styled.div`
   display: flex;
   flex: 1;
   overflow: hidden;
+  height: calc(100vh - 200px); /* ヘッダーとツールバーの高さを引いた値 */
 
   @media (max-width: 768px) {
     flex-direction: column;
+    height: auto;
   }
 `;
 
@@ -62,6 +64,7 @@ const LeftPanel = styled.div`
   flex-direction: column;
   padding: 20px;
   overflow: hidden;
+  min-width: 0; /* flexboxのオーバーフロー防止 */
 
   @media (max-width: 768px) {
     padding: 15px;
@@ -70,11 +73,12 @@ const LeftPanel = styled.div`
 `;
 
 const RightPanel = styled.div`
-  width: 400px;
+  width: 350px; /* 400pxから350pxに縮小 */
   background-color: white;
   border-left: 1px solid #dee2e6;
   padding: 20px;
   overflow-y: auto;
+  flex-shrink: 0; /* 縮小を防ぐ */
 
   @media (max-width: 768px) {
     width: 100%;
@@ -163,24 +167,16 @@ const EstimateCreator = ({ estimateId, user }) => {
     if (!estimateId || process.env.REACT_APP_DEMO_MODE === 'true') {
       // インポートしたデモデータを使用
       const demoEstimate = getDemoEstimate('demo-est-001');
-
+      
       setEstimate(demoEstimate);
       setItems(demoEstimate.items || []);
-      setProfitability({
-        margin_rate: 20,
+      setProfitability({ 
+        margin_rate: 20, 
         profit_amount: demoEstimate.total_amount * 0.2,
-        total_amount: demoEstimate.total_amount,
+        total_amount: demoEstimate.total_amount 
       });
 
-      // デモモードでの初期化完了をアクセシビリティで通知
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(
-          `デモモードで見積作成画面を開きました。${user?.name || 'ユーザー'}としてログイン中です。`
-        );
-        utterance.volume = 0.1;
-        utterance.rate = 1.5;
-        window.speechSynthesis.speak(utterance);
-      }
+      // 音声読み上げ機能は削除（ユーザーリクエストによる）
 
       return;
     }
@@ -234,7 +230,7 @@ const EstimateCreator = ({ estimateId, user }) => {
     } finally {
       setLoading(false);
     }
-  }, [estimateId, user?.name]);
+  }, [estimateId]);
 
   // 初期読み込み
   useEffect(() => {
@@ -242,7 +238,7 @@ const EstimateCreator = ({ estimateId, user }) => {
   }, [loadEstimate]);
 
   // 見積保存
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     if (!estimate) return;
 
     // デモモード時は実際の保存をスキップ
@@ -275,7 +271,7 @@ const EstimateCreator = ({ estimateId, user }) => {
     } finally {
       setLoading(false);
     }
-  }, [estimate]);
+  };
 
   // 明細追加
   const handleAddItem = async itemData => {
@@ -438,7 +434,7 @@ const EstimateCreator = ({ estimateId, user }) => {
   };
 
   // PDF出力
-  const handleGeneratePDF = useCallback(async () => {
+  const handleGeneratePDF = async () => {
     if (!estimate) return;
 
     // デモモード時は通知のみ
@@ -466,7 +462,7 @@ const EstimateCreator = ({ estimateId, user }) => {
     } finally {
       setLoading(false);
     }
-  }, [estimate]);
+  };
 
   // キーボードショートカット対応
   useEffect(() => {
@@ -499,7 +495,7 @@ const EstimateCreator = ({ estimateId, user }) => {
 
     window.addEventListener('keydown', handleKeyboardShortcuts);
     return () => window.removeEventListener('keydown', handleKeyboardShortcuts);
-  }, [isDirty, loading, handleGeneratePDF, handleSave]);
+  }, [isDirty, loading]);
 
   if (!estimate) {
     return (

@@ -900,8 +900,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
 
   // パフォーマンス監視（開発環境のみ）
   const performanceMonitor = usePerformanceMonitor('EstimateWizardPro');
-  const { performanceData, logPerformanceReport, markRenderStart, markRenderEnd } =
-    performanceMonitor || {};
+  const { performanceData, logPerformanceReport, markRenderStart, markRenderEnd } = performanceMonitor || {};
 
   // ウィザード状態管理
   const [currentStep, setCurrentStep] = useState(1);
@@ -985,6 +984,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
     },
   ];
 
+
   // 初期データ読み込み
   useEffect(() => {
     const initData = async () => {
@@ -993,9 +993,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
         if (typeof window !== 'undefined' && window.localStorage) {
           // 編集モードの場合は既存データ読み込み（セキュア・Demo対応）
           if (estimateId) {
-            const storageKey = isDemoMode
-              ? `demo_estimate_${estimateId}`
-              : `estimate_${estimateId}`;
+            const storageKey = isDemoMode ? `demo_estimate_${estimateId}` : `estimate_${estimateId}`;
             const savedData = secureLocalStorage.getItem(storageKey);
             if (savedData && savedData.formData) {
               securityLogger.log('estimate_data_loaded', { estimateId, isDemoMode });
@@ -1220,13 +1218,13 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
   const handleItemSelection = useCallback((itemId, field, value) => {
     setItemSelections(prev => {
       const currentItem = prev[itemId] || {};
-
+      
       // 数値フィールドの場合は適切に変換
       let processedValue = value;
       if (field === 'quantity' || field === 'purchase_price' || field === 'markup_rate') {
         processedValue = parseFloat(value) || 0;
       }
-
+      
       const updatedItem = {
         ...currentItem,
         [field]: processedValue,
@@ -1945,7 +1943,7 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
         )}
       </StepContent>
     ),
-    [itemSelections, handleItemSelection, calculatedAmounts, formatCurrency, errors.items]
+    [itemSelections, handleItemSelection, calculatedAmounts, formatCurrency]
   );
 
   // ステップ4: 金額確認（useMemoでパフォーマンス最適化）
@@ -2078,7 +2076,6 @@ const EstimateWizardPro = ({ estimateId = null, onComplete, onCancel }) => {
       itemSelections,
       calculatedAmounts,
       formData.adjustment_amount,
-      formData.adjustment_reason,
       handleInputChange,
       formatCurrency,
     ]

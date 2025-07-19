@@ -9,13 +9,13 @@
       "type": "image/x-icon"
     },
     {
-      "src": "favicon.ico",
-      "type": "image/x-icon",
-      "sizes": "192x192"
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#4a7c59",
+  "theme_color": "#2d5a3d",
   "background_color": "#ffffff"
 }

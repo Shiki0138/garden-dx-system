@@ -220,7 +220,7 @@ export const generateLandscapingInvoicePDF = async (
 
   // 7. 特記事項（造園業界慣習）
   currentY = addLandscapingNotes(doc, invoiceData, estimateData, margins, currentY, pageWidth);
-
+  
   // 8. 追記事項（材料・施工について）
   currentY = addAdditionalNotes(doc, margins, currentY, pageWidth);
   currentY = addConstructionNotes(doc, margins, currentY, pageWidth);
@@ -238,58 +238,53 @@ const addLandscapingHeader = (doc, invoiceData, companyInfo, margins, startY, pa
   let y = startY;
   const { layout, fonts, colors, landscaping } = LANDSCAPING_STANDARDS;
   const documentType = invoiceData.documentType || 'estimate'; // 'estimate' or 'invoice'
-
+  
   // タイトルと番号（中央上部）
   const titleText = documentType === 'invoice' ? '請求書' : 'お見積書';
-  const numberText =
-    documentType === 'invoice'
-      ? invoiceData.invoice_number || 'NO.1'
-      : invoiceData.estimate_number || 'NO.1';
-
+  const numberText = documentType === 'invoice' ? 
+    (invoiceData.invoice_number || 'NO.1') : 
+    (invoiceData.estimate_number || 'NO.1');
+  
   // タイトル
   doc.setFontSize(fonts.invoiceTitle.size);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(colors.text);
   doc.text(titleText, pageWidth / 2, y + 8, { align: 'center' });
-
+  
   // 番号
   doc.setFontSize(fonts.documentNumber.size);
   doc.text(numberText, pageWidth / 2, y + 18, { align: 'center' });
-
+  
   // 作成日・有効期限（右上）
   doc.setFontSize(fonts.normal.size);
   doc.setFont('helvetica', 'normal');
   const rightX = pageWidth - margins.right - 50;
   const today = new Date();
   const dateY = y + 5;
-
-  doc.text(
-    `作成日  R${today.getFullYear() - 2018} 年 ${today.getMonth() + 1} 月 ${today.getDate()} 日`,
-    rightX,
-    dateY
-  );
-
+  
+  doc.text(`作成日  R${today.getFullYear() - 2018} 年 ${today.getMonth() + 1} 月 ${today.getDate()} 日`, rightX, dateY);
+  
   if (documentType === 'estimate') {
     doc.text(`お見積有効期限 :    1ヵ月`, rightX, dateY + 6);
   }
-
+  
   // 会社情報（右側）
   const companyY = y + 25;
   doc.setFontSize(fonts.small.size);
   doc.setTextColor(colors.lightText);
-
+  
   // 建設業許可番号
   if (companyInfo.business_license) {
     doc.text(companyInfo.business_license, rightX, companyY);
   }
-
+  
   // 登録番号
   if (companyInfo.registration_number) {
     doc.text(`登録番号 ${companyInfo.registration_number}`, rightX, companyY + 5);
   }
-
+  
   y += 35;
-
+  
   return y;
 };
 
@@ -299,102 +294,102 @@ const addLandscapingHeader = (doc, invoiceData, companyInfo, margins, startY, pa
 const addCustomerInfo = (doc, invoiceData, companyInfo, margins, startY, pageWidth) => {
   let y = startY;
   const { fonts, colors, layout } = LANDSCAPING_STANDARDS;
-
+  
   // 左側：顧客情報
   const customerBoxWidth = 90;
   const customerBoxHeight = 50;
-
+  
   // 顧客名（大きく表示）
   doc.setFontSize(fonts.customerName.size);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(colors.text);
   doc.text(`${invoiceData.customer_name || '造園工房'}  縁  様`, margins.left, y);
-
+  
   y += 10;
-
+  
   // 枠線
   doc.setLineWidth(layout.borderWidth.normal);
   doc.setDrawColor(colors.border);
   doc.rect(margins.left, y, customerBoxWidth, customerBoxHeight);
-
+  
   // 担当者情報
   doc.setFontSize(fonts.normal.size);
   doc.setFont('helvetica', 'normal');
   let infoY = y + 8;
-
+  
   if (invoiceData.works_description) {
     doc.text(invoiceData.works_description, margins.left + 3, infoY);
     infoY += 6;
   }
-
+  
   // メッセージ
   const messages = [
     '時下ますますご清栄のこととお喜び申し上げます。',
     '平素は格別のご高配を賜り、厚く御礼申し上げます。',
     '下記内容の通りお見積りを申し上げます。',
-    'ご検討の程よろしくお願い申し上げます。',
+    'ご検討の程よろしくお願い申し上げます。'
   ];
-
+  
   doc.setFontSize(fonts.small.size);
   messages.forEach((msg, idx) => {
     if (infoY + idx * 4 < y + customerBoxHeight - 5) {
       doc.text(msg, margins.left + 3, infoY + idx * 4);
     }
   });
-
+  
   // 右側：会社情報
   const companyX = pageWidth - margins.right - 80;
   const companyY = startY;
-
+  
   // 会社名とキャッチフレーズ
   doc.setFontSize(fonts.small.size);
   doc.setTextColor(colors.lightText);
   if (companyInfo.catchphrase) {
     doc.text(companyInfo.catchphrase, companyX, companyY);
   }
-
+  
   // 会社名
   doc.setFontSize(fonts.companyTitle.size);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(colors.primary);
   doc.text(companyInfo.name || '庭想人株式会社', companyX, companyY + 10);
-
+  
   // 会社情報
   doc.setFontSize(fonts.small.size);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(colors.text);
-
+  
   const companyInfoY = companyY + 18;
   if (companyInfo.postal_code && companyInfo.address) {
     doc.text(`〒${companyInfo.postal_code}`, companyX, companyInfoY);
     doc.text(companyInfo.address, companyX, companyInfoY + 5);
   }
-
+  
   if (companyInfo.phone) {
     doc.text(`tel/fax  ${companyInfo.phone}`, companyX, companyInfoY + 12);
   }
-
+  
   if (companyInfo.mobile) {
     doc.text(`携帯   ${companyInfo.mobile}`, companyX, companyInfoY + 17);
   }
-
+  
   // 印鑑欄
   const stampY = companyY + 35;
   doc.setLineWidth(layout.borderWidth.thin);
   doc.setDrawColor(colors.border);
-
+  
   // 2つの印鑑欄
   doc.rect(companyX + 20, stampY, layout.stampBox.width, layout.stampBox.height);
   doc.rect(companyX + 48, stampY, layout.stampBox.width, layout.stampBox.height);
-
+  
   // 印鑑画像があれば表示
   if (companyInfo.company_seal) {
     doc.addImage(
-      companyInfo.company_seal,
-      'PNG',
-      companyX + 48,
-      stampY,
-      layout.stampBox.width,
+      companyInfo.company_seal, 
+      'PNG', 
+      companyX + 48, 
+      stampY, 
+      layout.stampBox.width, 
       layout.stampBox.height
     );
   } else {
@@ -404,7 +399,7 @@ const addCustomerInfo = (doc, invoiceData, companyInfo, margins, startY, pageWid
     doc.text('印', companyX + 35, stampY + 13, { align: 'center' });
     doc.text('印', companyX + 60, stampY + 13, { align: 'center' });
   }
-
+  
   return y + customerBoxHeight + layout.sectionSpacing;
 };
 
@@ -508,17 +503,17 @@ const addLandscapingItemsTable = (doc, items, margins, startY, pageWidth) => {
   const { fonts, colors, layout, landscaping } = LANDSCAPING_STANDARDS;
 
   const tableWidth = pageWidth - (margins.left + margins.right);
-
+  
   // 列幅設定（実際の見積書サンプルに基づく）
   const columnWidths = [
-    40, // 内容
-    25, // 別紙添付（有・無）
-    15, // 仕様
-    15, // 数量
-    25, // 単価（円）
-    25, // 金額（円）
+    40,  // 内容
+    25,  // 別紙添付（有・無）
+    15,  // 仕様
+    15,  // 数量
+    25,  // 単価（円）
+    25,  // 金額（円）
   ];
-
+  
   const headerHeight = 10;
 
   // テーブルヘッダー
@@ -535,8 +530,15 @@ const addLandscapingItemsTable = (doc, items, margins, startY, pageWidth) => {
   doc.setFont('helvetica', 'bold');
 
   // ヘッダー項目
-  const headers = ['内容', '別紙添付', '仕様', '数量', '単価（円）', '金額（円）'];
-
+  const headers = [
+    '内容',
+    '別紙添付',
+    '仕様',
+    '数量',
+    '単価（円）',
+    '金額（円）',
+  ];
+  
   let xPos = margins.left + 2;
 
   headers.forEach((header, index) => {
@@ -548,8 +550,7 @@ const addLandscapingItemsTable = (doc, items, margins, startY, pageWidth) => {
     }
 
     // ヘッダーテキスト
-    const textWidth =
-      (doc.getStringUnitWidth(header) * fonts.tableHeader.size) / doc.internal.scaleFactor;
+    const textWidth = (doc.getStringUnitWidth(header) * fonts.tableHeader.size) / doc.internal.scaleFactor;
     const centerX = xPos + (columnWidths[index] - textWidth) / 2;
     doc.text(header, centerX, y + 7);
 
@@ -566,7 +567,7 @@ const addLandscapingItemsTable = (doc, items, margins, startY, pageWidth) => {
   const formattedItems = items.map((item, index) => {
     // チェックマーク付きの項目かどうか判定
     const hasCheckmark = item.category && ['NO.2', 'NO.3'].includes(item.category);
-
+    
     return {
       content: item.item_name || item.name || '',
       attachment: hasCheckmark ? '✓' : '', // チェックマーク
@@ -606,7 +607,7 @@ const addLandscapingItemsTable = (doc, items, margins, startY, pageWidth) => {
 
       doc.setTextColor(colors.text);
       doc.setFont('helvetica', 'normal');
-
+      
       // チェックマークは太字で中央表示
       if (colIndex === 1 && data === '✓') {
         doc.setFont('helvetica', 'bold');
@@ -617,13 +618,11 @@ const addLandscapingItemsTable = (doc, items, margins, startY, pageWidth) => {
       const cellPadding = 2;
       if (colIndex >= 3) {
         // 数量・単価・金額は右寄せ
-        const textWidth =
-          (doc.getStringUnitWidth(data) * fonts.normal.size) / doc.internal.scaleFactor;
+        const textWidth = (doc.getStringUnitWidth(data) * fonts.normal.size) / doc.internal.scaleFactor;
         doc.text(data, xPos + columnWidths[colIndex] - textWidth - cellPadding, y + 6);
       } else if (colIndex === 1 || colIndex === 2) {
         // 別紙添付と仕様は中央寄せ
-        const textWidth =
-          (doc.getStringUnitWidth(data) * fonts.normal.size) / doc.internal.scaleFactor;
+        const textWidth = (doc.getStringUnitWidth(data) * fonts.normal.size) / doc.internal.scaleFactor;
         const centerX = xPos + (columnWidths[colIndex] - textWidth) / 2;
         doc.text(data, centerX, y + 6);
       } else {
@@ -642,26 +641,25 @@ const addLandscapingItemsTable = (doc, items, margins, startY, pageWidth) => {
 
     y += rowHeight;
   });
-
+  
   // 空行を追加（サンプルのように）
   for (let i = formattedItems.length; i < 20; i++) {
     const rowHeight = layout.tableRowHeight;
-
+    
     // 空行の枠線
     doc.setLineWidth(layout.borderWidth.thin);
     doc.setDrawColor(colors.border);
     doc.rect(margins.left, y, tableWidth, rowHeight);
-
+    
     // 列の縦線
     xPos = margins.left;
-    // eslint-disable-next-line no-loop-func
     columnWidths.forEach((width, index) => {
       if (index > 0) {
         doc.line(xPos, y, xPos, y + rowHeight);
       }
       xPos += width;
     });
-
+    
     y += rowHeight;
   }
 
@@ -695,14 +693,14 @@ const addLandscapingItemsTable = (doc, items, margins, startY, pageWidth) => {
 const addLandscapingTotalSection = (doc, invoiceData, margins, startY, pageWidth) => {
   let y = startY;
   const { fonts, colors, layout } = LANDSCAPING_STANDARDS;
-
+  
   // 合計セクションの幅
   const totalSectionWidth = 90;
   const leftX = pageWidth - margins.right - totalSectionWidth;
-
+  
   // 各行の高さ
   const rowHeight = 8;
-
+  
   // 合計情報
   const totalItems = [
     ['設計費', invoiceData.design_fee || 200000],
@@ -711,56 +709,54 @@ const addLandscapingTotalSection = (doc, invoiceData, margins, startY, pageWidth
     ['出精値引き', invoiceData.discount || 0],
     ['消費税', invoiceData.tax_amount || 557253],
   ];
-
+  
   // 各行を描画
   totalItems.forEach(([label, amount]) => {
     // 枠線
     doc.setLineWidth(layout.borderWidth.thin);
     doc.setDrawColor(colors.border);
     doc.rect(leftX, y, totalSectionWidth, rowHeight);
-
+    
     // ラベル
     doc.setFontSize(fonts.normal.size);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(colors.text);
     doc.text(label, leftX + 3, y + 5.5);
-
+    
     // 金額
     const amountText = formatLandscapingCurrency(amount);
-    const amountWidth =
-      (doc.getStringUnitWidth(amountText) * fonts.normal.size) / doc.internal.scaleFactor;
+    const amountWidth = (doc.getStringUnitWidth(amountText) * fonts.normal.size) / doc.internal.scaleFactor;
     doc.text(amountText, leftX + totalSectionWidth - amountWidth - 3, y + 5.5);
-
+    
     y += rowHeight;
   });
-
+  
   // 合計行（強調）
   doc.setFillColor(245, 245, 245);
   doc.rect(leftX, y, totalSectionWidth, rowHeight + 2, 'F');
   doc.setLineWidth(layout.borderWidth.thick);
   doc.setDrawColor(colors.primary);
   doc.rect(leftX, y, totalSectionWidth, rowHeight + 2);
-
+  
   // 合計ラベル
   doc.setFontSize(fonts.amount.size);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(colors.primary);
   doc.text('合計', leftX + 3, y + 6);
-
+  
   // 合計金額
   const totalAmount = invoiceData.total_amount || 6129785;
   const totalText = formatLandscapingCurrency(totalAmount);
-  const totalWidth =
-    (doc.getStringUnitWidth(totalText) * fonts.amount.size) / doc.internal.scaleFactor;
+  const totalWidth = (doc.getStringUnitWidth(totalText) * fonts.amount.size) / doc.internal.scaleFactor;
   doc.text(totalText, leftX + totalSectionWidth - totalWidth - 3, y + 6);
-
+  
   // 左側に合計金額表示（大きく）
   const summaryY = startY + 10;
   doc.setFontSize(fonts.heading.size);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(colors.text);
   doc.text('合計金額', margins.left, summaryY);
-
+  
   // 金額表示枠
   const amountBoxWidth = 120;
   const amountBoxHeight = 20;
@@ -769,25 +765,23 @@ const addLandscapingTotalSection = (doc, invoiceData, margins, startY, pageWidth
   doc.setLineWidth(layout.borderWidth.thick);
   doc.setDrawColor(colors.primary);
   doc.rect(margins.left, summaryY + 5, amountBoxWidth, amountBoxHeight);
-
+  
   // 大きな金額表示
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(colors.primary);
   doc.text(`￥${totalText}`, margins.left + amountBoxWidth / 2, summaryY + 17, { align: 'center' });
-
+  
   // 内消費税表示
   doc.setFontSize(fonts.small.size);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(colors.error);
-  doc.text(
-    `内消費税（10%）￥${formatLandscapingCurrency(invoiceData.tax_amount || 557253)}`,
-    margins.left + 5,
-    summaryY + 30
-  );
-
+  doc.text(`内消費税（10%）￥${formatLandscapingCurrency(invoiceData.tax_amount || 557253)}`, 
+    margins.left + 5, summaryY + 30);
+  
   return y + rowHeight + 20;
 };
+
 
 /**
  * 振込先・支払条件（造園業界標準）
@@ -839,44 +833,44 @@ const addPaymentInfo = (doc, companyInfo, margins, startY, pageWidth) => {
 const addLandscapingNotes = (doc, invoiceData, estimateData, margins, startY, pageWidth) => {
   let y = startY;
   const { fonts, colors } = LANDSCAPING_STANDARDS;
-
+  
   const { layout } = LANDSCAPING_STANDARDS;
-
+  
   // 特記事項セクションの枠線
   const notesWidth = pageWidth - margins.left - margins.right;
   const notesHeight = 60;
-
+  
   doc.setLineWidth(layout.borderWidth.normal);
   doc.setDrawColor(colors.border);
   doc.rect(margins.left, y, notesWidth, notesHeight);
-
+  
   // タイトル
   doc.setFontSize(fonts.heading.size);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(colors.text);
   doc.text('特記事項', margins.left + 5, y + 8);
-
+  
   y += 15;
-
+  
   // 特記事項項目
   doc.setFontSize(fonts.small.size);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(colors.text);
-
+  
   const specialNotes = [
     '・ 契約時は契約書を作成させて頂き、契約内容にて進めさせて頂きます。',
     '・ 植栽植物には枚れ保証は含まれておりません。',
     '・ 御見積書記載項目以外は別途とさせて頂きます。',
     '・ 工事中の電気・水道はご支給お願い致します。',
     '・ 工事用車両の駐車スペース確保をお願い致します。',
-    '・ 工事着工後に必要となった作業については別途相談とさせて頂きます。',
+    '・ 工事着工後に必要となった作業については別途相談とさせて頂きます。'
   ];
-
+  
   specialNotes.forEach(note => {
     doc.text(note, margins.left + 5, y);
     y += 4;
   });
-
+  
   return y + 10;
 };
 
@@ -886,32 +880,32 @@ const addLandscapingNotes = (doc, invoiceData, estimateData, margins, startY, pa
 const addAdditionalNotes = (doc, margins, startY, pageWidth) => {
   let y = startY;
   const { fonts, colors, layout } = LANDSCAPING_STANDARDS;
-
+  
   // 追記事項タイトル
   doc.setFontSize(fonts.heading.size);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(colors.text);
   doc.text('お見積り追記項目', margins.left, y);
-
+  
   y += 10;
-
+  
   // 枠線
   const notesWidth = pageWidth - margins.left - margins.right;
   const notesHeight = 80;
-
+  
   doc.setLineWidth(layout.borderWidth.thick);
   doc.setDrawColor(colors.border);
   doc.rect(margins.left, y, notesWidth, notesHeight);
-
+  
   y += 10;
-
+  
   // 材料について
   doc.setFontSize(fonts.normal.size);
   doc.setFont('helvetica', 'bold');
   doc.text('材料について', margins.left + 5, y);
-
+  
   y += 6;
-
+  
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(fonts.small.size);
   const materialNotes = [
@@ -929,14 +923,14 @@ const addAdditionalNotes = (doc, margins, startY, pageWidth) => {
     '　て頂き最終ご請求を申し上げます。',
     '',
     '● 枚れ木保証について',
-    '　植栽した植木についての枚れ保証は含まれておりません',
+    '　植栽した植木についての枚れ保証は含まれておりません'
   ];
-
+  
   materialNotes.forEach(note => {
     doc.text(note, margins.left + 5, y);
     y += 3;
   });
-
+  
   return y + 10;
 };
 
@@ -946,16 +940,16 @@ const addAdditionalNotes = (doc, margins, startY, pageWidth) => {
 const addConstructionNotes = (doc, margins, startY, pageWidth) => {
   let y = startY;
   const { fonts, colors, layout } = LANDSCAPING_STANDARDS;
-
+  
   doc.setFontSize(fonts.normal.size);
   doc.setFont('helvetica', 'bold');
   doc.text('施工について', margins.left, y);
-
+  
   y += 8;
-
+  
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(fonts.small.size);
-
+  
   const constructionNotes = [
     '● 図面',
     '　図面は、あくまでイメージになります。施工中に地形の変更・植栽位置の変更が生じる',
@@ -991,14 +985,14 @@ const addConstructionNotes = (doc, margins, startY, pageWidth) => {
     '',
     '作業時間等に関しましては、打ち合わせの上進めさせて頂きます',
     '基本作業時間：朝8時頃～夕方5時頃まで',
-    '　　　　　　　　　　（作業内容により、大幅に時間が必要な場合は、その都度ご報告させて頂きます）',
+    '　　　　　　　　　　（作業内容により、大幅に時間が必要な場合は、その都度ご報告させて頂きます）'
   ];
-
+  
   constructionNotes.forEach(note => {
     doc.text(note, margins.left, y);
     y += 3;
   });
-
+  
   return y;
 };
 
@@ -1007,19 +1001,16 @@ const addConstructionNotes = (doc, margins, startY, pageWidth) => {
  */
 const addLandscapingFooter = (doc, companyInfo, pageHeight, pageWidth, margins) => {
   const { fonts, colors, layout } = LANDSCAPING_STANDARDS;
-
+  
   // ページ下部の特記事項
   const footerNoteY = pageHeight - 30;
   doc.setFontSize(fonts.small.size);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(colors.text);
-
-  doc.text(
-    '※ 仕様及び数量変更の場合、事前打合せのうえ、別途御見積させていただきます。',
-    margins.left,
-    footerNoteY
-  );
-
+  
+  doc.text('※ 仕様及び数量変更の場合、事前打合せのうえ、別途御見積させていただきます。', 
+    margins.left, footerNoteY);
+  
   // 社印がある場合の配置
   if (companyInfo.company_seal) {
     const sealX = pageWidth - margins.right - 25;

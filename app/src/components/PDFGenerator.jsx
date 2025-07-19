@@ -612,7 +612,7 @@ const PDFGenerator = ({
         quantity: 1,
         unit_price: 663450,
         amount: 663450,
-      },
+      }
     ],
     design_fee: 200000,
     expenses: 641088,
