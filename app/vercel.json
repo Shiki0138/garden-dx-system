@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd app && CI=false npm run build",
-  "outputDirectory": "app/build",
-  "installCommand": "cd app && npm ci",
+  "buildCommand": "CI=false npm run build",
+  "outputDirectory": "build",
+  "installCommand": "npm ci",
   "framework": "create-react-app",
   "env": {
     "REACT_APP_SUPABASE_URL": "https://kbvaekypkszvzrwlbkug.supabase.co",
