@@ -28,6 +28,22 @@ const PageBreak = styled.div`
   }
 `;
 
+const PageHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15mm;
+  
+  .left-section {
+    width: 60%;
+  }
+  
+  .right-section {
+    width: 35%;
+    text-align: right;
+  }
+`;
+
 const DocumentTitle = styled.h1`
   text-align: center;
   font-size: 24pt;
@@ -247,6 +263,31 @@ const PaymentTerms = styled.div`
   }
 `;
 
+const ProjectDetails = styled.div`
+  margin-bottom: 20mm;
+  
+  h3 {
+    font-size: 14pt;
+    border-bottom: 2px solid #000;
+    padding-bottom: 3mm;
+    margin-bottom: 10mm;
+  }
+  
+  .detail-item {
+    margin-bottom: 10mm;
+    
+    .detail-label {
+      font-weight: bold;
+      margin-bottom: 3mm;
+    }
+    
+    .detail-content {
+      padding-left: 10mm;
+      white-space: pre-line;
+    }
+  }
+`;
+
 const TermsAndConditions = styled.div`
   margin-top: 15mm;
   
@@ -402,9 +443,9 @@ const EstimateTemplate = ({ data = {} }) => {
     warranty: "植栽した植木についての枯れ保証は含まれておりません。",
     construction: "図面は、あくまでイメージになります。施工中に地形の変更・植栽位置の変更が生じる場合があります。",
     access: "施工中は、出入りが多くなります。材料手配・材料調達等で、不在になることがあります。家の施錠は確実にお願いいたします。",
-    parking: "基本的には敷地内での駐車をさせていただければ幸いです。\n使用車両：\n• 軽トラック\n• 1トントラック\n• 移動式クレーン車\n• 2〜3トンダンプ車\n• その他",
+    parking: "基本的には敷地内での駐車をさせていただければ幸いです。使用車両：軽トラック、1トントラック、移動式クレーン車、2〜3トンダンプ車、その他",
     utilities: "作業上、電源（外部コンセント）・水道等のご支給をお願いします。",
-    workingHours: "基本作業時間：朝8時頃〜夕方5時頃まで\n（作業内容により、大幅に時間が必要な場合は、その都度ご報告させていただきます）"
+    workingHours: "基本作業時間：朝8時頃〜夕方5時頃まで（作業内容により、大幅に時間が必要な場合は、その都度ご報告させていただきます）"
   });
 
   const {
@@ -460,6 +501,7 @@ const EstimateTemplate = ({ data = {} }) => {
     setEditingSection(null);
   };
 
+  const currentDate = new Date();
   const pageCount = 3;
 
   return (
@@ -558,265 +600,166 @@ const EstimateTemplate = ({ data = {} }) => {
         <PageBreak>
           <DocumentTitle style={{ fontSize: '18pt', marginBottom: '10mm' }}>見積内訳書</DocumentTitle>
           
-          <div style={{ textAlign: 'right', fontSize: '10pt', marginBottom: '15mm' }}>
-            見積書番号: {estimateNumber}　　発行日: {issueDate}
-          </div>
+          <div style={{ textAlign: 'right', marginBottom: '10mm' }}>{date}</div>
+          
+          <ClientInfo>
+            <div className="client-name" style={{ marginBottom: '20mm' }}>{clientName}</div>
+            <div>御見積、ご提案申し上げます</div>
+          </ClientInfo>
+
+          <EstimateInfo>
+            <div className="info-row">
+              <span className="label">御見積有効期限</span>
+              <span className="value">30日間有効</span>
+            </div>
+          </EstimateInfo>
+
+          <ProjectDetails>
+            <div className="detail-item">
+              <div className="detail-label">工事名</div>
+              <div className="detail-content">{projectName}</div>
+            </div>
+            <div className="detail-item">
+              <div className="detail-label">工事場所</div>
+              <div className="detail-content">{location}</div>
+            </div>
+            <div className="detail-item">
+              <div className="detail-label">工期</div>
+              <div className="detail-content">{period}</div>
+            </div>
+            <div className="detail-item">
+              <div className="detail-label">支払時期（契約書作成）</div>
+              <div className="detail-content">
+                着工時　　¥1,838,935
+                中間金　　（契約書に基づく）
+                完成時　　追加費用を含む契約金残金
+              </div>
+            </div>
+          </ProjectDetails>
 
           <ItemTable>
             <thead>
               <tr>
-                <th style={{ width: '35%' }}>工事項目</th>
-                <th style={{ width: '15%' }}>仕様・規格</th>
-                <th style={{ width: '8%' }}>数量</th>
-                <th style={{ width: '10%' }}>単位</th>
-                <th style={{ width: '16%' }}>単価（円）</th>
-                <th style={{ width: '16%' }}>金額（円）</th>
+                <th style={{ width: '40%' }}>内容</th>
+                <th style={{ width: '10%' }}>仕様</th>
+                <th style={{ width: '10%' }}>数量</th>
+                <th style={{ width: '20%' }}>単価（円）</th>
+                <th style={{ width: '20%' }}>金額（円）</th>
               </tr>
             </thead>
             <tbody>
               {sampleItems.map((item, index) => (
                 <tr key={index}>
-                  <td className="item-name">
-                    <strong>{item.name}</strong>
-                    {item.description && (
-                      <div style={{ fontSize: '8pt', color: '#666', marginTop: '1mm' }}>
-                        {item.description}
-                      </div>
-                    )}
-                  </td>
-                  <td style={{ textAlign: 'center' }}>{item.unit}</td>
+                  <td className="item-name">{item.name}</td>
+                  <td>{item.unit}</td>
                   <td className="quantity">{item.quantity}</td>
-                  <td style={{ textAlign: 'center' }}>{item.unit}</td>
                   <td className="unit-price">{item.unitPrice.toLocaleString()}</td>
                   <td className="amount">{item.amount.toLocaleString()}</td>
                 </tr>
               ))}
-              
               <tr className="subtotal-row">
-                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>工事費小計</td>
-                <td className="amount">{itemsSubtotal.toLocaleString()}</td>
-              </tr>
-              
-              <tr className="legal-welfare-row">
-                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>法定福利費（15%）</td>
-                <td className="amount">{legalWelfareFee.toLocaleString()}</td>
-              </tr>
-              
-              <tr className="subtotal-row">
-                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>設計・監理費</td>
+                <td colSpan="4" style={{ textAlign: 'right' }}>設計費</td>
                 <td className="amount">{designFee.toLocaleString()}</td>
               </tr>
-              
               <tr className="subtotal-row">
-                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>諸経費（現場管理費等）</td>
+                <td colSpan="4" style={{ textAlign: 'right' }}>諸経費（交通費込み）</td>
                 <td className="amount">{miscExpenses.toLocaleString()}</td>
               </tr>
-              
               <tr className="subtotal-row">
-                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>税抜合計</td>
+                <td colSpan="4" style={{ textAlign: 'right' }}>小計</td>
                 <td className="amount">{beforeTax.toLocaleString()}</td>
               </tr>
-              
               <tr className="subtotal-row">
-                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>消費税（{taxRate}%）</td>
+                <td colSpan="4" style={{ textAlign: 'right' }}>出精値引き</td>
+                <td className="amount">0</td>
+              </tr>
+              <tr className="subtotal-row">
+                <td colSpan="4" style={{ textAlign: 'right' }}>消費税</td>
                 <td className="amount">{taxAmount.toLocaleString()}</td>
               </tr>
-              
               <tr className="total-row">
-                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold', fontSize: '12pt' }}>
-                  合計金額（税込）
-                </td>
-                <td className="amount" style={{ fontSize: '12pt' }}>
-                  ¥{total.toLocaleString()}
-                </td>
+                <td colSpan="4" style={{ textAlign: 'right' }}>合計</td>
+                <td className="amount">{total.toLocaleString()}</td>
               </tr>
             </tbody>
           </ItemTable>
 
-          <div className="important-note">
-            <div className="note-title">■ 重要事項</div>
-            <div>• 仕様及び数量変更の場合、事前打合せのうえ、別途見積いたします</div>
-            <div>• 本見積書の有効期限は発行日より{validityPeriod}です</div>
-            <div>• 法定福利費は社会保険料、労働保険料等を含みます</div>
+          <div style={{ fontSize: '9pt', color: '#ff0000' }}>
+            ※ 仕様及び数量変更の場合、事前打合せのうえ、別途御見積させていただきます。
           </div>
-
-          <PaymentTerms>
-            <div className="section-title">支払条件</div>
-            <div className="terms-content">
-              <strong>支払条件：</strong>{paymentTerms}<br />
-              <strong>支払方法：</strong>銀行振込（振込手数料はお客様負担）<br />
-              <strong>その他：</strong>天災地変等による工期延長の場合は、別途協議とします
-            </div>
-          </PaymentTerms>
-
-          <PageFooter>
-            2 / {pageCount}
-          </PageFooter>
         </PageBreak>
       </EstimateContainer>
 
-      {/* 3ページ目：特記事項（編集可能） */}
+      {/* 3ページ目：特記事項 */}
       <EstimateContainer>
         <TermsAndConditions>
-          <div className="section-title">特記事項</div>
+          <h3>お見積り追記項目</h3>
           
           <div className="terms-section">
-            <div className="category-title">■ 材料について</div>
-            <ul className="terms-list">
-              <li className="term-item">
-                <div className="item-title">石材</div>
-                <EditableContent
-                  isEditing={editingSection === 'materials'}
-                  onClick={() => setEditingSection('materials')}
-                  onBlur={(e) => handleEditContent('materials', e.target.innerText)}
-                  contentEditable={editingSection === 'materials'}
-                  suppressContentEditableWarning={true}
-                >
-                  {editableTerms.materials}
-                </EditableContent>
-                {editingSection !== 'materials' && (
-                  <button className="edit-button" onClick={() => setEditingSection('materials')}>
-                    編集
-                  </button>
-                )}
+            <h4>材料について</h4>
+            <ul>
+              <li>
+                <strong>石材</strong><br />
+                石材は今現在の金額ですが、仕入れ状況により金額の変動も予想されます。<br />
+                変更があればご報告させて頂きます。
               </li>
-              
-              <li className="term-item">
-                <div className="item-title">植物</div>
-                <EditableContent
-                  isEditing={editingSection === 'plants'}
-                  onClick={() => setEditingSection('plants')}
-                  onBlur={(e) => handleEditContent('plants', e.target.innerText)}
-                  contentEditable={editingSection === 'plants'}
-                  suppressContentEditableWarning={true}
-                >
-                  {editableTerms.plants}
-                </EditableContent>
-                {editingSection !== 'plants' && (
-                  <button className="edit-button" onClick={() => setEditingSection('plants')}>
-                    編集
-                  </button>
-                )}
+              <li>
+                <strong>植物</strong><br />
+                植物に関しましては仕入れ状況により、高さ等の変更が生じる場合があります。<br />
+                それに伴い金額に変更が生じた場合は、ご報告後調整させて頂きます<br />
+                高さ等はあくまで目安となります。仕入れ時の樹木の姿、形で金額は変わります<br /><br />
+                植栽状況にて、特に地被植物の量が多いと判断した場合は、ご請求時にその分を調整させて頂き最終ご請求を申し上げます。
               </li>
-              
-              <li className="term-item">
-                <div className="item-title">枯れ木保証について</div>
-                <div className="highlight">{editableTerms.warranty}</div>
+              <li>
+                <strong>枯れ木保証について</strong><br />
+                <span className="highlight">植栽した植木についての枯れ保証は含まれておりません</span>
               </li>
             </ul>
           </div>
 
           <div className="terms-section">
-            <div className="category-title">■ 施工について</div>
-            <ul className="terms-list">
-              <li className="term-item">
-                <div className="item-title">図面・設計</div>
-                <EditableContent
-                  isEditing={editingSection === 'construction'}
-                  onClick={() => setEditingSection('construction')}
-                  onBlur={(e) => handleEditContent('construction', e.target.innerText)}
-                  contentEditable={editingSection === 'construction'}
-                  suppressContentEditableWarning={true}
-                >
-                  {editableTerms.construction}
-                </EditableContent>
-                {editingSection !== 'construction' && (
-                  <button className="edit-button" onClick={() => setEditingSection('construction')}>
-                    編集
-                  </button>
-                )}
+            <h4>施工について</h4>
+            <ul>
+              <li>
+                <strong>図面</strong><br />
+                図面は、あくまでイメージになります。施工中に地形の変更・植栽位置の変更が生じる場合があります。全体のバランスを確認しながらの作業となります。
               </li>
-              
-              <li className="term-item">
-                <div className="item-title">現場アクセス</div>
-                <EditableContent
-                  isEditing={editingSection === 'access'}
-                  onClick={() => setEditingSection('access')}
-                  onBlur={(e) => handleEditContent('access', e.target.innerText)}
-                  contentEditable={editingSection === 'access'}
-                  suppressContentEditableWarning={true}
-                >
-                  {editableTerms.access}
-                </EditableContent>
-                {editingSection !== 'access' && (
-                  <button className="edit-button" onClick={() => setEditingSection('access')}>
-                    編集
-                  </button>
-                )}
+              <li>
+                <strong>施工</strong><br />
+                施工中は、出入りが多いくなります。材料手配・材料調達等で、不在になることがあります、家の施錠は確実にお願いいたします。
               </li>
-              
-              <li className="term-item">
-                <div className="item-title">駐車場・車両</div>
-                <EditableContent
-                  isEditing={editingSection === 'parking'}
-                  onClick={() => setEditingSection('parking')}
-                  onBlur={(e) => handleEditContent('parking', e.target.innerText)}
-                  contentEditable={editingSection === 'parking'}
-                  suppressContentEditableWarning={true}
-                >
-                  {editableTerms.parking}
-                </EditableContent>
-                {editingSection !== 'parking' && (
-                  <button className="edit-button" onClick={() => setEditingSection('parking')}>
-                    編集
-                  </button>
-                )}
+              <li>
+                <strong>トイレ</strong><br />
+                お手洗いはお借りすることは基本ありませんが、手持ちの簡易トイレをお庭の一部に設置させて頂きます。それが不承知の場合は<br />
+                定期的に、汚水処へ処分させていただきますので、ご了承ください
               </li>
-              
-              <li className="term-item">
-                <div className="item-title">電気・水道等の設備</div>
-                <EditableContent
-                  isEditing={editingSection === 'utilities'}
-                  onClick={() => setEditingSection('utilities')}
-                  onBlur={(e) => handleEditContent('utilities', e.target.innerText)}
-                  contentEditable={editingSection === 'utilities'}
-                  suppressContentEditableWarning={true}
-                >
-                  {editableTerms.utilities}
-                </EditableContent>
-                {editingSection !== 'utilities' && (
-                  <button className="edit-button" onClick={() => setEditingSection('utilities')}>
-                    編集
-                  </button>
-                )}
+              <li>
+                <strong>車輌</strong><br />
+                基本的には敷地内での駐車をさせて頂ければ幸いです。<br />
+                使用車両：軽トラック<br />
+                　　　　　1トントラック<br />
+                　　　　　移動式クレーン車<br />
+                　　　　　2〜3トンダンプ車<br />
+                　　　　　その他
               </li>
-              
-              <li className="term-item">
-                <div className="item-title">作業時間</div>
-                <EditableContent
-                  isEditing={editingSection === 'workingHours'}
-                  onClick={() => setEditingSection('workingHours')}
-                  onBlur={(e) => handleEditContent('workingHours', e.target.innerText)}
-                  contentEditable={editingSection === 'workingHours'}
-                  suppressContentEditableWarning={true}
-                >
-                  {editableTerms.workingHours}
-                </EditableContent>
-                {editingSection !== 'workingHours' && (
-                  <button className="edit-button" onClick={() => setEditingSection('workingHours')}>
-                    編集
-                  </button>
-                )}
+              <li>
+                <strong>近隣住宅への配慮</strong><br />
+                作業開始日決定後、近隣住宅へ弊社より直接ご挨拶をさせて頂きます<br />
+                （不在の場合は、挨拶文を郵便ポストに投函させて頂きます）
+              </li>
+              <li>
+                <strong>電気・水道</strong><br />
+                作業上、電源（外部コンセント）・水道等のご支給をお願いします
+              </li>
+              <li>
+                <strong>その他</strong><br />
+                予定外の作業が発生した場合（特に埋設物の有無等によるもの）は打合せをさせて頂き、作業工程の見直し、追加費用発生時は再度御見積させて頂きます<br /><br />
+                作業時間等に関しましては、打ち合わせの上進めさせて頂きます<br />
+                基本作業時間：朝8時頃〜夕方5時頃まで<br />
+                （作業内容により、大幅に時間が必要な場合は、その都度ご報告させて頂きます）
               </li>
             </ul>
           </div>
-
-          <div className="important-note">
-            <div className="note-title">■ その他重要事項</div>
-            <div>
-              • 予定外の作業が発生した場合（特に埋設物の有無等によるもの）は打合せをさせていただき、作業工程の見直し、追加費用発生時は再度見積いたします<br />
-              • 近隣住宅への配慮として、作業開始日決定後、弊社より直接ご挨拶をさせていただきます<br />
-              • 天候・災害等による工期変更の場合は、別途協議とします
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: '20mm', fontSize: '10pt' }}>
-            以上、ご査収のほどよろしくお願い申し上げます。
-          </div>
-
-          <PageFooter>
-            3 / {pageCount}
-          </PageFooter>
         </TermsAndConditions>
       </EstimateContainer>
     </>

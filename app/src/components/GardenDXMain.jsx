@@ -27,6 +27,7 @@ import EstimateCreator from './EstimateCreator';
 import EstimateWizard from './EstimateWizard';
 import InvoiceForm from './invoices/InvoiceForm';
 import DashboardTop from './DashboardTop';
+import EstimateTemplateDemo from '../../../src/components/EstimateTemplateDemo';
 import { generateProcessPDF } from '../utils/processPDFGenerator';
 import { generateProcessSchedule } from '../utils/processGenerator';
 
@@ -147,10 +148,11 @@ const GardenDXMain = () => {
     }
   }, [isDemoMode]);
 
-  // メインナビゲーション - 5つの主要機能（ダッシュボードを追加）
+  // メインナビゲーション - 主要機能（ダッシュボードを追加）
   const navigationItems = [
     { id: 'dashboard', label: 'ダッシュボード', icon: BarChart3, description: 'システム概要と統計' },
     { id: 'estimate', label: '見積作成', icon: FileText, description: '新規見積の作成・編集' },
+    { id: 'template-demo', label: '見積書テンプレート', icon: FileText, description: '見積書テンプレートの確認' },
     { id: 'process', label: '工程表作成', icon: Calendar, description: '見積から工程表を自動生成' },
     { id: 'budget', label: '予算管理', icon: DollarSign, description: '予算と実績の管理' },
     { id: 'invoice', label: '請求書作成', icon: Package, description: '請求書の作成・発行' }
@@ -269,6 +271,9 @@ const GardenDXMain = () => {
               currentProject={currentProject}
               onProjectChange={setCurrentProject}
             />
+          )}
+          {activeModule === 'template-demo' && (
+            <EstimateTemplateDemo />
           )}
           {activeModule === 'process' && (
             <ProcessModule
