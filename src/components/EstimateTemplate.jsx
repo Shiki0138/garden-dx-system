@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 const EstimateContainer = styled.div`
@@ -6,145 +6,211 @@ const EstimateContainer = styled.div`
   min-height: 297mm;
   margin: 0 auto;
   background: white;
-  padding: 20mm;
-  font-family: 'Noto Sans JP', sans-serif;
-  font-size: 10.5pt;
-  line-height: 1.6;
+  padding: 15mm 20mm;
+  font-family: 'Noto Sans JP', 'MS Gothic', sans-serif;
+  font-size: 10pt;
+  line-height: 1.5;
   color: #000;
+  position: relative;
   
   @media print {
     margin: 0;
-    padding: 15mm;
+    padding: 10mm 15mm;
+    page-break-inside: avoid;
   }
 `;
 
 const PageBreak = styled.div`
   page-break-after: always;
-  margin-bottom: 20mm;
   
   @media print {
     margin-bottom: 0;
   }
 `;
 
-const Header = styled.div`
+const DocumentTitle = styled.h1`
   text-align: center;
-  font-size: 18pt;
+  font-size: 24pt;
   font-weight: bold;
-  margin-bottom: 20mm;
+  margin: 10mm 0;
+  text-decoration: underline;
 `;
 
-const ClientInfo = styled.div`
-  margin-bottom: 20mm;
+const EstimateBasicInfo = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15mm;
+  
+  .left-info {
+    width: 48%;
+    
+    .estimate-number {
+      font-size: 14pt;
+      font-weight: bold;
+      margin-bottom: 5mm;
+    }
+    
+    .issue-date, .validity-period {
+      margin-bottom: 3mm;
+      
+      .label {
+        font-weight: bold;
+        margin-right: 10mm;
+      }
+    }
+  }
+  
+  .right-info {
+    width: 48%;
+    text-align: right;
+    
+    .total-amount {
+      font-size: 18pt;
+      font-weight: bold;
+      border: 2px solid #000;
+      padding: 8mm;
+      background: #f9f9f9;
+      margin-bottom: 5mm;
+    }
+    
+    .tax-info {
+      font-size: 10pt;
+      color: #666;
+    }
+  }
+`;
+
+const ClientSection = styled.div`
+  margin-bottom: 15mm;
+  
+  .client-address {
+    margin-bottom: 5mm;
+    font-size: 11pt;
+  }
   
   .client-name {
     font-size: 16pt;
     font-weight: bold;
-    border-bottom: 1px solid #000;
-    padding-bottom: 5mm;
     margin-bottom: 10mm;
-  }
-  
-  .message {
-    background: #f5f5f5;
-    padding: 10mm;
-    border: 1px solid #ddd;
-    margin-bottom: 10mm;
-    white-space: pre-line;
+    padding-bottom: 2mm;
+    border-bottom: 2px solid #000;
   }
 `;
 
-const CompanyInfo = styled.div`
+const CompanySection = styled.div`
   position: absolute;
   right: 20mm;
-  top: 50mm;
+  top: 80mm;
+  width: 70mm;
   text-align: right;
+  border: 1px solid #000;
+  padding: 5mm;
+  background: #f9f9f9;
   
   .company-name {
-    font-size: 14pt;
+    font-size: 12pt;
+    font-weight: bold;
+    margin-bottom: 3mm;
+  }
+  
+  .registration-number {
+    font-size: 9pt;
+    margin-bottom: 3mm;
+    color: #666;
+  }
+  
+  .contact-info {
+    font-size: 9pt;
+    line-height: 1.3;
+    margin-bottom: 5mm;
+  }
+  
+  .representative {
+    font-size: 10pt;
     font-weight: bold;
     margin-bottom: 5mm;
   }
   
   .stamp-area {
     display: flex;
-    gap: 10mm;
+    gap: 5mm;
     justify-content: flex-end;
-    margin-top: 10mm;
     
     .stamp-box {
-      width: 20mm;
-      height: 20mm;
+      width: 15mm;
+      height: 15mm;
       border: 1px solid #000;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12pt;
+      font-size: 8pt;
+      background: white;
     }
   }
 `;
 
-const EstimateInfo = styled.div`
-  margin-bottom: 20mm;
+const ProjectInfo = styled.div`
+  margin-bottom: 15mm;
   
-  .info-row {
-    display: flex;
-    margin-bottom: 3mm;
-    
-    .label {
-      width: 40mm;
-    }
-    
-    .value {
-      flex: 1;
-    }
-  }
-`;
-
-const SummaryBox = styled.div`
-  background: #fff3e0;
-  border: 2px solid #000;
-  padding: 10mm;
-  margin-bottom: 20mm;
-  
-  .total-amount {
-    font-size: 20pt;
+  .project-title {
+    font-size: 14pt;
     font-weight: bold;
-    text-align: center;
     margin-bottom: 5mm;
+    border-bottom: 1px solid #000;
+    padding-bottom: 2mm;
   }
   
-  .tax-info {
-    text-align: right;
-    font-size: 9pt;
-    color: #666;
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    
+    tr {
+      border-bottom: 1px solid #ddd;
+      
+      td {
+        padding: 3mm 5mm;
+        
+        &.label {
+          width: 30%;
+          background: #f5f5f5;
+          font-weight: bold;
+          border-right: 1px solid #ddd;
+        }
+        
+        &.value {
+          width: 70%;
+        }
+      }
+    }
   }
 `;
 
 const ItemTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20mm;
+  margin-bottom: 15mm;
+  font-size: 9pt;
   
   th, td {
     border: 1px solid #000;
-    padding: 3mm;
+    padding: 2mm;
     text-align: center;
   }
   
   th {
     background: #f0f0f0;
     font-weight: bold;
+    font-size: 10pt;
   }
   
   .item-name {
     text-align: left;
-    padding-left: 5mm;
+    padding-left: 3mm;
   }
   
   .quantity, .unit-price, .amount {
     text-align: right;
-    padding-right: 5mm;
+    padding-right: 3mm;
   }
   
   .subtotal-row {
@@ -154,68 +220,128 @@ const ItemTable = styled.table`
   
   .total-row {
     font-weight: bold;
-    font-size: 12pt;
+    font-size: 11pt;
     background: #e0e0e0;
+  }
+  
+  .legal-welfare-row {
+    background: #fff3cd;
+    font-weight: bold;
   }
 `;
 
-const ProjectDetails = styled.div`
-  margin-bottom: 20mm;
+const PaymentTerms = styled.div`
+  margin-bottom: 15mm;
   
-  h3 {
-    font-size: 14pt;
-    border-bottom: 2px solid #000;
-    padding-bottom: 3mm;
-    margin-bottom: 10mm;
+  .section-title {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-bottom: 5mm;
+    border-bottom: 1px solid #000;
+    padding-bottom: 2mm;
   }
   
-  .detail-item {
-    margin-bottom: 10mm;
-    
-    .detail-label {
-      font-weight: bold;
-      margin-bottom: 3mm;
-    }
-    
-    .detail-content {
-      padding-left: 10mm;
-      white-space: pre-line;
-    }
+  .terms-content {
+    font-size: 10pt;
+    line-height: 1.6;
   }
 `;
 
 const TermsAndConditions = styled.div`
-  margin-top: 20mm;
+  margin-top: 15mm;
   
-  h3 {
+  .section-title {
     font-size: 14pt;
+    font-weight: bold;
     border-bottom: 2px solid #000;
     padding-bottom: 3mm;
     margin-bottom: 10mm;
+    text-align: center;
   }
   
   .terms-section {
     margin-bottom: 15mm;
     
-    h4 {
+    .category-title {
       font-size: 12pt;
       font-weight: bold;
-      margin-bottom: 5mm;
+      margin-bottom: 8mm;
+      background: #f0f0f0;
+      padding: 3mm;
+      border-left: 4px solid #333;
     }
     
-    ul {
+    .terms-list {
+      padding-left: 0;
       list-style: none;
-      padding-left: 10mm;
       
-      li {
+      .term-item {
+        margin-bottom: 8mm;
+        padding: 5mm;
+        border: 1px solid #ddd;
+        background: #fafafa;
         position: relative;
-        padding-left: 15mm;
-        margin-bottom: 3mm;
         
-        &:before {
-          content: "●";
+        .item-title {
+          font-weight: bold;
+          margin-bottom: 3mm;
+          color: #333;
+        }
+        
+        .item-content {
+          line-height: 1.6;
+          font-size: 9pt;
+          
+          &.editable {
+            min-height: 15mm;
+            border: 1px dashed #ccc;
+            padding: 2mm;
+            background: white;
+            cursor: text;
+            
+            &:hover {
+              border-color: #999;
+            }
+            
+            &:focus {
+              outline: 2px solid #007bff;
+              border-color: #007bff;
+            }
+          }
+        }
+        
+        .edit-button {
           position: absolute;
-          left: 0;
+          top: 2mm;
+          right: 2mm;
+          background: #007bff;
+          color: white;
+          border: none;
+          padding: 1mm 3mm;
+          font-size: 8pt;
+          cursor: pointer;
+          border-radius: 2px;
+          
+          &:hover {
+            background: #0056b3;
+          }
+        }
+        
+        .bullet-list {
+          margin: 3mm 0;
+          padding-left: 8mm;
+          
+          li {
+            position: relative;
+            margin-bottom: 2mm;
+            
+            &:before {
+              content: "•";
+              position: absolute;
+              left: -5mm;
+              font-weight: bold;
+            }
+          }
         }
       }
     }
@@ -224,275 +350,473 @@ const TermsAndConditions = styled.div`
   .highlight {
     background: #ffeb3b;
     padding: 1mm 2mm;
+    font-weight: bold;
+  }
+  
+  .important-note {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    padding: 5mm;
+    margin: 5mm 0;
+    border-radius: 2mm;
+    
+    .note-title {
+      font-weight: bold;
+      color: #856404;
+      margin-bottom: 2mm;
+    }
+  }
+`;
+
+const PageFooter = styled.div`
+  position: fixed;
+  bottom: 10mm;
+  right: 20mm;
+  font-size: 8pt;
+  color: #666;
+  
+  @media print {
+    position: absolute;
+  }
+`;
+
+const EditableContent = styled.div`
+  min-height: 20mm;
+  padding: 3mm;
+  border: ${props => props.isEditing ? '2px solid #007bff' : '1px dashed #ccc'};
+  background: ${props => props.isEditing ? '#f8f9fa' : 'white'};
+  cursor: ${props => props.isEditing ? 'text' : 'pointer'};
+  white-space: pre-wrap;
+  line-height: 1.6;
+  
+  &:hover {
+    border-color: ${props => props.isEditing ? '#007bff' : '#999'};
   }
 `;
 
 const EstimateTemplate = ({ data = {} }) => {
+  const [editingSection, setEditingSection] = useState(null);
+  const [editableTerms, setEditableTerms] = useState({
+    materials: "石材は現在の金額ですが、仕入れ状況により金額の変動も予想されます。変更があればご報告させていただきます。",
+    plants: "植物に関しましては仕入れ状況により、高さ等の変更が生じる場合があります。それに伴い金額に変更が生じた場合は、ご報告後調整させていただきます。",
+    warranty: "植栽した植木についての枯れ保証は含まれておりません。",
+    construction: "図面は、あくまでイメージになります。施工中に地形の変更・植栽位置の変更が生じる場合があります。",
+    access: "施工中は、出入りが多くなります。材料手配・材料調達等で、不在になることがあります。家の施錠は確実にお願いいたします。",
+    parking: "基本的には敷地内での駐車をさせていただければ幸いです。\n使用車両：\n• 軽トラック\n• 1トントラック\n• 移動式クレーン車\n• 2〜3トンダンプ車\n• その他",
+    utilities: "作業上、電源（外部コンセント）・水道等のご支給をお願いします。",
+    workingHours: "基本作業時間：朝8時頃〜夕方5時頃まで\n（作業内容により、大幅に時間が必要な場合は、その都度ご報告させていただきます）"
+  });
+
   const {
-    estimateNumber = 'No.1',
-    date = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }),
-    validityPeriod = '1ヶ月',
-    clientName = '創建工房 緑 様',
-    projectName = '山田様邸新築造園工事',
-    location = '大阪府枚方市東香里南町20-10地内',
-    period = '180日',
-    totalAmount = '¥6,129,785',
-    taxIncluded = true,
-    taxRate = 10,
+    estimateNumber = 'EST-2024-001',
+    issueDate = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }),
+    validityPeriod = '30日間',
+    clientName = '○○○○ 様',
+    clientAddress = '〒000-0000 ○○県○○市○○町○○番地',
+    projectName = '新築住宅造園工事',
+    projectLocation = '○○県○○市○○町○○番地地内',
+    constructionPeriod = '契約締結後約180日',
+    paymentTerms = '着工時30%、中間時40%、完成時30%',
     items = [],
     companyName = '庭想人株式会社',
-    companyAddress = '奈良県葛城市太田262-1 安井利典',
-    companyTel = '0745-48-3057',
-    companyFax = '0745-48-3057',
-    companyMobile = '090-8937-1314',
+    companyNameEn = 'NIWAOMOBITO CO., LTD.',
+    companyAddress = '〒639-2113 奈良県葛城市太田262-1',
+    companyTel = 'TEL: 0745-48-3057',
+    companyFax = 'FAX: 0745-48-3057',
+    companyMobile = '携帯: 090-8937-1314',
+    representative = '代表取締役 安井利典',
     registrationNumber = 'T6150001027575',
-    message = '拝啓 時下ますますご清栄のこととお喜び申し上げます。\n平素は格別のご高配を賜り、厚く御礼申し上げます。\n下記内容の通りお見積りを申し上げます。\nご検討の程よろしくお願い申し上げます。'
+    licenseNumber = '奈良県知事許可 第17752号',
+    taxRate = 10
   } = data;
 
   // サンプルデータ（実際のデータがない場合）
   const sampleItems = items.length > 0 ? items : [
-    { name: '土工', unit: 'NO.2', quantity: 1, unitPrice: 413500, amount: 413500 },
-    { name: '土留め石積み工', unit: '㎡', quantity: 21.5, unitPrice: 60000, amount: 1290000 },
-    { name: 'アプローチ自然石乱張り', unit: '㎡', quantity: 6, unitPrice: 70000, amount: 420000 },
-    { name: 'アプローチ三和土', unit: '㎡', quantity: 3, unitPrice: 22000, amount: 66000 },
-    { name: '板塀門柱（900×1500）', unit: '式', quantity: 1, unitPrice: 150000, amount: 150000 },
-    { name: '自然石水鉢パン', unit: '式', quantity: 1, unitPrice: 20000, amount: 20000 },
-    { name: 'カーポート', unit: 'NO.3', quantity: 1, unitPrice: 1107948, amount: 1107948 },
-    { name: 'テラス', unit: 'NO.3', quantity: 1, unitPrice: 396776, amount: 396776 },
-    { name: '庭園灯等', unit: 'NO.3', quantity: 1, unitPrice: 87600, amount: 87600 },
-    { name: 'ウッドフェンス建柱', unit: '式', quantity: 1, unitPrice: 116170, amount: 116170 },
-    { name: '植栽', unit: '式', quantity: 1, unitPrice: 663450, amount: 663450 }
+    { name: '仮設工事', unit: '式', quantity: 1, unitPrice: 250000, amount: 250000, description: '工事用仮設設備一式' },
+    { name: '土工事', unit: '㎥', quantity: 45, unitPrice: 8500, amount: 382500, description: '掘削・残土処分' },
+    { name: '土留め石積み工', unit: '㎡', quantity: 21.5, unitPrice: 60000, amount: 1290000, description: '自然石積み工事' },
+    { name: 'アプローチ工事', unit: '㎡', quantity: 15, unitPrice: 45000, amount: 675000, description: '自然石乱張り・目地工事' },
+    { name: '門柱・塀工事', unit: '式', quantity: 1, unitPrice: 380000, amount: 380000, description: '板塀門柱（900×1500）' },
+    { name: 'カーポート設置', unit: '基', quantity: 1, unitPrice: 1107948, amount: 1107948, description: 'アルミ製カーポート' },
+    { name: 'テラス工事', unit: '㎡', quantity: 12, unitPrice: 33000, amount: 396000, description: 'ウッドデッキテラス' },
+    { name: '電気設備工事', unit: '式', quantity: 1, unitPrice: 180000, amount: 180000, description: '庭園灯・配線工事' },
+    { name: 'ウッドフェンス', unit: 'm', quantity: 15, unitPrice: 25000, amount: 375000, description: '木製フェンス設置' },
+    { name: '植栽工事', unit: '式', quantity: 1, unitPrice: 850000, amount: 850000, description: '高木・中木・低木・草花植栽一式' }
   ];
 
-  const subtotal = sampleItems.reduce((sum, item) => sum + item.amount, 0);
-  const designFee = 200000;
-  const miscExpenses = 641088;
-  const beforeTax = subtotal + designFee + miscExpenses;
+  const itemsSubtotal = sampleItems.reduce((sum, item) => sum + item.amount, 0);
+  const designFee = 350000; // 設計費
+  const legalWelfareFee = Math.floor(itemsSubtotal * 0.15); // 法定福利費（15%）
+  const miscExpenses = 180000; // 諸経費
+  const beforeTax = itemsSubtotal + designFee + legalWelfareFee + miscExpenses;
   const taxAmount = Math.floor(beforeTax * taxRate / 100);
   const total = beforeTax + taxAmount;
 
+  const handleEditContent = (section, newContent) => {
+    setEditableTerms(prev => ({
+      ...prev,
+      [section]: newContent
+    }));
+    setEditingSection(null);
+  };
+
+  const pageCount = 3;
+
   return (
     <>
-      {/* 1ページ目：表紙 */}
+      {/* 1ページ目：見積書表紙 */}
       <EstimateContainer>
         <PageBreak>
-          <Header>お見積ご提案書 {estimateNumber}</Header>
+          <DocumentTitle>見 積 書</DocumentTitle>
           
-          <EstimateInfo>
-            <div className="info-row">
-              <span className="label">作成日</span>
-              <span className="value">{date}</span>
+          <EstimateBasicInfo>
+            <div className="left-info">
+              <div className="estimate-number">見積書番号: {estimateNumber}</div>
+              <div className="issue-date">
+                <span className="label">発行日:</span>
+                <span className="value">{issueDate}</span>
+              </div>
+              <div className="validity-period">
+                <span className="label">見積有効期限:</span>
+                <span className="value">{validityPeriod}</span>
+              </div>
             </div>
-            <div className="info-row">
-              <span className="label">お見積有効期限</span>
-              <span className="value">{validityPeriod}</span>
+            <div className="right-info">
+              <div className="total-amount">
+                合計金額<br />
+                ¥{total.toLocaleString()}
+              </div>
+              <div className="tax-info">
+                （消費税 {taxRate}% 込み）
+              </div>
             </div>
-            <div className="info-row">
-              <span className="label">奈良県知事許可</span>
-              <span className="value">第17752号</span>
-            </div>
-            <div className="info-row">
-              <span className="label">登録番号</span>
-              <span className="value">{registrationNumber}</span>
-            </div>
-          </EstimateInfo>
+          </EstimateBasicInfo>
 
-          <ClientInfo>
+          <ClientSection>
+            <div className="client-address">{clientAddress}</div>
             <div className="client-name">{clientName}</div>
-            <div className="message">{message}</div>
-          </ClientInfo>
+          </ClientSection>
 
-          <CompanyInfo>
+          <CompanySection>
+            <div className="registration-number">
+              適格請求書発行事業者登録番号<br />
+              {registrationNumber}
+            </div>
             <div className="company-name">{companyName}</div>
-            <div>NIWAOMOBITO co.ltd</div>
-            <div>{companyAddress}</div>
-            <div>tel/fax {companyTel}</div>
-            <div>携帯 {companyMobile}</div>
+            <div style={{ fontSize: '9pt', marginBottom: '2mm' }}>{companyNameEn}</div>
+            <div className="contact-info">
+              {companyAddress}<br />
+              {companyTel}<br />
+              {companyFax}<br />
+              {companyMobile}
+            </div>
+            <div className="representative">{representative}</div>
+            <div style={{ fontSize: '8pt', marginBottom: '3mm' }}>{licenseNumber}</div>
             <div className="stamp-area">
-              <div className="stamp-box">印</div>
-              <div className="stamp-box">印</div>
+              <div className="stamp-box">代表印</div>
+              <div className="stamp-box">担当印</div>
             </div>
-          </CompanyInfo>
+          </CompanySection>
 
-          <SummaryBox>
-            <div className="total-amount">合計金額 ¥{total.toLocaleString()}</div>
-            <div className="tax-info">
-              内消費税（{taxRate}%） ¥{taxAmount.toLocaleString()}
-            </div>
-          </SummaryBox>
+          <ProjectInfo style={{ marginTop: '40mm' }}>
+            <div className="project-title">工事概要</div>
+            <table className="info-table">
+              <tbody>
+                <tr>
+                  <td className="label">工事件名</td>
+                  <td className="value">{projectName}</td>
+                </tr>
+                <tr>
+                  <td className="label">工事場所</td>
+                  <td className="value">{projectLocation}</td>
+                </tr>
+                <tr>
+                  <td className="label">工事期間</td>
+                  <td className="value">{constructionPeriod}</td>
+                </tr>
+                <tr>
+                  <td className="label">支払条件</td>
+                  <td className="value">{paymentTerms}</td>
+                </tr>
+              </tbody>
+            </table>
+          </ProjectInfo>
 
-          <div style={{ marginTop: '30mm' }}>
-            <h3>作業内容</h3>
-            <div style={{ fontSize: '14pt', fontWeight: 'bold' }}>{projectName}</div>
+          <div style={{ marginTop: '20mm', fontSize: '11pt', textAlign: 'center' }}>
+            下記の通り、お見積もりいたします。<br />
+            ご査収のほど、よろしくお願い申し上げます。
           </div>
+
+          <PageFooter>
+            1 / {pageCount}
+          </PageFooter>
         </PageBreak>
       </EstimateContainer>
 
-      {/* 2ページ目：明細 */}
+      {/* 2ページ目：詳細明細 */}
       <EstimateContainer>
         <PageBreak>
-          <Header>お見積・ご提案書</Header>
+          <DocumentTitle style={{ fontSize: '18pt', marginBottom: '10mm' }}>見積内訳書</DocumentTitle>
           
-          <div style={{ textAlign: 'right', marginBottom: '10mm' }}>{date}</div>
-          
-          <ClientInfo>
-            <div className="client-name" style={{ marginBottom: '20mm' }}>{clientName}</div>
-            <div>御見積、ご提案申し上げます</div>
-          </ClientInfo>
-
-          <EstimateInfo>
-            <div className="info-row">
-              <span className="label">御見積有効期限</span>
-              <span className="value">30日間有効</span>
-            </div>
-          </EstimateInfo>
-
-          <ProjectDetails>
-            <div className="detail-item">
-              <div className="detail-label">工事名</div>
-              <div className="detail-content">{projectName}</div>
-            </div>
-            <div className="detail-item">
-              <div className="detail-label">工事場所</div>
-              <div className="detail-content">{location}</div>
-            </div>
-            <div className="detail-item">
-              <div className="detail-label">工期</div>
-              <div className="detail-content">{period}</div>
-            </div>
-            <div className="detail-item">
-              <div className="detail-label">支払時期（契約書作成）</div>
-              <div className="detail-content">
-                着工時　　¥1,838,935
-                中間金　　（契約書に基づく）
-                完成時　　追加費用を含む契約金残金
-              </div>
-            </div>
-          </ProjectDetails>
+          <div style={{ textAlign: 'right', fontSize: '10pt', marginBottom: '15mm' }}>
+            見積書番号: {estimateNumber}  発行日: {issueDate}
+          </div>
 
           <ItemTable>
             <thead>
               <tr>
-                <th style={{ width: '40%' }}>内容</th>
-                <th style={{ width: '10%' }}>仕様</th>
-                <th style={{ width: '10%' }}>数量</th>
-                <th style={{ width: '20%' }}>単価（円）</th>
-                <th style={{ width: '20%' }}>金額（円）</th>
+                <th style={{ width: '35%' }}>工事項目</th>
+                <th style={{ width: '15%' }}>仕様・規格</th>
+                <th style={{ width: '8%' }}>数量</th>
+                <th style={{ width: '10%' }}>単位</th>
+                <th style={{ width: '16%' }}>単価（円）</th>
+                <th style={{ width: '16%' }}>金額（円）</th>
               </tr>
             </thead>
             <tbody>
               {sampleItems.map((item, index) => (
                 <tr key={index}>
-                  <td className="item-name">{item.name}</td>
-                  <td>{item.unit}</td>
+                  <td className="item-name">
+                    <strong>{item.name}</strong>
+                    {item.description && (
+                      <div style={{ fontSize: '8pt', color: '#666', marginTop: '1mm' }}>
+                        {item.description}
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ textAlign: 'center' }}>{item.unit}</td>
                   <td className="quantity">{item.quantity}</td>
+                  <td style={{ textAlign: 'center' }}>{item.unit}</td>
                   <td className="unit-price">{item.unitPrice.toLocaleString()}</td>
                   <td className="amount">{item.amount.toLocaleString()}</td>
                 </tr>
               ))}
+              
               <tr className="subtotal-row">
-                <td colSpan="4" style={{ textAlign: 'right' }}>設計費</td>
+                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>工事費小計</td>
+                <td className="amount">{itemsSubtotal.toLocaleString()}</td>
+              </tr>
+              
+              <tr className="legal-welfare-row">
+                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>法定福利費（15%）</td>
+                <td className="amount">{legalWelfareFee.toLocaleString()}</td>
+              </tr>
+              
+              <tr className="subtotal-row">
+                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>設計・監理費</td>
                 <td className="amount">{designFee.toLocaleString()}</td>
               </tr>
+              
               <tr className="subtotal-row">
-                <td colSpan="4" style={{ textAlign: 'right' }}>諸経費（交通費込み）</td>
+                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>諸経費（現場管理費等）</td>
                 <td className="amount">{miscExpenses.toLocaleString()}</td>
               </tr>
+              
               <tr className="subtotal-row">
-                <td colSpan="4" style={{ textAlign: 'right' }}>小計</td>
+                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>税抜合計</td>
                 <td className="amount">{beforeTax.toLocaleString()}</td>
               </tr>
+              
               <tr className="subtotal-row">
-                <td colSpan="4" style={{ textAlign: 'right' }}>出精値引き</td>
-                <td className="amount">0</td>
-              </tr>
-              <tr className="subtotal-row">
-                <td colSpan="4" style={{ textAlign: 'right' }}>消費税</td>
+                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>消費税（{taxRate}%）</td>
                 <td className="amount">{taxAmount.toLocaleString()}</td>
               </tr>
+              
               <tr className="total-row">
-                <td colSpan="4" style={{ textAlign: 'right' }}>合計</td>
-                <td className="amount">{total.toLocaleString()}</td>
+                <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold', fontSize: '12pt' }}>
+                  合計金額（税込）
+                </td>
+                <td className="amount" style={{ fontSize: '12pt' }}>
+                  ¥{total.toLocaleString()}
+                </td>
               </tr>
             </tbody>
           </ItemTable>
 
-          <div style={{ fontSize: '9pt', color: '#ff0000' }}>
-            ※ 仕様及び数量変更の場合、事前打合せのうえ、別途御見積させていただきます。
+          <div className="important-note">
+            <div className="note-title">■ 重要事項</div>
+            <div>• 仕様及び数量変更の場合、事前打合せのうえ、別途見積いたします</div>
+            <div>• 本見積書の有効期限は発行日より{validityPeriod}です</div>
+            <div>• 法定福利費は社会保険料、労働保険料等を含みます</div>
           </div>
+
+          <PaymentTerms>
+            <div className="section-title">支払条件</div>
+            <div className="terms-content">
+              <strong>支払条件：</strong>{paymentTerms}<br />
+              <strong>支払方法：</strong>銀行振込（振込手数料はお客様負担）<br />
+              <strong>その他：</strong>天災地変等による工期延長の場合は、別途協議とします
+            </div>
+          </PaymentTerms>
+
+          <PageFooter>
+            2 / {pageCount}
+          </PageFooter>
         </PageBreak>
       </EstimateContainer>
 
-      {/* 3ページ目：特記事項 */}
+      {/* 3ページ目：特記事項（編集可能） */}
       <EstimateContainer>
         <TermsAndConditions>
-          <h3>お見積り追記項目</h3>
+          <div className="section-title">特記事項</div>
           
           <div className="terms-section">
-            <h4>材料について</h4>
-            <ul>
-              <li>
-                <strong>石材</strong><br />
-                石材は今現在の金額ですが、仕入れ状況により金額の変動も予想されます。<br />
-                変更があればご報告させて頂きます。
+            <div className="category-title">■ 材料について</div>
+            <ul className="terms-list">
+              <li className="term-item">
+                <div className="item-title">石材</div>
+                <EditableContent
+                  isEditing={editingSection === 'materials'}
+                  onClick={() => setEditingSection('materials')}
+                  onBlur={(e) => handleEditContent('materials', e.target.innerText)}
+                  contentEditable={editingSection === 'materials'}
+                  suppressContentEditableWarning={true}
+                >
+                  {editableTerms.materials}
+                </EditableContent>
+                {editingSection !== 'materials' && (
+                  <button className="edit-button" onClick={() => setEditingSection('materials')}>
+                    編集
+                  </button>
+                )}
               </li>
-              <li>
-                <strong>植物</strong><br />
-                植物に関しましては仕入れ状況により、高さ等の変更が生じる場合があります。<br />
-                それに伴い金額に変更が生じた場合は、ご報告後調整させて頂きます<br />
-                高さ等はあくまで目安となります。仕入れ時の樹木の姿、形で金額は変わります<br /><br />
-                植栽状況にて、特に地被植物の量が多いと判断した場合は、ご請求時にその分を調整させて頂き最終ご請求を申し上げます。
+              
+              <li className="term-item">
+                <div className="item-title">植物</div>
+                <EditableContent
+                  isEditing={editingSection === 'plants'}
+                  onClick={() => setEditingSection('plants')}
+                  onBlur={(e) => handleEditContent('plants', e.target.innerText)}
+                  contentEditable={editingSection === 'plants'}
+                  suppressContentEditableWarning={true}
+                >
+                  {editableTerms.plants}
+                </EditableContent>
+                {editingSection !== 'plants' && (
+                  <button className="edit-button" onClick={() => setEditingSection('plants')}>
+                    編集
+                  </button>
+                )}
               </li>
-              <li>
-                <strong>枯れ木保証について</strong><br />
-                <span className="highlight">植栽した植木についての枯れ保証は含まれておりません</span>
+              
+              <li className="term-item">
+                <div className="item-title">枯れ木保証について</div>
+                <div className="highlight">{editableTerms.warranty}</div>
               </li>
             </ul>
           </div>
 
           <div className="terms-section">
-            <h4>施工について</h4>
-            <ul>
-              <li>
-                <strong>図面</strong><br />
-                図面は、あくまでイメージになります。施工中に地形の変更・植栽位置の変更が生じる場合があります。全体のバランスを確認しながらの作業となります。
+            <div className="category-title">■ 施工について</div>
+            <ul className="terms-list">
+              <li className="term-item">
+                <div className="item-title">図面・設計</div>
+                <EditableContent
+                  isEditing={editingSection === 'construction'}
+                  onClick={() => setEditingSection('construction')}
+                  onBlur={(e) => handleEditContent('construction', e.target.innerText)}
+                  contentEditable={editingSection === 'construction'}
+                  suppressContentEditableWarning={true}
+                >
+                  {editableTerms.construction}
+                </EditableContent>
+                {editingSection !== 'construction' && (
+                  <button className="edit-button" onClick={() => setEditingSection('construction')}>
+                    編集
+                  </button>
+                )}
               </li>
-              <li>
-                <strong>施工</strong><br />
-                施工中は、出入りが多いくなります。材料手配・材料調達等で、不在になることがあります、家の施錠は確実にお願いいたします。
+              
+              <li className="term-item">
+                <div className="item-title">現場アクセス</div>
+                <EditableContent
+                  isEditing={editingSection === 'access'}
+                  onClick={() => setEditingSection('access')}
+                  onBlur={(e) => handleEditContent('access', e.target.innerText)}
+                  contentEditable={editingSection === 'access'}
+                  suppressContentEditableWarning={true}
+                >
+                  {editableTerms.access}
+                </EditableContent>
+                {editingSection !== 'access' && (
+                  <button className="edit-button" onClick={() => setEditingSection('access')}>
+                    編集
+                  </button>
+                )}
               </li>
-              <li>
-                <strong>トイレ</strong><br />
-                お手洗いはお借りすることは基本ありませんが、手持ちの簡易トイレをお庭の一部に設置させて頂きます。それが不承知の場合は<br />
-                定期的に、汚水処へ処分させていただきますので、ご了承ください
+              
+              <li className="term-item">
+                <div className="item-title">駐車場・車両</div>
+                <EditableContent
+                  isEditing={editingSection === 'parking'}
+                  onClick={() => setEditingSection('parking')}
+                  onBlur={(e) => handleEditContent('parking', e.target.innerText)}
+                  contentEditable={editingSection === 'parking'}
+                  suppressContentEditableWarning={true}
+                >
+                  {editableTerms.parking}
+                </EditableContent>
+                {editingSection !== 'parking' && (
+                  <button className="edit-button" onClick={() => setEditingSection('parking')}>
+                    編集
+                  </button>
+                )}
               </li>
-              <li>
-                <strong>車輌</strong><br />
-                基本的には敷地内での駐車をさせて頂ければ幸いです。<br />
-                使用車両：軽トラック<br />
-                　　　　　1トントラック<br />
-                　　　　　移動式クレーン車<br />
-                　　　　　2〜3トンダンプ車<br />
-                　　　　　その他
+              
+              <li className="term-item">
+                <div className="item-title">電気・水道等の設備</div>
+                <EditableContent
+                  isEditing={editingSection === 'utilities'}
+                  onClick={() => setEditingSection('utilities')}
+                  onBlur={(e) => handleEditContent('utilities', e.target.innerText)}
+                  contentEditable={editingSection === 'utilities'}
+                  suppressContentEditableWarning={true}
+                >
+                  {editableTerms.utilities}
+                </EditableContent>
+                {editingSection !== 'utilities' && (
+                  <button className="edit-button" onClick={() => setEditingSection('utilities')}>
+                    編集
+                  </button>
+                )}
               </li>
-              <li>
-                <strong>近隣住宅への配慮</strong><br />
-                作業開始日決定後、近隣住宅へ弊社より直接ご挨拶をさせて頂きます<br />
-                （不在の場合は、挨拶文を郵便ポストに投函させて頂きます）
-              </li>
-              <li>
-                <strong>電気・水道</strong><br />
-                作業上、電源（外部コンセント）・水道等のご支給をお願いします
-              </li>
-              <li>
-                <strong>その他</strong><br />
-                予定外の作業が発生した場合（特に埋設物の有無等によるもの）は打合せをさせて頂き、作業工程の見直し、追加費用発生時は再度御見積させて頂きます<br /><br />
-                作業時間等に関しましては、打ち合わせの上進めさせて頂きます<br />
-                基本作業時間：朝8時頃〜夕方5時頃まで<br />
-                （作業内容により、大幅に時間が必要な場合は、その都度ご報告させて頂きます）
+              
+              <li className="term-item">
+                <div className="item-title">作業時間</div>
+                <EditableContent
+                  isEditing={editingSection === 'workingHours'}
+                  onClick={() => setEditingSection('workingHours')}
+                  onBlur={(e) => handleEditContent('workingHours', e.target.innerText)}
+                  contentEditable={editingSection === 'workingHours'}
+                  suppressContentEditableWarning={true}
+                >
+                  {editableTerms.workingHours}
+                </EditableContent>
+                {editingSection !== 'workingHours' && (
+                  <button className="edit-button" onClick={() => setEditingSection('workingHours')}>
+                    編集
+                  </button>
+                )}
               </li>
             </ul>
           </div>
+
+          <div className="important-note">
+            <div className="note-title">■ その他重要事項</div>
+            <div>
+              • 予定外の作業が発生した場合（特に埋設物の有無等によるもの）は打合せをさせていただき、作業工程の見直し、追加費用発生時は再度見積いたします<br />
+              • 近隣住宅への配慮として、作業開始日決定後、弊社より直接ご挨拶をさせていただきます<br />
+              • 天候・災害等による工期変更の場合は、別途協議とします
+            </div>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '20mm', fontSize: '10pt' }}>
+            以上、ご査収のほどよろしくお願い申し上げます。
+          </div>
+
+          <PageFooter>
+            3 / {pageCount}
+          </PageFooter>
         </TermsAndConditions>
       </EstimateContainer>
     </>
