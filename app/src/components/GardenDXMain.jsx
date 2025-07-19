@@ -27,7 +27,7 @@ import EstimateCreator from './EstimateCreator';
 import EstimateWizard from './EstimateWizard';
 import InvoiceForm from './invoices/InvoiceForm';
 import DashboardTop from './DashboardTop';
-import EstimateTemplateDemo from '../../../src/components/EstimateTemplateDemo';
+import EstimateTemplateDemo from './EstimateTemplateDemo';
 import { generateProcessPDF } from '../utils/processPDFGenerator';
 import { generateProcessSchedule } from '../utils/processGenerator';
 
