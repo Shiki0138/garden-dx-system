@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import EstimateTemplate from './EstimateTemplate';
+import EstimateTemplateProfessional from './EstimateTemplateProfessional';
 
 const DemoContainer = styled.div`
   max-width: 1400px;
@@ -152,6 +153,7 @@ const ToggleButton = styled.button`
 
 const EstimateTemplateDemo = () => {
   const [showForm, setShowForm] = useState(true);
+  const [templateType, setTemplateType] = useState('professional'); // 'standard' or 'professional'
   const [estimateData, setEstimateData] = useState({
     estimateNumber: 'No.1',
     date: new Date().toLocaleDateString('ja-JP', { 
@@ -211,6 +213,26 @@ const EstimateTemplateDemo = () => {
       
       {showForm && (
         <ControlPanel>
+          <FormSection>
+            <h3>テンプレートスタイル</h3>
+            <FormRow>
+              <ToggleButton
+                active={templateType === 'standard'}
+                onClick={() => setTemplateType('standard')}
+                style={{ flex: 1 }}
+              >
+                標準テンプレート
+              </ToggleButton>
+              <ToggleButton
+                active={templateType === 'professional'}
+                onClick={() => setTemplateType('professional')}
+                style={{ flex: 1 }}
+              >
+                プロフェッショナル
+              </ToggleButton>
+            </FormRow>
+          </FormSection>
+
           <FormSection>
             <h3>基本情報</h3>
             <FormRow>
@@ -360,7 +382,11 @@ const EstimateTemplateDemo = () => {
       )}
       
       <PreviewContainer>
-        <EstimateTemplate data={estimateData} />
+        {templateType === 'professional' ? (
+          <EstimateTemplateProfessional data={estimateData} />
+        ) : (
+          <EstimateTemplate data={estimateData} />
+        )}
       </PreviewContainer>
     </DemoContainer>
   );
