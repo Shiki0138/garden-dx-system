@@ -4,7 +4,6 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { ErrorCodes, createErrorResponse, createSuccessResponse, withErrorHandling } from './error_handling'
 
 /**
  * デモユーザー情報
@@ -167,7 +166,7 @@ export class DemoAuthManager {
   /**
    * デモモード権限チェック
    */
-  checkDemoPermission(resource: string, action: string): boolean {
+  checkDemoPermission(_resource: string, _action: string): boolean {
     if (!this.isDemoMode || !this.currentDemoUser) {
       return false
     }
@@ -420,7 +419,7 @@ export class DemoSupabaseClient {
     return { data: newRecord, error: null }
   }
 
-  private async handleDemoUpdate(table: string, params: any): Promise<{ data: any; error: any }> {
+  private async handleDemoUpdate(_table: string, params: any): Promise<{ data: any; error: any }> {
     // デモモードでは更新をシミュレート
     const updatedRecord = {
       ...params.data,
@@ -430,7 +429,7 @@ export class DemoSupabaseClient {
     return { data: updatedRecord, error: null }
   }
 
-  private async handleDemoDelete(table: string, params: any): Promise<{ data: any; error: any }> {
+  private async handleDemoDelete(_table: string, params: any): Promise<{ data: any; error: any }> {
     // デモモードでは削除をシミュレート
     return { data: { id: params.id }, error: null }
   }

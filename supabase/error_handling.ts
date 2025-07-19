@@ -84,7 +84,7 @@ export const ErrorCodes = {
 /**
  * エラーメッセージマッピング
  */
-const ErrorMessages: Record<string, string> = {
+const ErrorMessages: Record<keyof typeof ErrorCodes, string> = {
   [ErrorCodes.AUTH_INVALID_CREDENTIALS]: 'メールアドレスまたはパスワードが正しくありません',
   [ErrorCodes.AUTH_EXPIRED_SESSION]: 'セッションの有効期限が切れました。再度ログインしてください',
   [ErrorCodes.AUTH_INSUFFICIENT_PERMISSIONS]: 'この操作を実行する権限がありません',
@@ -118,7 +118,7 @@ export function parsePostgrestError(error: PostgrestError): { code: string; mess
   if (error.code === '42501' || error.message?.includes('row-level security')) {
     return { 
       code: ErrorCodes.RLS_PERMISSION_DENIED, 
-      message: ErrorMessages[ErrorCodes.RLS_PERMISSION_DENIED] 
+      message: ErrorMessages[ErrorCodes.RLS_PERMISSION_DENIED] || 'Permission denied' 
     }
   }
   
@@ -134,7 +134,7 @@ export function parsePostgrestError(error: PostgrestError): { code: string; mess
   if (error.code === '23505') {
     return { 
       code: ErrorCodes.BIZ_DUPLICATE_ENTRY, 
-      message: ErrorMessages[ErrorCodes.BIZ_DUPLICATE_ENTRY] 
+      message: ErrorMessages[ErrorCodes.BIZ_DUPLICATE_ENTRY] || 'Duplicate entry' 
     }
   }
   
@@ -142,14 +142,14 @@ export function parsePostgrestError(error: PostgrestError): { code: string; mess
   if (error.details?.includes('0 rows') || error.message?.includes('No rows found')) {
     return { 
       code: ErrorCodes.DB_RECORD_NOT_FOUND, 
-      message: ErrorMessages[ErrorCodes.DB_RECORD_NOT_FOUND] 
+      message: ErrorMessages[ErrorCodes.DB_RECORD_NOT_FOUND] || 'Record not found' 
     }
   }
   
   // デフォルト
   return { 
     code: ErrorCodes.DB_QUERY_ERROR, 
-    message: ErrorMessages[ErrorCodes.DB_QUERY_ERROR] 
+    message: ErrorMessages[ErrorCodes.DB_QUERY_ERROR] || 'Database query error' 
   }
 }
 
@@ -161,7 +161,7 @@ export function parseAuthError(error: AuthError): { code: string; message: strin
   if (error.message?.includes('Invalid login credentials')) {
     return { 
       code: ErrorCodes.AUTH_INVALID_CREDENTIALS, 
-      message: ErrorMessages[ErrorCodes.AUTH_INVALID_CREDENTIALS] 
+      message: ErrorMessages[ErrorCodes.AUTH_INVALID_CREDENTIALS] || 'Invalid credentials' 
     }
   }
   
@@ -169,7 +169,7 @@ export function parseAuthError(error: AuthError): { code: string; message: strin
   if (error.message?.includes('session expired') || error.message?.includes('refresh_token')) {
     return { 
       code: ErrorCodes.AUTH_EXPIRED_SESSION, 
-      message: ErrorMessages[ErrorCodes.AUTH_EXPIRED_SESSION] 
+      message: ErrorMessages[ErrorCodes.AUTH_EXPIRED_SESSION] || 'Session expired' 
     }
   }
   
@@ -177,14 +177,14 @@ export function parseAuthError(error: AuthError): { code: string; message: strin
   if (error.message?.includes('User not found')) {
     return { 
       code: ErrorCodes.AUTH_USER_NOT_FOUND, 
-      message: ErrorMessages[ErrorCodes.AUTH_USER_NOT_FOUND] 
+      message: ErrorMessages[ErrorCodes.AUTH_USER_NOT_FOUND] || 'User not found' 
     }
   }
   
   // デフォルト
   return { 
     code: ErrorCodes.SYS_INTERNAL_ERROR, 
-    message: error.message || ErrorMessages[ErrorCodes.SYS_INTERNAL_ERROR] 
+    message: error.message || ErrorMessages[ErrorCodes.SYS_INTERNAL_ERROR] || 'Internal error' 
   }
 }
 
