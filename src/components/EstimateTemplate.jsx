@@ -559,7 +559,7 @@ const EstimateTemplate = ({ data = {} }) => {
           <DocumentTitle style={{ fontSize: '18pt', marginBottom: '10mm' }}>見積内訳書</DocumentTitle>
           
           <div style={{ textAlign: 'right', fontSize: '10pt', marginBottom: '15mm' }}>
-            見積書番号: {estimateNumber}　　発行日: {issueDate}
+            見積書番号: {estimateNumber}  発行日: {issueDate}
           </div>
 
           <ItemTable>
