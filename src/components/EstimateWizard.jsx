@@ -27,6 +27,7 @@ import {
   FiPlus,
   FiMinus,
   FiInfo,
+  FiPercent,
 } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
 import { 
@@ -37,6 +38,8 @@ import {
   COLORS, 
   mediaQuery 
 } from '../styles/mobileConstants';
+import MarkupRateStep from './MarkupRateStep';
+import PriceMasterSelection from './PriceMasterSelection';
 
 // アニメーション定義
 const fadeInUp = keyframes`
@@ -703,6 +706,8 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
   // 単価マスタデータ
   const [priceMasterData, setPriceMasterData] = useState([]);
   const [categories, setCategories] = useState({});
+  const [markupRate, setMarkupRate] = useState(1.3);
+  const [selectedMasterItems, setSelectedMasterItems] = useState(new Set());
 
   // ステップ定義
   const steps = [
@@ -720,12 +725,18 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
     },
     {
       number: 3,
-      title: '項目入力',
+      title: '掛け率設定',
+      icon: FiPercent,
+      description: '単価マスターに適用する掛け率を設定',
+    },
+    {
+      number: 4,
+      title: '項目選択',
       icon: FiLayers,
       description: '工事項目の選択と数量入力',
     },
     {
-      number: 4,
+      number: 5,
       title: '金額調整',
       icon: FiTrendingUp,
       description: '仕入額・掛け率・調整額の最終確認',
@@ -735,9 +746,19 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
   // 初期データ読み込み関数
   const loadInitialData = useCallback(async () => {
     try {
-      // 単価マスタデータ取得
-      const response = await fetch('/api/demo/price-master');
-      const priceData = await response.json();
+      // 単価マスタデータ取得（モックデータ使用）
+      const priceData = [
+        { item_id: 1, category: '土工事', item_name: '根切り', unit: 'm³', purchase_price: 8000, default_markup_rate: 1.3 },
+        { item_id: 2, category: '土工事', item_name: '埋戻し', unit: 'm³', purchase_price: 6000, default_markup_rate: 1.3 },
+        { item_id: 3, category: '土工事', item_name: '残土処分', unit: 'm³', purchase_price: 10000, default_markup_rate: 1.3 },
+        { item_id: 4, category: '基礎工事', item_name: 'コンクリート基礎', unit: 'm³', purchase_price: 25000, default_markup_rate: 1.3 },
+        { item_id: 5, category: '基礎工事', item_name: '型枠工事', unit: 'm²', purchase_price: 5000, default_markup_rate: 1.3 },
+        { item_id: 6, category: '植栽工事', item_name: '高木植栽', unit: '本', purchase_price: 30000, default_markup_rate: 1.3 },
+        { item_id: 7, category: '植栽工事', item_name: '中木植栽', unit: '本', purchase_price: 15000, default_markup_rate: 1.3 },
+        { item_id: 8, category: '植栽工事', item_name: '低木植栽', unit: '本', purchase_price: 5000, default_markup_rate: 1.3 },
+        { item_id: 9, category: '舗装工事', item_name: 'アスファルト舗装', unit: 'm²', purchase_price: 5000, default_markup_rate: 1.3 },
+        { item_id: 10, category: '舗装工事', item_name: 'インターロッキング', unit: 'm²', purchase_price: 8000, default_markup_rate: 1.3 },
+      ];
       setPriceMasterData(priceData);
 
       // カテゴリ分類
@@ -910,6 +931,48 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
     }));
   }, []);
 
+  // 項目選択の切り替え
+  const toggleItemSelection = useCallback((itemId) => {
+    setSelectedMasterItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // 選択した項目を一括追加
+  const addSelectedItems = useCallback(() => {
+    const selectedItems = priceMasterData.filter(item => selectedMasterItems.has(item.item_id));
+    const newItems = selectedItems.map((masterItem, index) => ({
+      id: Date.now() + index,
+      category: masterItem.category,
+      sub_category: masterItem.sub_category,
+      item_name: masterItem.item_name,
+      quantity: 1,
+      unit: masterItem.unit,
+      purchase_price: masterItem.purchase_price,
+      markup_rate: markupRate,
+      unit_price: Math.round(masterItem.purchase_price * markupRate),
+      line_total: Math.round(masterItem.purchase_price * markupRate),
+      line_cost: masterItem.purchase_price,
+      adjustment: 0,
+      is_custom: false,
+      master_item_id: masterItem.item_id,
+    }));
+
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, ...newItems],
+    }));
+    
+    // 選択をクリア
+    setSelectedMasterItems(new Set());
+  }, [selectedMasterItems, priceMasterData, markupRate]);
+
   // 項目削除
   const removeItem = useCallback(itemId => {
     setFormData(prev => ({
@@ -949,12 +1012,16 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
           break;
 
         case 3:
-          if (formData.items.length === 0) {
-            newErrors.items = '工事項目を少なくとも1件追加してください';
-          }
+          // 掛け率設定の検証（特に必要なし）
           break;
 
         case 4:
+          if (formData.items.length === 0) {
+            newErrors.items = '工事項目を少なくとも1件選択してください';
+          }
+          break;
+
+        case 5:
           // 最終ステップでは特に検証なし（金額は自動計算）
           break;
       }
@@ -968,7 +1035,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
   // ステップ進む
   const nextStep = useCallback(() => {
     if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 4));
+      setCurrentStep(prev => Math.min(prev + 1, 5));
     }
   }, [currentStep, validateStep]);
 
@@ -994,7 +1061,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
 
   // 見積完成
   const completeEstimate = useCallback(async () => {
-    if (!validateStep(4)) return;
+    if (!validateStep(5)) return;
 
     setIsLoading(true);
     try {
@@ -1279,180 +1346,21 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
     </StepContent>
   );
 
-  // ステップ3: 項目入力
+  // ステップ4: 項目選択
   const renderStep3 = () => (
     <StepContent>
-      <SectionTitle>
-        <FiLayers />
-        工事項目の入力
-      </SectionTitle>
-
-      <InfoCard>
-        <FiInfo size={24} color="#4a7c4a" />
-        <InfoText>
-          単価マスタから項目を選択するか、カスタム項目を追加してください。数量を入力すると金額が自動計算されます。
-        </InfoText>
-      </InfoCard>
-
-      {/* 単価マスタから追加 */}
-      <div style={{ marginBottom: '25px' }}>
-        <h3 style={{ color: '#2d5a2d', marginBottom: '15px' }}>単価マスタから選択</h3>
-        {Object.entries(categories).map(([category, items]) => (
-          <div key={category} style={{ marginBottom: '20px' }}>
-            <h4 style={{ color: '#4a7c4a', marginBottom: '10px' }}>{category}</h4>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                gap: '10px',
-              }}
-            >
-              {items.map(item => (
-                <div
-                  key={item.item_id}
-                  style={{
-                    padding: '12px',
-                    border: '1px solid #e8f5e8',
-                    borderRadius: '8px',
-                    background: '#fafafa',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                  onClick={() => addItemFromMaster(item)}
-                  onMouseEnter={e => {
-                    e.target.style.background = '#e8f5e8';
-                    e.target.style.borderColor = '#4a7c4a';
-                  }}
-                  onMouseLeave={e => {
-                    e.target.style.background = '#fafafa';
-                    e.target.style.borderColor = '#e8f5e8';
-                  }}
-                >
-                  <div style={{ fontWeight: '600', marginBottom: '4px' }}>{item.item_name}</div>
-                  <div style={{ fontSize: '12px', color: '#666' }}>
-                    {formatCurrency(item.purchase_price * item.default_markup_rate)} / {item.unit}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 選択された項目一覧 */}
-      <ItemsContainer>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '20px',
-          }}
-        >
-          <h3 style={{ color: '#2d5a2d', margin: 0 }}>選択された工事項目</h3>
-          <AddItemButton onClick={() => addItem()}>
-            <FiPlus />
-            カスタム項目追加
-          </AddItemButton>
-        </div>
-
-        {formData.items.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-            項目が追加されていません。上記の単価マスタから選択するか、カスタム項目を追加してください。
-          </div>
-        ) : (
-          <>
-            {/* ヘッダー行 */}
-            <ItemRow style={{ background: '#4a7c4a', color: 'white', fontWeight: '600' }}>
-              <div>項目名</div>
-              <div>数量</div>
-              <div>単位</div>
-              <div>仕入単価</div>
-              <div>掛率</div>
-              <div>販売単価</div>
-              <div>操作</div>
-            </ItemRow>
-
-            {formData.items.map(item => (
-              <ItemRow key={item.id}>
-                <ItemInput
-                  type="text"
-                  value={item.item_name}
-                  onChange={e => updateItem(item.id, 'item_name', e.target.value)}
-                  placeholder="項目名"
-                />
-                <ItemInput
-                  type="number"
-                  value={item.quantity}
-                  onChange={e => updateItem(item.id, 'quantity', e.target.value)}
-                  min="0"
-                  step="0.1"
-                />
-                <ItemInput
-                  type="text"
-                  value={item.unit}
-                  onChange={e => updateItem(item.id, 'unit', e.target.value)}
-                  placeholder="単位"
-                />
-                <ItemInput
-                  type="number"
-                  value={item.purchase_price}
-                  onChange={e => updateItem(item.id, 'purchase_price', e.target.value)}
-                  min="0"
-                />
-                <ItemInput
-                  type="number"
-                  value={item.markup_rate}
-                  onChange={e => updateItem(item.id, 'markup_rate', e.target.value)}
-                  min="1"
-                  step="0.1"
-                />
-                <div style={{ padding: '10px', fontWeight: '600' }}>
-                  {formatCurrency(item.unit_price)}
-                </div>
-                <RemoveButton onClick={() => removeItem(item.id)}>
-                  <FiMinus />
-                </RemoveButton>
-              </ItemRow>
-            ))}
-          </>
-        )}
-
-        {errors.items && (
-          <div style={{ color: '#e74c3c', fontSize: '14px', marginTop: '10px' }}>
-            {errors.items}
-          </div>
-        )}
-      </ItemsContainer>
-
-      {/* 小計表示 */}
-      {formData.items.length > 0 && (
-        <CalculationPanel>
-          <CalculationRow>
-            <CalculationLabel>項目数</CalculationLabel>
-            <CalculationValue>{formData.items.length} 項目</CalculationValue>
-          </CalculationRow>
-          <CalculationRow>
-            <CalculationLabel>仕入原価合計</CalculationLabel>
-            <CalculationValue>{formatCurrency(calculatedAmounts.total_cost)}</CalculationValue>
-          </CalculationRow>
-          <CalculationRow>
-            <CalculationLabel>販売価格小計</CalculationLabel>
-            <CalculationValue>{formatCurrency(calculatedAmounts.subtotal)}</CalculationValue>
-          </CalculationRow>
-          <CalculationRow>
-            <CalculationLabel>粗利益</CalculationLabel>
-            <CalculationValue>
-              {formatCurrency(calculatedAmounts.gross_profit)}(
-              {calculatedAmounts.gross_margin_rate.toFixed(1)}%)
-            </CalculationValue>
-          </CalculationRow>
-        </CalculationPanel>
-      )}
+      <PriceMasterSelection
+        categories={categories}
+        markupRate={markupRate}
+        onItemsChange={(items) => {
+          setFormData(prev => ({ ...prev, items }));
+        }}
+        onAddCustom={() => addItem()}
+      />
     </StepContent>
   );
 
-  // ステップ4: 金額調整
+  // ステップ5: 金額調整
   const renderStep4 = () => (
     <StepContent>
       <SectionTitle>
@@ -1610,10 +1518,20 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
       <WizardContent>
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}
-        {currentStep === 3 && renderStep3()}
-        {currentStep === 4 && renderStep4()}
+        {currentStep === 3 && (
+          <MarkupRateStep 
+            onNext={(rate) => { 
+              setMarkupRate(rate); 
+              nextStep(); 
+            }} 
+            onBack={prevStep} 
+            initialRate={markupRate} 
+          />
+        )}
+        {currentStep === 4 && renderStep3()}
+        {currentStep === 5 && renderStep4()}
 
-        <NavigationButtons>
+        {currentStep !== 3 && (<NavigationButtons>
           <div>
             {currentStep > 1 && (
               <Button variant="secondary" onClick={prevStep} disabled={isLoading}>
@@ -1629,7 +1547,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
               一時保存
             </Button>
 
-            {currentStep < 4 ? (
+            {currentStep < 5 ? (
               <Button variant="primary" onClick={nextStep} disabled={isLoading}>
                 次のステップ
                 <FiArrowRight />
@@ -1641,7 +1559,7 @@ const EstimateWizard = ({ estimateId = null, onComplete, onCancel }) => {
               </Button>
             )}
           </div>
-        </NavigationButtons>
+        </NavigationButtons>)}
       </WizardContent>
     </WizardContainer>
   );
