@@ -28,6 +28,7 @@ import EstimateWizard from './EstimateWizard';
 import InvoiceForm from './invoices/InvoiceForm';
 import DashboardTop from './DashboardTop';
 import EstimateTemplateDemo from './EstimateTemplateDemo';
+import DocumentTemplates from './DocumentTemplates';
 import { generateProcessPDF } from '../utils/processPDFGenerator';
 import { generateProcessSchedule } from '../utils/processGenerator';
 
@@ -152,7 +153,7 @@ const GardenDXMain = () => {
   const navigationItems = [
     { id: 'dashboard', label: 'ダッシュボード', icon: BarChart3, description: 'システム概要と統計' },
     { id: 'estimate', label: '見積作成', icon: FileText, description: '新規見積の作成・編集' },
-    { id: 'template-demo', label: '見積書テンプレート', icon: FileText, description: '見積書テンプレートの確認' },
+    { id: 'templates', label: '様式テンプレート', icon: FileText, description: '見積書・請求書テンプレート' },
     { id: 'process', label: '工程表作成', icon: Calendar, description: '見積から工程表を自動生成' },
     { id: 'budget', label: '予算管理', icon: DollarSign, description: '予算と実績の管理' },
     { id: 'invoice', label: '請求書作成', icon: Package, description: '請求書の作成・発行' }
@@ -272,8 +273,8 @@ const GardenDXMain = () => {
               onProjectChange={setCurrentProject}
             />
           )}
-          {activeModule === 'template-demo' && (
-            <EstimateTemplateDemo />
+          {activeModule === 'templates' && (
+            <DocumentTemplates />
           )}
           {activeModule === 'process' && (
             <ProcessModule
