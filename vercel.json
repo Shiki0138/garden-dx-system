@@ -1,5 +1,4 @@
 {
-  "rootDirectory": "app",
   "buildCommand": "CI=false npm run build",
   "outputDirectory": "build",
   "installCommand": "npm ci",
@@ -10,6 +9,7 @@
     "REACT_APP_API_BASE_URL": "https://kbvaekypkszvzrwlbkug.supabase.co",
     "REACT_APP_DEMO_MODE": "true",
     "REACT_APP_ENVIRONMENT": "production",
+    "REACT_APP_EMERGENCY_NUMBER": "119",
     "CI": "false",
     "GENERATE_SOURCEMAP": "false"
   },
