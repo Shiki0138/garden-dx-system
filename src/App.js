@@ -8,6 +8,7 @@ import { LandscapingErrorBoundary } from './components/ui/ErrorBoundary';
 import DemoBanner from './components/DemoBanner';
 import DemoGuide from './components/DemoGuide';
 import LoginPage from './components/auth/LoginPage';
+import AdminLogin from './components/AdminLogin';
 import EstimateCreator from './components/EstimateCreator';
 import EstimateWizardPro from './components/EstimateWizardPro';
 import PDFGenerator from './components/PDFGenerator';
@@ -83,6 +84,14 @@ const AppContent = () => {
   // デモモード時は権限チェックをスキップ（テスト用）
   const shouldShowLogin = !isDemoMode && !user && showLogin;
 
+  // 保存されたユーザー情報を確認
+  useEffect(() => {
+    const savedUser = localStorage.getItem('adminUser');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
   // デモモード時は自動的にテスト開始
   useEffect(() => {
     if (isDemoMode && !user) {
@@ -109,6 +118,11 @@ const AppContent = () => {
     setShowGuide(false);
     localStorage.setItem('demo-guide-seen', 'true');
   };
+
+  // 管理者ログインを表示（デモモードでない場合、かつユーザーがログインしていない場合）
+  if (!isDemoMode && !user) {
+    return <AdminLogin onLogin={handleLogin} />;
+  }
 
   if (shouldShowLogin) {
     return <LoginPage onLogin={handleLogin} />;
