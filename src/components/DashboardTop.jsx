@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { 
   FileText, 
@@ -11,7 +11,12 @@ import {
   AlertCircle,
   Users,
   BarChart3,
-  ArrowRight
+  ArrowRight,
+  Plus,
+  Eye,
+  Edit,
+  Leaf,
+  Sun
 } from 'lucide-react';
 
 // スタイルコンポーネント
@@ -21,26 +26,58 @@ const DashboardContainer = styled.div`
   margin: 0 auto;
   background: #f8fafc;
   min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 `;
 
 const WelcomeSection = styled.div`
-  background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+  background: linear-gradient(135deg, #2d5a2d 0%, #4a7c4a 100%);
   color: white;
   padding: 32px;
   border-radius: 16px;
   margin-bottom: 32px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '🌿';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 80px;
+    opacity: 0.2;
+  }
+
+  @media (max-width: 768px) {
+    padding: 24px;
+    
+    &::after {
+      font-size: 60px;
+    }
+  }
 `;
 
 const WelcomeTitle = styled.h1`
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 8px;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
 `;
 
 const WelcomeSubtitle = styled.p`
   font-size: 1.1rem;
   opacity: 0.9;
+
+  @media (max-width: 768px) {
+    font-size: 0.95rem;
+  }
 `;
 
 const StatsGrid = styled.div`
@@ -48,6 +85,11 @@ const StatsGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
   margin-bottom: 32px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 `;
 
 const StatCard = styled.div`
@@ -57,10 +99,12 @@ const StatCard = styled.div`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
   border: 1px solid #e2e8f0;
+  cursor: pointer;
 
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: #4a7c4a;
   }
 `;
 
@@ -98,97 +142,113 @@ const StatValue = styled.div`
 `;
 
 const StatChange = styled.div`
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: ${props => props.positive ? '#10b981' : '#ef4444'};
   display: flex;
   align-items: center;
   gap: 4px;
 `;
 
-const MainGrid = styled.div`
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-  
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const ContentSection = styled.div`
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+const QuickActionsSection = styled.div`
+  margin-bottom: 32px;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 `;
 
-const QuickActionGrid = styled.div`
+const QuickActionsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
 `;
 
-const QuickActionCard = styled.button`
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+const QuickActionButton = styled.button`
+  background: white;
   border: 2px solid #e2e8f0;
-  padding: 20px;
   border-radius: 12px;
+  padding: 20px;
   cursor: pointer;
   transition: all 0.3s ease;
-  text-align: left;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 12px;
+  text-align: center;
 
   &:hover {
-    background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
-    border-color: #1a472a;
-    color: white;
+    background: #f8fafc;
+    border-color: #4a7c4a;
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(26, 71, 42, 0.2);
+    box-shadow: 0 4px 12px rgba(74, 124, 74, 0.2);
+  }
 
-    svg {
-      color: white;
-    }
+  svg {
+    color: #4a7c4a;
   }
 `;
 
-const ActionIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+const QuickActionLabel = styled.span`
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+`;
+
+const RecentActivitySection = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ActivityCard = styled.div`
   background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+`;
+
+const ActivityHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const ActivityTitle = styled.h3`
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #1a472a;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 8px;
 `;
 
-const ActionTitle = styled.h4`
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0;
-`;
-
-const ActionDescription = styled.p`
+const ViewAllLink = styled.a`
+  color: #4a7c4a;
   font-size: 0.875rem;
-  opacity: 0.8;
-  margin: 0;
+  text-decoration: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
-const RecentActivityList = styled.div`
+const ActivityList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -196,16 +256,24 @@ const RecentActivityList = styled.div`
 
 const ActivityItem = styled.div`
   display: flex;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
   padding: 12px;
   background: #f8fafc;
   border-radius: 8px;
-  align-items: center;
+  border: 1px solid #e2e8f0;
   transition: all 0.2s ease;
 
   &:hover {
     background: #f1f5f9;
+    border-color: #cbd5e1;
   }
+`;
+
+const ActivityInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
 `;
 
 const ActivityIcon = styled.div`
@@ -215,269 +283,329 @@ const ActivityIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${props => props.bgColor || '#e0f2fe'};
-  color: ${props => props.color || '#0ea5e9'};
-  flex-shrink: 0;
+  background: ${props => props.bgColor || '#e8f5e8'};
+  color: ${props => props.color || '#4a7c4a'};
 `;
 
-const ActivityContent = styled.div`
-  flex: 1;
+const ActivityText = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 `;
 
-const ActivityTitle = styled.div`
-  font-size: 0.9rem;
+const ActivityName = styled.span`
+  font-size: 0.875rem;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 2px;
 `;
 
-const ActivityTime = styled.div`
-  font-size: 0.8rem;
+const ActivityDate = styled.span`
+  font-size: 0.75rem;
   color: #64748b;
 `;
 
-const ProgressBar = styled.div`
-  width: 100%;
-  height: 8px;
-  background: #e2e8f0;
+const ActivityStatus = styled.span`
+  font-size: 0.75rem;
+  padding: 4px 8px;
   border-radius: 4px;
-  overflow: hidden;
-  margin-top: 8px;
+  font-weight: 600;
+  background: ${props => {
+    switch (props.status) {
+      case 'completed': return '#dcfce7';
+      case 'pending': return '#fef3c7';
+      case 'inProgress': return '#dbeafe';
+      default: return '#f3f4f6';
+    }
+  }};
+  color: ${props => {
+    switch (props.status) {
+      case 'completed': return '#15803d';
+      case 'pending': return '#a16207';
+      case 'inProgress': return '#1e40af';
+      default: return '#6b7280';
+    }
+  }};
 `;
 
-const ProgressFill = styled.div`
-  height: 100%;
-  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
-  width: ${props => props.progress}%;
-  transition: width 0.3s ease;
-`;
-
-const ViewAllButton = styled.button`
+const SeasonalNotice = styled.div`
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border: 1px solid #fbbf24;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #1a472a;
-  font-weight: 600;
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-top: 16px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  gap: 16px;
 
-  &:hover {
-    background: #f1f5f9;
-    transform: translateX(4px);
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
   }
 `;
 
-// メインコンポーネント
-const DashboardTop = ({ data, onModuleChange, user }) => {
-  const stats = [
-    {
-      title: '進行中の見積',
-      value: data.activeEstimates || 3,
-      change: '+12%',
-      positive: true,
-      icon: <FileText size={24} />,
-      color: '#3b82f6',
-      bgColor: '#eff6ff'
-    },
-    {
-      title: '今月の売上',
-      value: `¥${(data.monthlyRevenue || 1250000).toLocaleString()}`,
-      change: '+23%',
-      positive: true,
-      icon: <DollarSign size={24} />,
-      color: '#10b981',
-      bgColor: '#f0fdf4'
-    },
-    {
-      title: 'アクティブプロジェクト',
-      value: data.totalProjects || 5,
-      change: '+2',
-      positive: true,
-      icon: <BarChart3 size={24} />,
-      color: '#f59e0b',
-      bgColor: '#fffbeb'
-    },
-    {
-      title: '完了工程',
-      value: data.completedProcesses || 8,
-      change: '今週',
-      positive: true,
-      icon: <CheckCircle size={24} />,
-      color: '#8b5cf6',
-      bgColor: '#f5f3ff'
-    }
-  ];
+const SeasonalIcon = styled.div`
+  font-size: 48px;
+`;
 
-  const quickActions = [
-    {
-      icon: <FileText size={20} />,
-      title: '新規見積作成',
-      description: '見積書を作成します',
-      action: () => onModuleChange('estimate')
-    },
-    {
-      icon: <Calendar size={20} />,
-      title: '工程表作成',
-      description: 'プロジェクトの工程表を作成',
-      action: () => onModuleChange('process')
-    },
-    {
-      icon: <DollarSign size={20} />,
-      title: '予算管理',
-      description: '予算と実績を管理',
-      action: () => onModuleChange('budget')
-    },
-    {
-      icon: <Package size={20} />,
-      title: '請求書発行',
-      description: '請求書を作成・発行',
-      action: () => onModuleChange('invoice')
-    }
-  ];
+const SeasonalText = styled.div`
+  flex: 1;
+`;
 
-  const recentActivities = [
-    {
-      icon: <FileText size={16} />,
-      title: '見積書 #2024-001 が承認されました',
-      time: '2時間前',
-      type: 'success'
-    },
-    {
-      icon: <Calendar size={16} />,
-      title: '駒沢公園プロジェクトの工程が更新されました',
-      time: '5時間前',
-      type: 'info'
-    },
-    {
-      icon: <AlertCircle size={16} />,
-      title: '横浜プロジェクトの納期が近づいています',
-      time: '1日前',
-      type: 'warning'
-    },
-    {
-      icon: <Package size={16} />,
-      title: '請求書 #INV-2024-015 が発行されました',
-      time: '2日前',
-      type: 'success'
-    }
-  ];
+const SeasonalTitle = styled.h3`
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 4px;
+`;
 
-  const getActivityColor = (type) => {
-    switch(type) {
-      case 'success': return { color: '#10b981', bgColor: '#f0fdf4' };
-      case 'warning': return { color: '#f59e0b', bgColor: '#fffbeb' };
-      case 'info': return { color: '#3b82f6', bgColor: '#eff6ff' };
-      default: return { color: '#64748b', bgColor: '#f8fafc' };
+const SeasonalMessage = styled.p`
+  font-size: 0.875rem;
+  color: #92400e;
+  margin: 0;
+`;
+
+const DashboardTop = ({ data = {}, onModuleChange, user }) => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [greeting, setGreeting] = useState('');
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const hour = currentTime.getHours();
+    if (hour < 12) {
+      setGreeting('おはようございます');
+    } else if (hour < 18) {
+      setGreeting('こんにちは');
+    } else {
+      setGreeting('こんばんは');
+    }
+  }, [currentTime]);
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('ja-JP', {
+      style: 'currency',
+      currency: 'JPY'
+    }).format(amount);
+  };
+
+  const getSeasonalMessage = () => {
+    const month = currentTime.getMonth() + 1;
+    if (month >= 3 && month <= 5) {
+      return { icon: '🌸', title: '春の繁忙期', message: '新規造園工事のご依頼が増える時期です' };
+    } else if (month >= 6 && month <= 8) {
+      return { icon: '☀️', title: '夏季作業', message: '熱中症対策を万全に、早朝作業を推奨します' };
+    } else if (month >= 9 && month <= 11) {
+      return { icon: '🍁', title: '秋の植栽シーズン', message: '植栽工事に最適な時期です' };
+    } else {
+      return { icon: '❄️', title: '冬季メンテナンス', message: '剪定・防寒対策の時期です' };
     }
   };
+
+  const seasonal = getSeasonalMessage();
+
+  const stats = {
+    totalProjects: data.totalProjects || 12,
+    activeEstimates: data.activeEstimates || 5,
+    monthlyRevenue: data.monthlyRevenue || 3580000,
+    completedProcesses: data.completedProcesses || 8,
+    pendingInvoices: data.pendingInvoices || 3,
+    staffCount: data.staffCount || 15
+  };
+
+  const recentEstimates = [
+    { id: 1, name: '田中邸 庭園リフォーム', date: '2024-01-22', status: 'pending', amount: 1650000 },
+    { id: 2, name: '山田様 新築外構工事', date: '2024-01-21', status: 'completed', amount: 2300000 },
+    { id: 3, name: '佐藤マンション 植栽管理', date: '2024-01-20', status: 'inProgress', amount: 450000 }
+  ];
+
+  const upcomingProjects = [
+    { id: 1, name: '鈴木邸 芝生張替工事', date: '2024-01-25', type: '施工', duration: '3日間' },
+    { id: 2, name: '高橋様 庭木剪定', date: '2024-01-26', type: 'メンテナンス', duration: '1日' },
+    { id: 3, name: '公園整備プロジェクト', date: '2024-01-28', type: '施工', duration: '7日間' }
+  ];
 
   return (
     <DashboardContainer>
       <WelcomeSection>
-        <WelcomeTitle>
-          おはようございます、{user?.user_metadata?.name || user?.name || '田中様'}
-        </WelcomeTitle>
+        <WelcomeTitle>{greeting}、{user?.name || '管理者'}さん</WelcomeTitle>
         <WelcomeSubtitle>
-          今日も素晴らしい一日になりますように。現在のプロジェクト状況をご確認ください。
+          {currentTime.toLocaleDateString('ja-JP', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            weekday: 'long'
+          })} - Garden DX システムへようこそ
         </WelcomeSubtitle>
       </WelcomeSection>
 
+      <SeasonalNotice>
+        <SeasonalIcon>{seasonal.icon}</SeasonalIcon>
+        <SeasonalText>
+          <SeasonalTitle>{seasonal.title}</SeasonalTitle>
+          <SeasonalMessage>{seasonal.message}</SeasonalMessage>
+        </SeasonalText>
+      </SeasonalNotice>
+
       <StatsGrid>
-        {stats.map((stat, index) => (
-          <StatCard key={index}>
-            <StatHeader>
-              <div>
-                <StatTitle>{stat.title}</StatTitle>
-                <StatValue>{stat.value}</StatValue>
-                <StatChange positive={stat.positive}>
-                  <TrendingUp size={16} />
-                  {stat.change}
-                </StatChange>
-              </div>
-              <StatIcon color={stat.color} bgColor={stat.bgColor}>
-                {stat.icon}
-              </StatIcon>
-            </StatHeader>
-          </StatCard>
-        ))}
+        <StatCard onClick={() => onModuleChange('process')}>
+          <StatHeader>
+            <StatTitle>進行中プロジェクト</StatTitle>
+            <StatIcon bgColor="#e8f5e8" color="#4a7c4a">
+              <Calendar size={24} />
+            </StatIcon>
+          </StatHeader>
+          <StatValue>{stats.totalProjects}</StatValue>
+          <StatChange positive>
+            <TrendingUp size={16} />
+            前月比 +2件
+          </StatChange>
+        </StatCard>
+
+        <StatCard onClick={() => onModuleChange('estimate')}>
+          <StatHeader>
+            <StatTitle>作成中見積もり</StatTitle>
+            <StatIcon bgColor="#fef3c7" color="#f59e0b">
+              <FileText size={24} />
+            </StatIcon>
+          </StatHeader>
+          <StatValue>{stats.activeEstimates}</StatValue>
+          <StatChange positive={false}>
+            <Clock size={16} />
+            承認待ち 3件
+          </StatChange>
+        </StatCard>
+
+        <StatCard onClick={() => onModuleChange('invoice')}>
+          <StatHeader>
+            <StatTitle>今月の売上</StatTitle>
+            <StatIcon bgColor="#dcfce7" color="#22c55e">
+              <DollarSign size={24} />
+            </StatIcon>
+          </StatHeader>
+          <StatValue>{formatCurrency(stats.monthlyRevenue)}</StatValue>
+          <StatChange positive>
+            <TrendingUp size={16} />
+            前月比 +15%
+          </StatChange>
+        </StatCard>
+
+        <StatCard>
+          <StatHeader>
+            <StatTitle>完了工程</StatTitle>
+            <StatIcon bgColor="#dbeafe" color="#3b82f6">
+              <CheckCircle size={24} />
+            </StatIcon>
+          </StatHeader>
+          <StatValue>{stats.completedProcesses}</StatValue>
+          <StatChange positive>
+            今月の完了率 89%
+          </StatChange>
+        </StatCard>
       </StatsGrid>
 
-      <MainGrid>
-        <ContentSection>
-          <SectionTitle>
-            <BarChart3 size={20} />
-            クイックアクション
-          </SectionTitle>
-          <QuickActionGrid>
-            {quickActions.map((action, index) => (
-              <QuickActionCard key={index} onClick={action.action}>
-                <ActionIcon>{action.icon}</ActionIcon>
-                <div>
-                  <ActionTitle>{action.title}</ActionTitle>
-                  <ActionDescription>{action.description}</ActionDescription>
-                </div>
-              </QuickActionCard>
-            ))}
-          </QuickActionGrid>
+      <QuickActionsSection>
+        <SectionTitle>
+          <Leaf size={24} />
+          よく使う機能
+        </SectionTitle>
+        <QuickActionsGrid>
+          <QuickActionButton onClick={() => onModuleChange('estimate')}>
+            <Plus size={32} />
+            <QuickActionLabel>新規見積作成</QuickActionLabel>
+          </QuickActionButton>
+          <QuickActionButton onClick={() => onModuleChange('process')}>
+            <Calendar size={32} />
+            <QuickActionLabel>工程表作成</QuickActionLabel>
+          </QuickActionButton>
+          <QuickActionButton onClick={() => onModuleChange('invoice')}>
+            <Package size={32} />
+            <QuickActionLabel>請求書発行</QuickActionLabel>
+          </QuickActionButton>
+          <QuickActionButton onClick={() => onModuleChange('budget')}>
+            <DollarSign size={32} />
+            <QuickActionLabel>予算管理</QuickActionLabel>
+          </QuickActionButton>
+          <QuickActionButton onClick={() => onModuleChange('templates')}>
+            <FileText size={32} />
+            <QuickActionLabel>テンプレート</QuickActionLabel>
+          </QuickActionButton>
+          <QuickActionButton>
+            <Users size={32} />
+            <QuickActionLabel>スタッフ管理</QuickActionLabel>
+          </QuickActionButton>
+        </QuickActionsGrid>
+      </QuickActionsSection>
 
-          <SectionTitle style={{ marginTop: '32px' }}>
-            <Users size={20} />
-            プロジェクト進捗状況
-          </SectionTitle>
-          <div>
-            <ActivityItem>
-              <ActivityContent>
-                <ActivityTitle>駒沢公園前庭園リニューアル工事</ActivityTitle>
-                <ActivityTime>進捗率: 65%</ActivityTime>
-                <ProgressBar>
-                  <ProgressFill progress={65} />
-                </ProgressBar>
-              </ActivityContent>
-            </ActivityItem>
-            <ActivityItem>
-              <ActivityContent>
-                <ActivityTitle>横浜モデルハウス外構工事</ActivityTitle>
-                <ActivityTime>進捗率: 30%</ActivityTime>
-                <ProgressBar>
-                  <ProgressFill progress={30} />
-                </ProgressBar>
-              </ActivityContent>
-            </ActivityItem>
-          </div>
-        </ContentSection>
-
-        <ContentSection>
-          <SectionTitle>
-            <Clock size={20} />
-            最近のアクティビティ
-          </SectionTitle>
-          <RecentActivityList>
-            {recentActivities.map((activity, index) => {
-              const colors = getActivityColor(activity.type);
-              return (
-                <ActivityItem key={index}>
-                  <ActivityIcon {...colors}>
-                    {activity.icon}
+      <RecentActivitySection>
+        <ActivityCard>
+          <ActivityHeader>
+            <ActivityTitle>
+              <FileText size={20} />
+              最近の見積もり
+            </ActivityTitle>
+            <ViewAllLink onClick={() => onModuleChange('estimate')}>
+              すべて見る
+              <ArrowRight size={16} />
+            </ViewAllLink>
+          </ActivityHeader>
+          <ActivityList>
+            {recentEstimates.map(estimate => (
+              <ActivityItem key={estimate.id}>
+                <ActivityInfo>
+                  <ActivityIcon>
+                    <FileText size={18} />
                   </ActivityIcon>
-                  <ActivityContent>
-                    <ActivityTitle>{activity.title}</ActivityTitle>
-                    <ActivityTime>{activity.time}</ActivityTime>
-                  </ActivityContent>
-                </ActivityItem>
-              );
-            })}
-          </RecentActivityList>
-          <ViewAllButton>
-            すべて表示
-            <ArrowRight size={16} />
-          </ViewAllButton>
-        </ContentSection>
-      </MainGrid>
+                  <ActivityText>
+                    <ActivityName>{estimate.name}</ActivityName>
+                    <ActivityDate>{formatCurrency(estimate.amount)}</ActivityDate>
+                  </ActivityText>
+                </ActivityInfo>
+                <ActivityStatus status={estimate.status}>
+                  {estimate.status === 'completed' ? '承認済み' : 
+                   estimate.status === 'pending' ? '承認待ち' : '作成中'}
+                </ActivityStatus>
+              </ActivityItem>
+            ))}
+          </ActivityList>
+        </ActivityCard>
+
+        <ActivityCard>
+          <ActivityHeader>
+            <ActivityTitle>
+              <Calendar size={20} />
+              今後の予定
+            </ActivityTitle>
+            <ViewAllLink onClick={() => onModuleChange('process')}>
+              すべて見る
+              <ArrowRight size={16} />
+            </ViewAllLink>
+          </ActivityHeader>
+          <ActivityList>
+            {upcomingProjects.map(project => (
+              <ActivityItem key={project.id}>
+                <ActivityInfo>
+                  <ActivityIcon bgColor="#dbeafe" color="#3b82f6">
+                    <Calendar size={18} />
+                  </ActivityIcon>
+                  <ActivityText>
+                    <ActivityName>{project.name}</ActivityName>
+                    <ActivityDate>{project.date} - {project.duration}</ActivityDate>
+                  </ActivityText>
+                </ActivityInfo>
+                <ActivityStatus status="inProgress">
+                  {project.type}
+                </ActivityStatus>
+              </ActivityItem>
+            ))}
+          </ActivityList>
+        </ActivityCard>
+      </RecentActivitySection>
     </DashboardContainer>
   );
 };
