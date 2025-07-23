@@ -572,6 +572,10 @@ const Button = styled.button`
   align-items: center;
   gap: 10px;
   transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 
   ${props => {
     switch (props.variant) {

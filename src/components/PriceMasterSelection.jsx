@@ -104,10 +104,18 @@ const ItemCard = styled.div`
   gap: 12px;
   transition: all 0.2s ease;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 
   &:hover {
     border-color: #4a7c4a;
     background: ${props => props.checked ? '#e8f5e8' : '#f5f5f5'};
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 `;
 

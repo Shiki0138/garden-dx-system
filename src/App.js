@@ -12,7 +12,7 @@ import AdminLogin from './components/AdminLogin';
 import EstimateCreator from './components/EstimateCreator';
 import EstimateWizardPro from './components/EstimateWizardPro';
 import PDFGenerator from './components/PDFGenerator';
-import GardenDXMain from './components/GardenDXMain';
+import MobileOptimizedGardenDX from './components/MobileOptimizedGardenDX';
 import { checkEnvironmentVariables } from './utils/apiErrorHandler';
 import { log } from './utils/logger';
 import { initNotificationSystem } from './utils/notifications';
@@ -133,7 +133,7 @@ const AppContent = () => {
       <div className="App">
         {/* <DebugInfo /> */}
         {isDemoMode && <DemoBanner />}
-        <GardenDXMain />
+        <MobileOptimizedGardenDX />
         {showGuide && <DemoGuide onClose={handleCloseGuide} />}
       </div>
     </Router>
