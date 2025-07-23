@@ -1,5 +1,4 @@
 {
-  "rootDirectory": ".",
   "buildCommand": "CI=false npm run build",
   "outputDirectory": "build",
   "installCommand": "npm install",
