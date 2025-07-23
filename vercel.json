@@ -1,15 +1,19 @@
 {
   "buildCommand": "CI=false npm run build",
   "outputDirectory": "build",
-  "installCommand": "npm ci",
+  "installCommand": "npm install",
   "framework": "create-react-app",
+  "functions": {
+    "api/*.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "env": {
     "REACT_APP_SUPABASE_URL": "https://kbvaekypkszvzrwlbkug.supabase.co",
     "REACT_APP_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtidmFla3lwa3N6dnpyd2xia3VnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMDQ5NzksImV4cCI6MjA2NDU4MDk3OX0.5vSllsb13X_iFdEA4MqzDB64bYn90INWhb-0V8_-ia0",
     "REACT_APP_API_BASE_URL": "https://kbvaekypkszvzrwlbkug.supabase.co",
     "REACT_APP_DEMO_MODE": "true",
     "REACT_APP_ENVIRONMENT": "production",
-    "REACT_APP_EMERGENCY_NUMBER": "119",
     "CI": "false",
     "GENERATE_SOURCEMAP": "false"
   },

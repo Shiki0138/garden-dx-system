@@ -10,7 +10,6 @@ import {
   BarChart3,
   Camera,
   MapPin,
-  Phone,
   Menu,
   X,
   Bell,
@@ -107,13 +106,6 @@ const MobileWorkflow = ({
     );
   };
 
-  // 緊急連絡
-  const makeEmergencyCall = () => {
-    const emergencyNumber = process.env.REACT_APP_EMERGENCY_NUMBER || '119';
-    if (window.confirm(`緊急連絡先（${emergencyNumber}）に電話をかけますか？`)) {
-      window.location.href = `tel:${emergencyNumber}`;
-    }
-  };
 
   // クリーンアップ
   useEffect(() => {
@@ -203,10 +195,6 @@ const MobileWorkflow = ({
               <ActionButton onClick={getCurrentLocation}>
                 <MapPin size={32} />
                 <ActionLabel>現在地</ActionLabel>
-              </ActionButton>
-              <ActionButton onClick={makeEmergencyCall}>
-                <Phone size={32} />
-                <ActionLabel>緊急連絡</ActionLabel>
               </ActionButton>
             </QuickActions>
 
