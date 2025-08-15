@@ -43,6 +43,12 @@ export const structurePriceData = (csvData) => {
       門扉: [],
       カーポート: []
     },
+    資材工事: {
+      資材: []
+    },
+    機械損耗費: {
+      機械: []
+    },
     その他工事: {
       水景: [],
       照明: [],
@@ -83,6 +89,12 @@ export const structurePriceData = (csvData) => {
       case '門扉':
       case 'カーポート':
         structured.外構工事[category].push(item);
+        break;
+      case '資材':
+        structured.資材工事[category].push(item);
+        break;
+      case '機械':
+        structured.機械損耗費[category].push(item);
         break;
       case '水景':
       case '照明':
@@ -193,6 +205,20 @@ export const searchPriceItem = (keyword) => {
     searchInCategory(items, `外構工事/${subCategory}`);
   });
   
+  // 資材工事
+  if (priceMaster.資材工事) {
+    Object.entries(priceMaster.資材工事).forEach(([subCategory, items]) => {
+      searchInCategory(items, `資材工事/${subCategory}`);
+    });
+  }
+  
+  // 機械損耗費
+  if (priceMaster.機械損耗費) {
+    Object.entries(priceMaster.機械損耗費).forEach(([subCategory, items]) => {
+      searchInCategory(items, `機械損耗費/${subCategory}`);
+    });
+  }
+  
   // その他工事
   Object.entries(priceMaster.その他工事).forEach(([subCategory, items]) => {
     searchInCategory(items, `その他工事/${subCategory}`);
@@ -224,6 +250,18 @@ export const applyPriceToEstimateItem = (itemCode, quantity = 1, priceType = 'st
   
   if (!foundItem) {
     Object.values(priceMaster.外構工事).forEach(items => {
+      if (!foundItem) foundItem = findItem(items);
+    });
+  }
+  
+  if (!foundItem && priceMaster.資材工事) {
+    Object.values(priceMaster.資材工事).forEach(items => {
+      if (!foundItem) foundItem = findItem(items);
+    });
+  }
+  
+  if (!foundItem && priceMaster.機械損耗費) {
+    Object.values(priceMaster.機械損耗費).forEach(items => {
       if (!foundItem) foundItem = findItem(items);
     });
   }

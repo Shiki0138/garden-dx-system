@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { Upload, FileText, CheckCircle, AlertCircle, Download } from 'lucide-react';
 import { handleFileUpload, getPriceMaster } from '../utils/importPriceMaster';
+import { loadDefaultPriceMaster } from '../utils/defaultPriceMaster';
 
 const Container = styled.div`
   max-width: 1000px;
@@ -252,12 +253,30 @@ const PriceMasterUpload = () => {
     document.body.removeChild(link);
   };
 
+  const loadDefaultData = () => {
+    try {
+      const success = loadDefaultPriceMaster();
+      if (success) {
+        setUploadStatus('success');
+        setUploadMessage('デフォルト価格マスターデータ（依頼項目含む）を読み込みました');
+      } else {
+        setUploadStatus('error');
+        setUploadMessage('データの読み込みに失敗しました');
+      }
+    } catch (error) {
+      setUploadStatus('error');
+      setUploadMessage('データの読み込み中にエラーが発生しました');
+    }
+  };
+
   const countItems = (data) => {
     let count = 0;
-    count += data.土工事.length;
-    Object.values(data.植栽工事).forEach(items => count += items.length);
-    Object.values(data.外構工事).forEach(items => count += items.length);
-    Object.values(data.その他工事).forEach(items => count += items.length);
+    count += data.土工事?.length || 0;
+    Object.values(data.植栽工事 || {}).forEach(items => count += items.length);
+    Object.values(data.外構工事 || {}).forEach(items => count += items.length);
+    Object.values(data.資材工事 || {}).forEach(items => count += items.length);
+    Object.values(data.機械損耗費 || {}).forEach(items => count += items.length);
+    Object.values(data.その他工事 || {}).forEach(items => count += items.length);
     return count;
   };
 
@@ -312,6 +331,19 @@ const PriceMasterUpload = () => {
             テンプレートをダウンロード
           </Button>
         </TemplateSection>
+
+        <TemplateSection>
+          <h3>サンプルデータ読み込み</h3>
+          <p>
+            依頼項目を含む標準的な価格マスターデータをすぐに利用できます。
+            <br />
+            <strong>追加項目：</strong>石積み（面積み・崩れ積み・ロックガーデン）、石貼り、三和土舗装、単粒砕石敷きならし（A・Bランク）、防草シート（A・Bランク）、機械損耗費（グリーン車・小型整地車両・転圧機・モルタルミキサー）
+          </p>
+          <Button onClick={loadDefaultData} primary>
+            <FileText size={16} />
+            デフォルトデータを読み込み
+          </Button>
+        </TemplateSection>
       </UploadSection>
 
       {currentData && (
@@ -328,7 +360,7 @@ const PriceMasterUpload = () => {
             </div>
             <div className="info-card">
               <h4>カテゴリー数</h4>
-              <p>4種類</p>
+              <p>6種類</p>
             </div>
           </DataInfo>
         </CurrentDataSection>

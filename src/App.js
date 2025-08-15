@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-ro
 import { AuthProvider } from './hooks/useAuth';
 import { SupabaseAuthProvider } from './contexts/SupabaseAuthContext';
 import { DemoModeProvider, useDemoMode } from './contexts/DemoModeContext';
+import EmployeeGuard, { EmployeeAuthProvider } from './components/employee/EmployeeGuard';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LandscapingErrorBoundary } from './components/ui/ErrorBoundary';
 import DemoBanner from './components/DemoBanner';
@@ -133,7 +134,14 @@ const AppContent = () => {
       <div className="App">
         {/* <DebugInfo /> */}
         {isDemoMode && <DemoBanner />}
-        <MobileOptimizedGardenDX />
+        <Routes>
+          <Route path="/employee" element={
+            <EmployeeAuthProvider>
+              <EmployeeGuard />
+            </EmployeeAuthProvider>
+          } />
+          <Route path="/*" element={<MobileOptimizedGardenDX />} />
+        </Routes>
         {showGuide && <DemoGuide onClose={handleCloseGuide} />}
       </div>
     </Router>
