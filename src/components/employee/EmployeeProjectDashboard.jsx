@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Calendar, Clock, User, Camera, Save, FileText, CheckCircle } from 'lucide-react';
 import { useEmployeeAuth } from './EmployeeGuard';
+import { resizeMultipleImages, createThumbnail, processWithMemoryCheck } from '../../utils/imageOptimizer';
+import { globalMemoryMonitor } from '../../utils/memoryMonitor';
 
 const Dashboard = styled.div`
   max-width: 1200px;
@@ -268,6 +270,15 @@ const EmployeeProjectDashboard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  // メモリ監視を開始
+  useEffect(() => {
+    globalMemoryMonitor.startMonitoring();
+    
+    return () => {
+      globalMemoryMonitor.stopMonitoring();
+    };
+  }, []);
+
   // サンプルプロジェクトデータ
   useEffect(() => {
     // 実際の実装では、APIからプロジェクト一覧を取得
@@ -366,31 +377,69 @@ const EmployeeProjectDashboard = () => {
       validFiles.push({ file, safeFileName });
     }
     
-    // 有効なファイルのみプレビューを生成
-    validFiles.forEach(({ file, safeFileName }) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        // XSS対策: data URLの検証
-        const dataUrl = e.target.result;
-        if (dataUrl && dataUrl.startsWith('data:image/')) {
-          setReportForm(prev => ({
-            ...prev,
-            photos: [...prev.photos, {
-              id: Date.now() + Math.random(),
-              file: new File([file], safeFileName, { type: file.type }),
-              preview: dataUrl,
-              originalName: file.name,
-              safeFileName: safeFileName
-            }]
-          }));
-        }
-      };
-      reader.onerror = () => {
-        console.error('File read error:', file.name);
-        alert(`ファイルの読み込みに失敗しました: ${file.name}`);
-      };
-      reader.readAsDataURL(file);
-    });
+    if (validFiles.length === 0) return;
+    
+    // メモリ効率的な画像処理を実行
+    try {
+      await processWithMemoryCheck(async () => {
+        // 画像を最適化（リサイズ・圧縮）
+        const resizeResults = await resizeMultipleImages(
+          validFiles.map(v => v.file),
+          {
+            maxWidth: parseInt(process.env.REACT_APP_MAX_IMAGE_WIDTH, 10) || 1920,
+            maxHeight: parseInt(process.env.REACT_APP_MAX_IMAGE_HEIGHT, 10) || 1080,
+            quality: parseFloat(process.env.REACT_APP_IMAGE_QUALITY) || 0.85,
+            format: 'jpeg'
+          },
+          (progress) => {
+            console.log(`画像処理進捗: ${progress.percentage}%`);
+          }
+        );
+        
+        // サムネイル生成
+        const thumbnailPromises = validFiles.map(async ({ file }, index) => {
+          const thumbnail = await createThumbnail(file, 150);
+          return { index, thumbnail };
+        });
+        
+        const thumbnails = await Promise.all(thumbnailPromises);
+        
+        // 処理結果をフォームに追加
+        resizeResults.forEach((result, index) => {
+          if (result.success) {
+            const { file, safeFileName } = validFiles[index];
+            const thumbnail = thumbnails[index]?.thumbnail;
+            
+            setReportForm(prev => ({
+              ...prev,
+              photos: [...prev.photos, {
+                id: Date.now() + Math.random() + index,
+                file: new File([file], safeFileName, { type: file.type }),
+                preview: result.data, // 最適化された画像
+                thumbnail: thumbnail, // サムネイル
+                originalName: file.name,
+                safeFileName: safeFileName,
+                originalSize: result.originalSize,
+                compressedSize: result.size,
+                compressionRatio: result.compressionRatio,
+                dimensions: {
+                  width: result.width,
+                  height: result.height
+                }
+              }]
+            }));
+          } else {
+            console.error(`画像処理エラー: ${result.file}`, result.error);
+            alert(`画像処理に失敗しました: ${result.file}`);
+          }
+        });
+        
+        console.log(`${resizeResults.filter(r => r.success).length}枚の画像を最適化しました`);
+      });
+    } catch (error) {
+      console.error('画像処理エラー:', error);
+      alert('画像処理中にエラーが発生しました');
+    }
   };
 
   const removePhoto = (photoId) => {

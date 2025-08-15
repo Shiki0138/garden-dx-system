@@ -4,6 +4,7 @@
   "description": "造園業向け統合業務管理システム - 見積エンジン",
   "private": true,
   "dependencies": {
+    "@fontsource/noto-sans-jp": "^5.2.6",
     "@supabase/supabase-js": "^2.50.2",
     "@tanstack/react-table": "^8.9.3",
     "@testing-library/jest-dom": "^5.16.4",

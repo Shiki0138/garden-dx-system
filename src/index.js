@@ -3,6 +3,11 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 
+// Import Japanese fonts
+import "@fontsource/noto-sans-jp/400.css"; // Regular
+import "@fontsource/noto-sans-jp/500.css"; // Medium
+import "@fontsource/noto-sans-jp/700.css"; // Bold
+
 // Wait for DOM to be ready
 function initApp() {
   const rootElement = document.getElementById('root');
