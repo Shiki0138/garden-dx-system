@@ -29,7 +29,7 @@ export const resizeImage = async (file, options = {}) => {
         const ctx = canvas.getContext('2d');
         
         // アスペクト比を保持しながらサイズを計算
-        let { width, height } = calculateDimensions(
+        const { width, height } = calculateDimensions(
           img.width,
           img.height,
           maxWidth,

@@ -1,10 +1,39 @@
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { setupOptimalJapaneseFont, getRecommendedFontSettings } from './pdfFontManager';
 
 // フォント設定（日本語対応）
-const setupPDFFont = doc => {
-  // TODO: 日本語フォントの設定
-  // jsPDF の日本語フォント対応は追加ライブラリが必要
+const setupPDFFont = async (doc) => {
+  try {
+    const fontResult = await setupOptimalJapaneseFont(doc, {
+      preferredFont: 'notoSansJP',
+      fallbackToSystem: true,
+      debug: process.env.NODE_ENV === 'development'
+    });
+    
+    if (fontResult.success) {
+      console.info(`PDF font configured: ${fontResult.fontFamily} (${fontResult.type})`);
+      
+      // フォントが使用可能な場合の設定
+      if (fontResult.type === 'webfont' || fontResult.type === 'system') {
+        // 実際のフォント設定は制限があるため、CSS fontFamilyで対応
+        doc.setProperties({
+          fontFamily: fontResult.fontFamily
+        });
+      }
+    } else {
+      console.warn('Japanese font setup failed:', fontResult.warning || fontResult.error);
+    }
+    
+    return fontResult;
+  } catch (error) {
+    console.error('Font setup error:', error);
+    return {
+      success: false,
+      fontFamily: 'helvetica',
+      error: error.message
+    };
+  }
 };
 
 /**
@@ -20,7 +49,13 @@ export const generateInvoicePDF = async (invoiceData, companyInfo = {}) => {
     format: 'a4',
   });
 
-  setupPDFFont(doc);
+  // 非同期フォント設定
+  const fontResult = await setupPDFFont(doc);
+  
+  // フォント設定結果をログ出力
+  if (process.env.NODE_ENV === 'development') {
+    console.log('PDF Font Setup Result:', fontResult);
+  }
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();

@@ -33,6 +33,12 @@ import {
   PDFPerformanceMonitor,
 } from '../utils/pdfOptimizer';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
+import { 
+  safePDFGeneration, 
+  getUserFriendlyErrorMessage,
+  logPDFError,
+  PDF_ERROR_TYPES 
+} from '../utils/pdfErrorHandler';
 
 // 造園業界標準カラーパレット
 const colors = {
@@ -704,8 +710,10 @@ const PDFGenerator = ({
       }
 
       let pdf;
-
-      if (enableOptimization && performanceMonitor.current) {
+      
+      // 安全なPDF生成の実行
+      const generationResult = await safePDFGeneration(async () => {
+        if (enableOptimization && performanceMonitor.current) {
         // パフォーマンスモニター開始
         performanceMonitor.current.start();
 
@@ -731,45 +739,70 @@ const PDFGenerator = ({
 
         updateProgress(20);
 
-        // 最適化されたPDF生成
-        pdf = await optimizePDFGeneration(
-          async (data, options) => {
-            updateProgress(50);
-            const result = await generator(dataToUse, companyInfo, null, {
-              ...optimizationOptions,
-              ...options,
+          // 最適化されたPDF生成
+          pdf = await optimizePDFGeneration(
+            async (data, options) => {
+              updateProgress(50);
+              const result = await generator(dataToUse, companyInfo, null, {
+                ...optimizationOptions,
+                ...options,
+              });
+              updateProgress(90);
+              return result;
+            },
+            dataToUse,
+            optimizationOptions
+          );
+
+          updateProgress(100);
+
+          // パフォーマンス統計情報の取得
+          if (showStats && pdf) {
+            const pdfSize = pdf.output('blob').size;
+            performanceMonitor.current.end(pdfSize);
+
+            setOptimizationStats({
+              renderTime: performanceMonitor.current.metrics.renderTime,
+              memoryUsage: performanceMonitor.current.metrics.memoryUsage,
+              pdfSize,
+              optimizationEnabled: true,
             });
-            updateProgress(90);
-            return result;
-          },
-          dataToUse,
-          optimizationOptions
-        );
+          }
+          
+          return pdf;
+        } else {
+          // 通常のPDF生成
+          const generator =
+            documentType === 'invoice' ? generateLandscapingInvoicePDF : generateInvoicePDF;
 
-        updateProgress(100);
-
-        // パフォーマンス統計情報の取得
-        if (showStats && pdf) {
-          const pdfSize = pdf.output('blob').size;
-          performanceMonitor.current.end(pdfSize);
-
-          setOptimizationStats({
-            renderTime: performanceMonitor.current.metrics.renderTime,
-            memoryUsage: performanceMonitor.current.metrics.memoryUsage,
-            pdfSize,
-            optimizationEnabled: true,
+          pdf = await generator(dataToUse, companyInfo, null, {
+            quality: 'high',
+            includeMetadata: true,
+            optimizeForPrint: true,
           });
+          
+          return pdf;
+        }
+      }, {
+        documentType,
+        dataSize: JSON.stringify(dataToUse).length,
+        enableOptimization,
+        timestamp: new Date().toISOString()
+      });
+      
+      if (generationResult.success) {
+        pdf = generationResult.result;
+        
+        // パフォーマンス情報を統計に追加
+        if (showStats && generationResult.performance) {
+          setOptimizationStats(prev => ({
+            ...prev,
+            ...generationResult.performance,
+            success: true
+          }));
         }
       } else {
-        // 通常のPDF生成
-        const generator =
-          documentType === 'invoice' ? generateLandscapingInvoicePDF : generateInvoicePDF;
-
-        pdf = await generator(dataToUse, companyInfo, null, {
-          quality: 'high',
-          includeMetadata: true,
-          optimizeForPrint: true,
-        });
+        throw generationResult.error;
       }
 
       setStatus({
@@ -780,26 +813,37 @@ const PDFGenerator = ({
       onGenerated(pdf);
       return pdf;
     } catch (error) {
-      console.error('PDF生成エラー:', error);
-      let errorMessage = 'PDF生成でエラーが発生しました';
-
-      if (error.message.includes('必要なデータが不足')) {
-        errorMessage = 'PDF生成に必要なデータが不足しています';
-      } else if (error.message.includes('会社名と電話番号')) {
-        errorMessage = '会社名と電話番号は必須項目です';
-      } else if (error.message.includes('network')) {
-        errorMessage = 'ネットワークエラーが発生しました。インターネット接続を確認してください';
-      } else if (error.message.includes('timeout')) {
-        errorMessage = '処理がタイムアウトしました。再度お試しください';
-      } else if (error.message) {
-        errorMessage = `エラー: ${error.message}`;
-      }
-
+      // 詳細なエラーログを記録
+      const analyzedError = logPDFError(error, {
+        documentType,
+        dataSize: documentData ? JSON.stringify(documentData).length : 0,
+        enableOptimization,
+        showStats,
+        companyInfo: companyInfo.name
+      });
+      
+      // ユーザーフレンドリーなエラーメッセージを生成
+      const userMessage = getUserFriendlyErrorMessage(analyzedError);
+      
       setStatus({
         type: 'error',
-        message: errorMessage,
+        message: userMessage,
       });
-      onError(error);
+      
+      // エラー統計を更新
+      if (showStats) {
+        setOptimizationStats(prev => ({
+          ...prev,
+          error: {
+            type: analyzedError.type,
+            message: analyzedError.message,
+            timestamp: analyzedError.timestamp
+          },
+          success: false
+        }));
+      }
+      
+      onError(analyzedError);
     } finally {
       setLoading(false);
       setProgress(0);
@@ -820,27 +864,39 @@ const PDFGenerator = ({
 
     try {
       const dataToUse = documentData || sampleData;
-
-      await downloadLandscapingInvoicePDF(dataToUse, companyInfo, null, {
-        quality: 'high',
-        notifyDownload: true,
-        notifySuccess: true,
+      
+      const downloadResult = await safePDFGeneration(async () => {
+        return await downloadLandscapingInvoicePDF(dataToUse, companyInfo, null, {
+          quality: 'high',
+          notifyDownload: true,
+          notifySuccess: true,
+        });
+      }, {
+        operation: 'download',
+        documentType,
+        dataSize: JSON.stringify(dataToUse).length
       });
-
-      setStatus({
-        type: 'success',
-        message: 'PDFダウンロードが完了しました',
-      });
+      
+      if (downloadResult.success) {
+        setStatus({
+          type: 'success',
+          message: 'PDFダウンロードが完了しました',
+        });
+      } else {
+        throw downloadResult.error;
+      }
     } catch (error) {
-      console.error('PDFダウンロードエラー:', error);
+      const analyzedError = logPDFError(error, { operation: 'download' });
+      const userMessage = getUserFriendlyErrorMessage(analyzedError);
+      
       setStatus({
         type: 'error',
-        message: `PDFダウンロードでエラーが発生しました: ${error.message}`,
+        message: userMessage,
       });
     } finally {
       setLoading(false);
     }
-  }, [documentData, sampleData, companyInfo]);
+  }, [documentData, sampleData, companyInfo, documentType]);
 
   const printPDF = useCallback(async () => {
     try {
