@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FiLock, FiUser, FiEye, FiEyeOff } from 'react-icons/fi';
+import { verifyPassword } from '../utils/crypto';
+import { validateLandscapingInput, csrfProtection } from '../utils/securityUtils';
+import { useSecureAuth } from '../hooks/useSecureAuth';
+import { secureApi } from '../utils/apiClient';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -205,32 +209,98 @@ const AdminLogin = ({ onLogin }) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login: secureLogin } = useSecureAuth();
+
+  // Generate CSRF token on component mount
+  useEffect(() => {
+    const token = csrfProtection.generateToken();
+    csrfProtection.sessionToken.set(token);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    // 簡易的な管理者認証（本番環境では適切な認証を実装）
-    if (email === 'admin@garden-dx.jp' && password === 'admin123') {
-      const adminUser = {
-        id: 'admin-001',
-        name: '管理者',
-        email: email,
-        role: 'admin',
-        permissions: ['view_all', 'edit_all', 'delete_all', 'manage_users']
-      };
-      
-      if (rememberMe) {
-        localStorage.setItem('adminUser', JSON.stringify(adminUser));
+    try {
+      // 入力検証
+      const emailValidation = validateLandscapingInput.email(email);
+      if (!emailValidation.isValid) {
+        setError(emailValidation.errors[0]);
+        setLoading(false);
+        return;
+      }
+
+      // APIを使用した認証（本番環境）
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          const response = await secureApi.post('/api/auth/admin/login', {
+            email: emailValidation.sanitizedValue,
+            password: password
+          });
+          
+          if (response.success && response.data) {
+            const { user, token } = response.data;
+            
+            // セキュアな認証フックを使用してログイン
+            const loginResult = await secureLogin(user, token);
+            
+            if (loginResult.success) {
+              setTimeout(() => {
+                onLogin(user);
+              }, 500);
+              return;
+            } else {
+              setError(loginResult.error || 'ログインに失敗しました');
+            }
+          }
+        } catch (apiError) {
+          console.error('API authentication error:', apiError);
+          setError('認証サーバーへの接続に失敗しました');
+        }
+      } else {
+        // 開発環境のみ：環境変数から認証情報を取得
+        const devAdminEmail = process.env.REACT_APP_DEV_ADMIN_EMAIL;
+        const devAdminPasswordHash = process.env.REACT_APP_DEV_ADMIN_PASSWORD_HASH;
+        
+        if (!devAdminEmail || !devAdminPasswordHash) {
+          console.error('Development authentication credentials not configured');
+          setError('開発環境の認証情報が設定されていません');
+          setLoading(false);
+          return;
+        }
+        
+        if (email === devAdminEmail) {
+          const isValid = await verifyPassword(password, devAdminPasswordHash);
+          if (isValid) {
+            const adminUser = {
+              id: 'dev-admin-001',
+              name: '開発管理者',
+              email: email,
+              role: 'admin',
+              permissions: ['view_all', 'edit_all', 'delete_all', 'manage_users'],
+              isDevelopment: true
+            };
+            
+            // セキュアな認証フックを使用
+            const loginResult = await secureLogin(adminUser, 'dev-token-' + Date.now());
+            
+            if (loginResult.success) {
+              setTimeout(() => {
+                onLogin(adminUser);
+              }, 500);
+              return;
+            }
+          }
+        }
       }
       
-      setTimeout(() => {
-        onLogin(adminUser);
-      }, 1000);
-    } else {
       setLoading(false);
       setError('メールアドレスまたはパスワードが正しくありません');
+    } catch (error) {
+      console.error('Login error:', error);
+      setLoading(false);
+      setError('ログイン処理中にエラーが発生しました');
     }
   };
 
@@ -315,11 +385,14 @@ const AdminLogin = ({ onLogin }) => {
           </LoginButton>
         </Form>
 
-        <DemoInfo>
-          <strong>デモアカウント情報</strong><br />
-          メール: admin@garden-dx.jp<br />
-          パスワード: admin123
-        </DemoInfo>
+        {process.env.NODE_ENV === 'development' && (
+          <DemoInfo>
+            <strong>開発環境</strong><br />
+            認証情報は環境変数で設定してください<br />
+            REACT_APP_DEV_ADMIN_EMAIL<br />
+            REACT_APP_DEV_ADMIN_PASSWORD_HASH
+          </DemoInfo>
+        )}
 
         <DemoButton onClick={handleDemoLogin}>
           デモモードで試す

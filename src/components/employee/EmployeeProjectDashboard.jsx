@@ -303,30 +303,93 @@ const EmployeeProjectDashboard = () => {
     }));
   };
 
-  const handlePhotoUpload = (files) => {
+  const handlePhotoUpload = async (files) => {
     const fileArray = Array.from(files);
     const currentPhotos = reportForm.photos;
     
-    if (currentPhotos.length + fileArray.length > 5) {
-      alert('写真は最大5枚までアップロードできます');
+    // 最大枚数チェック
+    const maxPhotos = parseInt(process.env.REACT_APP_MAX_PHOTOS, 10) || 5;
+    if (currentPhotos.length + fileArray.length > maxPhotos) {
+      alert(`写真は最大${maxPhotos}枚までアップロードできます`);
       return;
     }
     
-    fileArray.forEach(file => {
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
+    // セキュリティ設定を取得
+    const maxFileSize = process.env.REACT_APP_MAX_FILE_SIZE 
+      ? parseInt(process.env.REACT_APP_MAX_FILE_SIZE, 10) 
+      : 5242880; // デフォルト5MB
+    const allowedTypes = process.env.REACT_APP_ALLOWED_FILE_TYPES
+      ? process.env.REACT_APP_ALLOWED_FILE_TYPES.split(',')
+      : ['image/jpeg', 'image/png', 'image/webp'];
+    
+    // 各ファイルを検証
+    const validFiles = [];
+    for (const file of fileArray) {
+      // ファイルタイプチェック（MIMEタイプとファイル拡張子の両方を検証）
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+      const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+      
+      if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExtension)) {
+        alert(`許可されていないファイル形式です: ${file.name}\n許可形式: JPEG, PNG, WebP`);
+        continue;
+      }
+      
+      // ファイルサイズチェック
+      if (file.size > maxFileSize) {
+        alert(`ファイルサイズが大きすぎます: ${file.name}\n最大サイズ: ${(maxFileSize / 1024 / 1024).toFixed(1)}MB`);
+        continue;
+      }
+      
+      // ファイル名サニタイズ（セキュリティ対策）
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 8);
+      const safeFileName = `photo_${timestamp}_${randomStr}.${fileExtension}`;
+      
+      // ファイルの内容を検証（マジックナンバーチェック）
+      const buffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      
+      // JPEGマジックナンバー: FF D8 FF
+      // PNGマジックナンバー: 89 50 4E 47
+      // WebPマジックナンバー: 52 49 46 46
+      const isValidImage = 
+        (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) || // JPEG
+        (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) || // PNG
+        (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46); // WebP
+      
+      if (!isValidImage) {
+        console.error('Invalid image file detected:', file.name);
+        alert(`無効な画像ファイルです: ${file.name}`);
+        continue;
+      }
+      
+      validFiles.push({ file, safeFileName });
+    }
+    
+    // 有効なファイルのみプレビューを生成
+    validFiles.forEach(({ file, safeFileName }) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        // XSS対策: data URLの検証
+        const dataUrl = e.target.result;
+        if (dataUrl && dataUrl.startsWith('data:image/')) {
           setReportForm(prev => ({
             ...prev,
             photos: [...prev.photos, {
               id: Date.now() + Math.random(),
-              file,
-              preview: e.target.result
+              file: new File([file], safeFileName, { type: file.type }),
+              preview: dataUrl,
+              originalName: file.name,
+              safeFileName: safeFileName
             }]
           }));
-        };
-        reader.readAsDataURL(file);
-      }
+        }
+      };
+      reader.onerror = () => {
+        console.error('File read error:', file.name);
+        alert(`ファイルの読み込みに失敗しました: ${file.name}`);
+      };
+      reader.readAsDataURL(file);
     });
   };
 

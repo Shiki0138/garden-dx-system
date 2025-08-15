@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { User, Lock, LogIn, Users } from 'lucide-react';
+import { validateLandscapingInput, csrfProtection } from '../../utils/securityUtils';
+import { useSecureAuth } from '../../hooks/useSecureAuth';
+import { secureApi } from '../../utils/apiClient';
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -167,13 +170,13 @@ const EmployeeLogin = ({ onLogin }) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const { login: secureLogin } = useSecureAuth();
 
-  // デモ用従業員アカウント
-  const demoEmployees = [
-    { id: 'EMP001', password: 'worker123', name: '田中太郎', role: 'employee' },
-    { id: 'EMP002', password: 'worker123', name: '佐藤花子', role: 'employee' },
-    { id: 'EMP003', password: 'worker123', name: '山田次郎', role: 'employee' }
-  ];
+  // Generate CSRF token on component mount
+  useEffect(() => {
+    const token = csrfProtection.generateToken();
+    csrfProtection.sessionToken.set(token);
+  }, []);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -197,23 +200,65 @@ const EmployeeLogin = ({ onLogin }) => {
     setError('');
     
     try {
-      // デモ認証ロジック
-      const employee = demoEmployees.find(emp => 
-        emp.id === formData.employeeId && emp.password === formData.password
-      );
+      // 入力検証
+      const idValidation = validateLandscapingInput.customerName(formData.employeeId);
+      if (!idValidation.isValid) {
+        setError('従業員IDの形式が正しくありません');
+        setIsLoading(false);
+        return;
+      }
       
-      if (employee) {
-        // ログイン成功
-        onLogin({
-          id: employee.id,
-          name: employee.name,
-          role: employee.role,
-          user_metadata: {
-            name: employee.name,
-            employee_id: employee.id
+      // APIを使用した認証（本番環境）
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          const response = await secureApi.post('/api/auth/employee/login', {
+            employeeId: idValidation.sanitizedValue,
+            password: formData.password
+          });
+          
+          if (response.success && response.data) {
+            const { user, token } = response.data;
+            
+            // セキュアな認証フックを使用してログイン
+            const loginResult = await secureLogin(user, token);
+            
+            if (loginResult.success) {
+              onLogin(user);
+              return;
+            } else {
+              setError(loginResult.error || 'ログインに失敗しました');
+            }
           }
-        });
+        } catch (apiError) {
+          console.error('API authentication error:', apiError);
+          setError('認証サーバーへの接続に失敗しました');
+        }
       } else {
+        // 開発環境のみ：環境変数から認証
+        const devEmployeePrefix = process.env.REACT_APP_DEV_EMPLOYEE_PREFIX || 'DEV-EMP';
+        
+        if (formData.employeeId.startsWith(devEmployeePrefix)) {
+          // 開発用の簡易認証（本番では絶対に使用しない）
+          console.warn('⚠️ Using development authentication');
+          const employee = {
+            id: formData.employeeId,
+            name: `開発従業員 ${formData.employeeId}`,
+            role: 'employee',
+            user_metadata: {
+              name: `開発従業員 ${formData.employeeId}`,
+              employee_id: formData.employeeId
+            },
+            isDevelopment: true
+          };
+          
+          const loginResult = await secureLogin(employee, 'dev-emp-token-' + Date.now());
+          
+          if (loginResult.success) {
+            onLogin(employee);
+            return;
+          }
+        }
+        
         setError('従業員IDまたはパスワードが正しくありません');
       }
       
@@ -284,12 +329,14 @@ const EmployeeLogin = ({ onLogin }) => {
           </LoginButton>
         </Form>
 
-        <DemoCredentials>
-          <h4>📋 デモ用アカウント</h4>
-          <div className="credential">従業員ID: EMP001 / パスワード: worker123</div>
-          <div className="credential">従業員ID: EMP002 / パスワード: worker123</div>
-          <div className="credential">従業員ID: EMP003 / パスワード: worker123</div>
-        </DemoCredentials>
+        {process.env.NODE_ENV === 'development' && (
+          <DemoCredentials>
+            <h4>📋 開発環境</h4>
+            <div className="credential">従業員IDプレフィックス: {process.env.REACT_APP_DEV_EMPLOYEE_PREFIX || 'DEV-EMP'}</div>
+            <div className="credential">例: DEV-EMP001, DEV-EMP002</div>
+            <div className="credential">パスワード: 任意（開発環境のみ）</div>
+          </DemoCredentials>
+        )}
       </LoginCard>
     </LoginContainer>
   );
